@@ -1,0 +1,15 @@
+2020-05-25 21:03:29,672   WARNING   Model: wide_resnet101_2  Mode:None
+2020-05-25 21:03:55,225   WARNING   Model: wide_resnet101_2  Mode:None
+2020-05-25 21:03:55,647   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 21:53:56,529   WARNING   Model: wide_resnet101_2  Mode:None
+2020-05-25 21:53:56,968   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 21:56:14,385   WARNING   Model: wide_resnet101_2  Mode:None
+2020-05-25 21:56:14,837   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 21:57:06,641   WARNING   Model: wide_resnet101_2  Mode:None
+2020-05-25 21:57:07,078   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 21:58:40,982   WARNING   Model: wide_resnet101_2  Mode:NddrLSC
+2020-05-25 21:58:41,426   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 22:02:45,108   WARNING   Model: wide_resnet101_2  Mode:NddrLSC
+2020-05-25 22:02:45,565   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
+2020-05-25 22:10:10,721   WARNING   Model: wide_resnet101_2  Mode:NddrLSC
+2020-05-25 22:10:11,163   INFO   Fea_name by list: ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA']
