@@ -19,9 +19,9 @@ transformer = {'Train':transforms.Compose([
     # transforms.ToTensor(),
 ]),
 'All':transforms.Compose([
-    transforms.Resize((224,224)), # 448是合适的？
-    transforms.Grayscale(3),# 将其为原来的RGB黑白图像转为灰度的
-    transforms.ToTensor(), #Convert a PIL image or numpy.array to tensor and normalize in range[0.0, 1.0]
+    transforms.Resize((224,224)), 
+    transforms.Grayscale(3),
+    transforms.ToTensor(), 
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])

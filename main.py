@@ -14,11 +14,14 @@ import logging
 import argparse
 import datetime
 import MTLModel
-import NDDRDenseCross
 import MTLDataset
 import MTLLoss
 from MTLLoss import MultiLossLayer
 
+# 改进部分：1. 革新输出格式
+# 改进部分：2. 重新跑程序，看看是否合理
+# 改进部分：3. 看看是否要加入checkpoint，和 动态调整LR等机制
+# 任务结束时输出一下summary
 
 
 def get_criterion(criterion):
@@ -58,7 +61,7 @@ def get_optimizer(optimizer, multi_loss):
 
 def parse_args(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--net", type=str, help="The Main Classifier", default='wide_resnet101_2')
+    parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='CrossEntropy')
@@ -79,8 +82,6 @@ def parse_args(argv):
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='SIDC3')
-    # parser.add_argument("--A", type=int, help="A task cofficient", default=1)
-    # parser.add_argument("--B", type=int, help="B task cofficient", default=1)
     parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
     # parser.add_argument("--pkl_name", type=str, help="pkl name", default=0)
     # parser.add_argument("--reg_lambda", type=float, help="L2 regularization lambda", default=1e-5)
@@ -99,11 +100,7 @@ def train(epoch):
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
    
 
-    # model setting
-    # net = model.to(DEVICE)
-    # criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.Adam(net.parameters(),lr=LEARNING_RATE)
-    # 抽取成策略模式，方便修改
+
     model.train()
     for i, (img, US_data, label4, label2) in enumerate(train_dataloader):
         img = img.to(DEVICE)
@@ -123,7 +120,7 @@ def train(epoch):
         train_loss_multi = multi_loss(train_loss, train_loss_US)
         train_loss_meter_multi.add(train_loss_multi.data.item())
         optimizer.zero_grad()
-        multi_loss.backward()
+        train_loss_multi.backward()
         optimizer.step()
 
 
@@ -134,7 +131,7 @@ def train(epoch):
         train_loss_item_US = train_loss_US.data.item()
         batch_train_loss_meter_US.add(train_loss_item_US)
         train_loss_meter_US.add(train_loss_item_US)
-        train_loss_meter_multi.add(multi_loss.data.item())
+        train_loss_meter_multi.add(train_loss_multi.data.item())
 
         if i % NUM_TRAIN_CHECK_BATCHES == 0:
             logging.debug('Main {}:{}'.format(i * BATCH_SIZE, batch_train_loss_meter.value()))
@@ -151,14 +148,14 @@ def train(epoch):
     logging.info('Epoch Average Train Multi Loss:{}'.format(train_loss_meter_multi.value()))
     writer.add_scalar('loss/train_multi', train_loss_meter_multi.value()[0], epoch)
     train_loss_meter_multi.reset()
-    return multi_loss
 
-def test(epoch, multi_loss):
+
+def test(epoch):
     test_dataset = MTLDataset.MTLDataset(
         str(data_root) + 'TEST/', us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test', screener=rf_sort_list, screen_num=10)
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    model.net.eval()
+    model.eval()
     test_loss = 0
     test_loss_US = 0
     test_loss_multi = 0
@@ -187,6 +184,7 @@ def test(epoch, multi_loss):
                 epoch_label4 = label4
                 epoch_output_US = output_US
                 epoch_US_label = US_label
+
             else:
                 epoch_output = torch.cat((epoch_output, output))
                 epoch_label4 = torch.cat((epoch_label4, label4))
@@ -340,9 +338,10 @@ rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiamete
 args = parse_args(sys.argv[1:])
 start_epoch = 1
 DEVICE = torch.device('cuda:' + str(args.GPU) if torch.cuda.is_available() else 'cpu')
+torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
-model = NDDRDenseCross.NddrDenseNet(mode=args.mode, memory_efficient=True, nddr_drop_rate=args.nddr_dr, length_aux= args.length_aux).to(DEVICE)
+model = MTLModel.NddrDenseNet(mode=args.mode, memory_efficient=False, nddr_drop_rate=args.nddr_dr, length_aux= args.length_aux).to(DEVICE)
 criterion = get_criterion(args.criterion)
 criterionUS = get_criterionUS(args.criterionUS)
 multi_loss = MultiLossLayer(2)
@@ -368,4 +367,5 @@ for epoch in range(start_epoch, args.epoch):
     train(epoch)
     test(epoch)
     # adjust_learning_rate(optimizer, epoch)
+
     
