@@ -59,9 +59,9 @@ def get_optimizer(optimizer, multi_loss):
 
 # 注意要控制Y作为类型结果时，要是独热编码，这里要做一些测试
 # 然后可能要需要加入mixup的criterion
-def mixup_data(x, y, alpha=1.0):
+def mixup_data(x, y1, y2, alpha=1.0):
     if alpha > 0:
-        lam = np.ramdom.beta(alpha, alpha)
+        lam = np.random.beta(alpha, alpha)
     else:
         lam = 1
 
@@ -69,8 +69,15 @@ def mixup_data(x, y, alpha=1.0):
     index = torch.randperm(batch_size).to(DEVICE)
 
     mixed_x = lam * x + (1 - lam) * x[index, :]
-    y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam
+    y1_a, y1_b = y1, y1[index]
+    y2_a, y2_b = y2, y2[index]
+    return mixed_x, y1_a, y1_b, y2_a, y2_b, lam
+
+def mixup_criterion_type(the_criterion, pred, y_a, y_b, lam):
+    return lam * the_criterion(pred, y_a) + (1 - lam) * the_criterion(pred, y_b)
+
+def mixup_criterion_numeric(the_criterion, pred, y_a, y_b, lam):
+    return the_criterion(pred, lam * y_a + (1 - lam) * y_b)
 
 def parse_args(argv):
     parser = argparse.ArgumentParser()
@@ -94,8 +101,9 @@ def parse_args(argv):
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
-    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='SIDC3')
+    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='testMix')
     parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
+    parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
     # parser.add_argument("--pkl_name", type=str, help="pkl name", default=0)
     # parser.add_argument("--reg_lambda", type=float, help="L2 regularization lambda", default=1e-5)
     # parser.add_argument("--keep_prob", type=float, help="Dropout keep probability", default=0.8)
@@ -116,11 +124,19 @@ def train(epoch):
 
     model.train()
     for i, (img, US_data, label4, label2) in enumerate(train_dataloader):
+        #input
         img = img.to(DEVICE)
+        #label
         US_data = US_data.to(DEVICE)
-        label4 = label4.to(DEVICE)
-        label2 = label4%3>0
         US_label = US_data[:,:args.length_aux]
+        label4 = label4.to(DEVICE)
+        # mixup
+        img, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, US_label, label4, args.alpha)
+       
+
+      
+        label2 = label4%3>0
+        
         if args.mode is not None:
             out, out_US = model(img)
         else:
@@ -128,8 +144,10 @@ def train(epoch):
     
 
         # Show the result
-        train_loss = criterion(out, label4)
-        train_loss_US = criterionUS(out_US, US_label)
+        # train_loss = criterion(out, label4)
+        train_loss = mixup_criterion_type(criterion, out, label4_a, label4_b, lam)
+        # train_loss_US = criterionUS(out_US, US_label)
+        train_loss_US = mixup_criterion_numeric(criterionUS, out_US, US_label_a, US_label_b, lam)
         train_loss_multi = multi_loss(train_loss, train_loss_US)
         train_loss_meter_multi.add(train_loss_multi.data.item())
         optimizer.zero_grad()
@@ -164,6 +182,7 @@ def train(epoch):
 
 
 def test(epoch):
+    logging.info("Epoch " + str(epoch))
     test_dataset = MTLDataset.MTLDataset(
         str(data_root) + 'TEST/', us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test', screener=rf_sort_list, screen_num=10)
     test_dataloader = data.DataLoader(
