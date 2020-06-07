@@ -18,10 +18,7 @@ import MTLDataset
 import MTLLoss
 from MTLLoss import MultiLossLayer
 
-# 改进部分：1. 革新输出格式
-# 改进部分：2. 重新跑程序，看看是否合理
-# 改进部分：3. 看看是否要加入checkpoint，和 动态调整LR等机制
-# 任务结束时输出一下summary
+
 
 
 def get_criterion(criterion):
@@ -206,7 +203,7 @@ def test(epoch):
             test_loss_meter_multi.add(test_loss_item_multi)
             pred = output.argmax(dim=1)
             pred_aux = pred%3>0
-            # pred_aux = output_aux.argmax(dim=1)
+
             confusion_matrix.add(pred, label4)
             confusion_matrix_aux.add(pred_aux,label2)
             correct += pred.eq(label4.view_as(pred)).sum().item()
@@ -360,7 +357,7 @@ writer = SummaryWriter('./'+str(args.logdir)+'/' + str(args.s_data_root[-10:]) +
 logging.basicConfig(level=args.logging_level,filename=args.log_file_name,
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
 logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
-# 先暂定0.75，后需修改
+
 best_acc = 0.75
 
 for epoch in range(start_epoch, args.epoch):
