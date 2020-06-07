@@ -16,7 +16,9 @@ import datetime
 import MTLModel
 import MTLDataset
 import MTLLoss
+import numpy as np
 from MTLLoss import MultiLossLayer
+
 
 
 
@@ -55,6 +57,20 @@ def get_optimizer(optimizer, multi_loss):
 #     torch.save(state, './checkpoint/ckpt.t7' + args.name + '_'
 #                + str(args.seed))
 
+# 注意要控制Y作为类型结果时，要是独热编码，这里要做一些测试
+# 然后可能要需要加入mixup的criterion
+def mixup_data(x, y, alpha=1.0):
+    if alpha > 0:
+        lam = np.ramdom.beta(alpha, alpha)
+    else:
+        lam = 1
+
+    batch_size = x.size()[0]
+    index = torch.randperm(batch_size).to(DEVICE)
+
+    mixed_x = lam * x + (1 - lam) * x[index, :]
+    y_a, y_b = y, y[index]
+    return mixed_x, y_a, y_b, lam
 
 def parse_args(argv):
     parser = argparse.ArgumentParser()
