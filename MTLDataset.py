@@ -207,6 +207,10 @@ class SegDataset(data.Dataset):
             seg_label[seg_label > 0] = 1
             seg_label[seg_label == 0] = 0
             seg_label = torch.unsqueeze(torch.FloatTensor(seg_label), 0)
+            reverse_seg_label = seg_label * (-1.0)
+            seg_label = torch.cat((seg_label, reverse_seg_label),dim = 0)
+
+          
             # TODO: 检测unsqueeze之后是否失真
         
 

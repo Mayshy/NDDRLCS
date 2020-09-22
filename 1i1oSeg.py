@@ -1,3 +1,5 @@
+# python的可读性真是太差了，这里约束一下：
+# 每个函数前
 import os
 import numpy as np
 import pandas as pd
@@ -18,9 +20,15 @@ import sys
 import visdom
 from torchnet import meter
 import datetime
-
+import metrics
 from collections import  Counter
 
+
+"""
+单输入单输出分割
+
+seg_label 标签 torch.Size([16, 2, 224, 224])
+"""
 # Q：灰度图是否归一化？？？
 # Q: 未来要做p-value
 
@@ -45,6 +53,7 @@ def get_optimizer(optimizer, multi_loss):
     elif (optimizer == 'AmsgradW'):
         return optim.AdamW([{'params':model.parameters()}, {'params':multi_loss.parameters()}], lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
             
+# mixup 数据增强器，帮助提升小数据集下训练与测试的稳定性
 def mixup_data(x, y0, y1, y2, alpha=1.0):
     if alpha > 0:
         lam = np.random.beta(alpha, alpha)
@@ -66,8 +75,7 @@ def mixup_criterion_type(the_criterion, pred, y_a, y_b, lam):
 def mixup_criterion_numeric(the_criterion, pred, y_a, y_b, lam):
     return the_criterion(pred, lam * y_a + (1 - lam) * y_b)
 
-
-
+# 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
@@ -93,87 +101,87 @@ def parse_args(argv):
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='protoType')
-    parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
+    parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
-
     return parser.parse_args(argv)
 
-
+# 训练
+# TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV
 def train(epoch):
     all_train_iter_loss = []
+    # 设置数据集
     train_dataset = MTLDataset.SegDataset(
         str(data_root)+'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test = 'Train',screener=rf_sort_list,screen_num = 10)
-  
     train_dataloader = data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     model.train()
 
+    # 开始一个epoch的迭代
     for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
+        # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
         img = img.to(DEVICE)
-        # label
         seg_label = seg_label.to(DEVICE)
         US_data = US_data.to(DEVICE)
         US_label = US_data[:, :args.length_aux]
         label4 = label4.to(DEVICE)
+
         # mixup
         img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label, US_label, label4, args.alpha)
 
+        # 执行模型，得到输出
         out = model(img)['out']
+        # 可能需要做sigmoid？
         out = torch.sigmoid(out)
 
-        
-
-
-
+        # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
         train_loss_item = train_loss.data.item()
         train_loss_meter.add(train_loss_item)
         batch_train_loss_meter.add(train_loss_item)
         all_train_iter_loss.append(train_loss_item)
+
+        # 使用优化器执行反向传播
         optimizer.zero_grad()
         train_loss.backward()
         optimizer.step()
 
+        # TODO 输出每NUM_TRAIN_CHECK_BATCHES个batch的train_loss
         if i % NUM_TRAIN_CHECK_BATCHES == 0:
             logging.debug('Train {}:{}'.format(i * BATCH_SIZE, batch_train_loss_meter.value()))
             batch_train_loss_meter.reset()
-            
+        
+            # for j in range(BATCH_SIZE):
+            #     save_img = transforms.ToPILImage()(out[j]).convert('L')
+            #     path = '../Log/' + args.logdir + '/T' + str(j) + '/'
+            #     if not os.path.exists(path):
+            #         os.makedirs(path)
+            #     save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
 
-        if i == 0:
-            one = torch.ones_like(out)
-            zero = torch.zeros_like(out)
-            out = torch.where(out >= 0.5, one, out)
-            out = torch.where(out < 0.5, zero, out).cpu()
-            for j in range(BATCH_SIZE):
-                save_img = transforms.ToPILImage()(out[j]).convert('L')
-                path = '../Log/' + args.logdir + '/T' + str(j) + '/'
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
-
-
-            # vis.close()
-            # vis.images(out_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction'))
-            # vis.images(seg_label_np[:, None, :, :], win='train_label', opts=dict(title='label'))
-            # vis.line(all_train_iter_loss, win='train_iter_loss', opts=dict(title='train iter loss'))
 
     logging.info('Epoch Average Train Loss:{}'.format(train_loss_meter.value()))
     writer.add_scalar('loss/train', train_loss_meter.value()[0], epoch)
     train_loss_meter.reset()
+    # 测试阶段要监控的指标很简单：loss，loss的单位有 单batch loss，多batch loss，总平均loss
+    # 方案： 存为csv的是 单batch loss， 输出出来的是 多batch loss
 
 def test(epoch):
     all_test_iter_loss = []
     logging.info("Epoch " + str(epoch))
+
+    # 设置数据集
     test_dataset = MTLDataset.SegDataset(
         str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test', screener=rf_sort_list,
         screen_num=10)
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
+
     test_loss_meter.reset()
 
+    # 开始这轮的迭代
     with torch.no_grad():
         for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(test_dataloader):
+            # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
             img = img.to(DEVICE)
             seg_label = seg_label.to(DEVICE)
             US_data = US_data.to(DEVICE)
@@ -182,8 +190,23 @@ def test(epoch):
 
             # 输出
             output = model(img)['out']
-            output = torch.sigmoid(output)
+            # output = torch.sigmoid(output)
+            # seg_label 标签
+            # 
+
+            # seg_test = torch.squeeze(seg_label, 1).long()
+            seg_test = seg_label.long()
+            
+
             # 记录Loss，计算性能指标
+            # print("F1Raw" + str(metrics.classwise_f1(output, seg_test)))
+            print("diceLoss " + str(metrics.dice_loss(output, seg_test)))
+            print("iouReal? " + str(metrics.iou_score(output, seg_test)))
+            print("sensi " + str(metrics.sensitivity(output, seg_test)))
+            # print("iouRaw" + str(metrics.classwise_iou(output, seg_test)))
+            
+
+
             loss = criterion(output, seg_label)
             iter_loss = loss.item()
             all_test_iter_loss.append(iter_loss)
@@ -195,25 +218,12 @@ def test(epoch):
             seg_label_np = seg_label.cpu().detach().numpy().copy()
             seg_label_np = np.argmin(seg_label_np, axis=1)
 
-            # if (i == 0):
-            #     epoch_output = output
-            #     epoch_label4 = label4
-            #     epoch_output_US = output_US
-            #     epoch_US_label = US_label
-            #
-            # else:
-            #     epoch_output = torch.cat((epoch_output, output))
-            #     epoch_label4 = torch.cat((epoch_label4, label4))
-            #     epoch_output_US = torch.cat((epoch_output_US, output_US))
-            #     epoch_US_label = torch.cat((epoch_US_label, US_label))
-
             if i % NUM_TRAIN_CHECK_BATCHES == 0:
                 logging.debug('Test {}:{}'.format(i * BATCH_SIZE, batch_test_loss_meter.value()))
-                # vis.images(output_np[:, None, :, :], win='test_pred', opts=dict(title='test prediction'))
-                # vis.images(seg_label_np[:, None, :, :], win='test_label', opts=dict(title='label'))
-                # vis.line(all_test_iter_loss, win='test_iter_loss', opts=dict(title='test iter loss'))
                 batch_test_loss_meter.reset()
 
+            # 目前每个epoch只输出第一个batch的图片
+            # 利用ones_like和torch.where来
             if i == 0:
                 one = torch.ones_like(output)
                 zero = torch.zeros_like(output)
@@ -230,6 +240,8 @@ def test(epoch):
         test_loss_meter.reset()
 
 
+# 启动配置
+# ------------------------------------------------------------------------------------------------------------------------------------------
 # Meter用于度量波动区间
 batch_train_loss_meter = meter.AverageValueMeter()
 train_loss_meter = meter.AverageValueMeter()
@@ -245,7 +257,7 @@ DEVICE = torch.device('cuda:' + str(args.GPU) if torch.cuda.is_available() else 
 torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
-model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=1, aux_loss=None).to(DEVICE)
+model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=2, aux_loss=None).to(DEVICE)
 criterion = get_criterion(args.criterion)
 criterionUS = get_criterionUS(args.criterionUS)
 multi_loss = MultiLossLayer(2)
@@ -256,11 +268,15 @@ NUM_CLASSES = 4
 BATCH_SIZE = args.n_batch_size
 NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
-# vis = visdom.Visdom()
+
 writer = SummaryWriter('../Log/'+str(args.logdir)+'/' + str(args.s_data_root[-10:]) +'/'+ str(args.net) +'_'+ str(args.mode) )
 logging.basicConfig(level=args.logging_level,filename=args.log_file_name,
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
 logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
+
+## metrics
+# jaccard_index = metrics.make_weighted_metric(metrics.classwise_iou)
+# f1_score = metrics.make_weighted_metric(metrics.classwise_f1)
 
 for epoch in range(start_epoch, args.epoch):
     train(epoch)
