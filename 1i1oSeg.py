@@ -28,9 +28,15 @@ from collections import  Counter
 单输入单输出分割
 
 seg_label 标签 torch.Size([16, 2, 224, 224])
-"""
+
+要使用的性能指标:
+1. pixel_accuray , 参考
+2. 
+
 # Q：灰度图是否归一化？？？
 # Q: 未来要做p-value
+"""
+
 
 # 配置分类损失函数
 def get_criterion(criterion):
@@ -108,13 +114,15 @@ def parse_args(argv):
 # 训练
 # TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV
 def train(epoch):
-    all_train_iter_loss = []
     # 设置数据集
     train_dataset = MTLDataset.SegDataset(
         str(data_root)+'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test = 'Train',screener=rf_sort_list,screen_num = 10)
     train_dataloader = data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     model.train()
+
+    
+
 
     # 开始一个epoch的迭代
     for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
@@ -125,47 +133,35 @@ def train(epoch):
         US_label = US_data[:, :args.length_aux]
         label4 = label4.to(DEVICE)
 
+        
+
         # mixup
         img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label, US_label, label4, args.alpha)
 
         # 执行模型，得到输出
         out = model(img)['out']
         # 可能需要做sigmoid？
-        out = torch.sigmoid(out)
+        out = nn.Softmax2D()(out)
 
         # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
-        train_loss_item = train_loss.data.item()
-        train_loss_meter.add(train_loss_item)
-        batch_train_loss_meter.add(train_loss_item)
-        all_train_iter_loss.append(train_loss_item)
+        batch_train_loss.append(train_loss.item())
 
         # 使用优化器执行反向传播
         optimizer.zero_grad()
         train_loss.backward()
         optimizer.step()
-
-        # TODO 输出每NUM_TRAIN_CHECK_BATCHES个batch的train_loss
-        if i % NUM_TRAIN_CHECK_BATCHES == 0:
-            logging.debug('Train {}:{}'.format(i * BATCH_SIZE, batch_train_loss_meter.value()))
-            batch_train_loss_meter.reset()
+    batch_train_loss = np.array(batch_train_loss)
+    print("Epoch %d train loss MEAN %f" % np.mean(batch_train_loss))
+    print("Epoch %d train loss STD %f" % np.std(batch_train_loss))
+    
         
-            # for j in range(BATCH_SIZE):
-            #     save_img = transforms.ToPILImage()(out[j]).convert('L')
-            #     path = '../Log/' + args.logdir + '/T' + str(j) + '/'
-            #     if not os.path.exists(path):
-            #         os.makedirs(path)
-            #     save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
+           
 
 
-    logging.info('Epoch Average Train Loss:{}'.format(train_loss_meter.value()))
-    writer.add_scalar('loss/train', train_loss_meter.value()[0], epoch)
-    train_loss_meter.reset()
-    # 测试阶段要监控的指标很简单：loss，loss的单位有 单batch loss，多batch loss，总平均loss
-    # 方案： 存为csv的是 单batch loss， 输出出来的是 多batch loss
+    
 
 def test(epoch):
-    all_test_iter_loss = []
     logging.info("Epoch " + str(epoch))
 
     # 设置数据集
@@ -176,7 +172,6 @@ def test(epoch):
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
 
-    test_loss_meter.reset()
 
     # 开始这轮的迭代
     with torch.no_grad():
@@ -190,37 +185,34 @@ def test(epoch):
 
             # 输出
             output = model(img)['out']
-            # output = torch.sigmoid(output)
+            output = nn.Softmax2D()(output)
             # seg_label 标签
-            # 
+            loss = criterion(output, seg_label)
 
-            # seg_test = torch.squeeze(seg_label, 1).long()
+            output[output >= 0.5] = 1
+            output[output < 0.5] = 0
             seg_test = seg_label.long()
-            
 
+            tp = 
+
+            
             # 记录Loss，计算性能指标
             # print("F1Raw" + str(metrics.classwise_f1(output, seg_test)))
-            print("diceLoss " + str(metrics.dice_loss(output, seg_test)))
+            print("diceLoss0 " + str(metrics.dice_loss(output[:, 0:1, :], seg_test[:, 0:1, :])))
+            print("diceLoss1 " + str(metrics.dice_loss(output[:, 1:2, :], seg_test[:, 1:2, :])))
             print("iouReal? " + str(metrics.iou_score(output, seg_test)))
             print("sensi " + str(metrics.sensitivity(output, seg_test)))
-            # print("iouRaw" + str(metrics.classwise_iou(output, seg_test)))
             
 
 
-            loss = criterion(output, seg_label)
-            iter_loss = loss.item()
-            all_test_iter_loss.append(iter_loss)
-            batch_test_loss_meter.add(iter_loss)
-            test_loss_meter.add(iter_loss)
+            
 
             output_np = output.cpu().detach().numpy().copy()
             output_np = np.argmin(output_np, axis=1)
             seg_label_np = seg_label.cpu().detach().numpy().copy()
             seg_label_np = np.argmin(seg_label_np, axis=1)
 
-            if i % NUM_TRAIN_CHECK_BATCHES == 0:
-                logging.debug('Test {}:{}'.format(i * BATCH_SIZE, batch_test_loss_meter.value()))
-                batch_test_loss_meter.reset()
+         
 
             # 目前每个epoch只输出第一个batch的图片
             # 利用ones_like和torch.where来
@@ -235,18 +227,16 @@ def test(epoch):
                     if not os.path.exists(path):
                         os.makedirs(path)
                     save_img.save(path +'E'+ str(epoch) +'_' + ID[j] + '.jpg')
-        logging.info('Epoch Average Test Loss:{}'.format(test_loss_meter.value()))
-        writer.add_scalar('loss/test', test_loss_meter.value()[0], epoch)
-        test_loss_meter.reset()
+        
 
 
 # 启动配置
 # ------------------------------------------------------------------------------------------------------------------------------------------
-# Meter用于度量波动区间
-batch_train_loss_meter = meter.AverageValueMeter()
-train_loss_meter = meter.AverageValueMeter()
-batch_test_loss_meter = meter.AverageValueMeter()
-test_loss_meter = meter.AverageValueMeter()
+# # Meter用于度量波动区间
+# batch_train_loss_meter = meter.AverageValueMeter()
+# train_loss_meter = meter.AverageValueMeter()
+# batch_test_loss_meter = meter.AverageValueMeter()
+# test_loss_meter = meter.AverageValueMeter()
 
 # 配置特征排序（和引用的特征量）
 rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA', 'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
@@ -278,6 +268,33 @@ logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
 # jaccard_index = metrics.make_weighted_metric(metrics.classwise_iou)
 # f1_score = metrics.make_weighted_metric(metrics.classwise_f1)
 
+train_loss = []
+test_loss = []
+pixel_accuracy = []
+IOU = []
+DICE = []
+precision = []
+sensitivity = []
+specificity = []
+hausdorff = []
 for epoch in range(start_epoch, args.epoch):
+    batch_train_loss = []
+    batch_test_loss = []
+    batch_pixel_accuracy = []
+    batch_IOU = []
+    batch_DICE = []
+    batch_precision = []
+    batch_sensitivity = []
+    batch_specificity = []
+    batch_hausdorff = []
     train(epoch)
     test(epoch)
+    train_loss.extend(batch_train_loss)
+    test_loss.extend(batch_test_loss)
+    pixel_accuracy.extend(batch_pixel_accuracy)
+    IOU.extend(batch_IOU)
+    DICE.extend(batch_DICE)
+    precision.extend(batch_precision)
+    sensitivity.extend(batch_sensitivity)
+    specificity.extend(batch_specificity)
+    hausdorff.extend(batch_hausdorff)

@@ -1,7 +1,10 @@
 import torch
 from torch import nn
 
-
+"""
+语义分割常用损失函数
+https://blog.csdn.net/CaiDaoqing/article/details/90457197
+"""
 
 
 class MultiLossLayer(nn.Module):

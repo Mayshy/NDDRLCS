@@ -2,15 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional
+from torch.utils import data
+import MTLDataset
+import torchvision
 
 # https://zhuanlan.zhihu.com/p/117435908
 """
 二分类分割性能指标
-
-问题：dice 超过1
-1. 不知道公式准不准
-2. 可能被mixup影响
-3. seg_label是否应该是long
+输出 (batch_size, num_class, width, height) ， 输出可能未被归一化
+标签 (batch_size, num_class, width, height) ， 独热编码,用[:, x: x+1, :]来找到第x个类
 
 out shape torch.Size([16, 2, 224, 224])
 
@@ -24,36 +24,38 @@ DICE
 两个体相交的面积占总面积的比值，范围是0~1.
 dice = (2 * tp) / (2 * tp + fp + fn)
 https://blog.csdn.net/baidu_36511315/article/details/105217674
+使用方式：
+1. pred[:, 0:1, :] pred[:, 1:2, :]
 """
-def dice_loss(pred, target):
+def dice_loss(pred, gt,  activation='softmax2d'):
     """This definition generalize to real valued pred and target vector.
 This should be differentiable.
     pred: tensor with first dimension as batch
     target: tensor with first dimension as batch
     """
-    # N = gt.size(0)
-    # pred_flat = pred.view(N, -1)
-    # gt_flat = gt.view(N, -1)
-    # print(pred_flat.shape)
-    # print(gt_flat.shape)
-    # tp = torch.sum((pred_flat != 0) * (gt_flat != 0), dim=1)
-    # fp = torch.sum((pred_flat != 0) * (gt_flat == 0), dim=1)
-    # fn = torch.sum((pred_flat == 0) * (gt_flat != 0), dim=1)
-    # # 转为float，以防long类型之间相除结果为0
-    # loss = (2 * tp + EPSILON).float() / (2 * tp + fp + fn + EPSILON).float()
-    # return (loss.sum() / N).item()
+    if activation is None or activation == "none":
+        activation_fn = lambda x: x
+    elif activation == "sigmoid":
+        activation_fn = nn.Sigmoid()
+    elif activation == "softmax2d":
+        activation_fn = nn.Softmax2d()
+    else:
+        raise NotImplementedError("Activation implemented for sigmoid and softmax2d")
+ 
+    pred = activation_fn(pred)
     smooth = EPSILON
-    # smooth = EPSILON
+    N = gt.size(0)
+    pred_flat = pred.view(N, -1)
+    gt_flat = gt.view(N, -1)
+ 
+    intersection = (pred_flat * gt_flat).sum()
+    return ((2. * intersection + smooth) / (pred_flat.sum() + gt_flat.sum() + smooth)).item()
+    # tp = torch.sum(gt_flat * pred_flat, dim=1)
+    # fp = torch.sum(pred_flat, dim=1) - tp
+    # fn = torch.sum(gt_flat, dim=1) - tp
+    # loss = (2 * tp + EPSILON) / (2 * tp + fp + fn + EPSILON)
+    # return (loss.sum() / N).item()
 
-    # have to use contiguous since they may from a torch.view op
-    iflat = pred.contiguous().view(-1)
-    tflat = target.contiguous().view(-1)
-    intersection = (iflat * tflat).sum()
-
-    A_sum = torch.sum(tflat * iflat)
-    B_sum = torch.sum(tflat * tflat)
-    
-    return ((2. * intersection + smooth) / (A_sum + B_sum + smooth)).item()
 
 
 # 也是错的
@@ -135,7 +137,7 @@ def one_hot(labels: torch.Tensor,
     batch_size, height, width = labels.shape
     one_hot = torch.zeros(batch_size, num_classes, height, width,
                           device=device, dtype=dtype)
-    return one_hot.scatter_(1, labels.unsqueeze(1), 1.0) + EPSILON
+    return one_hot.scatter_(1, labels.unsqueeze(1), 1.0)
 
 
 # jaccard_index = make_weighted_metric(classwise_iou)
@@ -228,14 +230,39 @@ if __name__ == '__main__':
              [0, 0, 0, 0],
              [1, 0, 0, 1]]]
     ])
-    
     print(pred.shape)
     print("diceLoss " + str(dice_loss(pred, gt)))
     print("iouReal? " + str(iou_score(pred, gt)))
     print("sensi " + str(sensitivity(pred, gt)))
 
-    print(pred2.shape)
-    print(gt2.shape)
     print("diceLoss " + str(dice_loss(pred2, gt2)))
+    print("diceLoss " + str(dice_loss(pred2[:, 0:1, :], gt2[:, 0:1, :])))
+    print("diceLoss " + str(dice_loss(pred2[:, 1:2, :], gt2[:, 1:2, :])))
+    print("diceLoss " + str(dice_loss(pred2[:, 2:3, :], gt2[:, 2:3, :])))
     print("iouReal? " + str(iou_score(pred2, gt2)))
     print("sensi " + str(sensitivity(pred2, gt2)))
+
+    data_root = "../ResearchData/UltraImageUSFullTest/UltraImageCropFull"
+    seg_root = "../seg/"
+    us_path = '../ResearchData/data_ultrasound_1.csv'
+    NUM_CLASSES = 4
+    BATCH_SIZE = 16
+    rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA', 'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
+    train_dataset = MTLDataset.SegDataset(
+        str(data_root)+'TRAIN/', seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test = 'Train',screener=rf_sort_list,screen_num = 10)
+    train_dataloader = data.DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    # target为一个batch的值
+    target = iter(train_dataloader).next()
+    DEVICE = torch.device('cuda:' + str(1) if torch.cuda.is_available() else 'cpu')
+    img = target[1]
+    seg_label = target[2].to(DEVICE)
+    
+    model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=2, aux_loss=None).to(DEVICE)
+
+    output = model(img.to(DEVICE))['out']
+
+    soft_output = nn.Softmax2d()(output)
+    print(dice_loss(soft_output, seg_label))
+    print(seg_label.shape)
+    print(seg_label.sum())
