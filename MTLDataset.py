@@ -207,6 +207,7 @@ class SegDataset(data.Dataset):
             seg_label = np.array(seg_label)
             seg_label[seg_label > 0] = 1
             seg_label[seg_label == 0] = 0
+            # print('0' + str(seg_label.shape))
             seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
             # print(seg_label.sum())
             # reverse_seg_label = seg_label.clone()
@@ -215,8 +216,11 @@ class SegDataset(data.Dataset):
             # reverse_seg_label[reverse_seg_label == -1] = 0
             # print(reverse_seg_label.sum())
             # seg_label = torch.cat((seg_label, reverse_seg_label),dim = 0).long()
+            # print('1' + str(seg_label.shape))
             seg_label = metrics.one_hot(seg_label, 2)
-            # TODO: 检测unsqueeze之后是否失真
+            seg_label = torch.squeeze(seg_label, 0)
+
+
         
 
         numeric_data = img_ID_data[:-1]
@@ -260,15 +264,26 @@ class SegDataset(data.Dataset):
 
 
 def moduleTest():
-    roi_root = 'D:/Workspace/ResearchData/RawData/Test/UltraImageUSFullTest/UltraImageCropTransectionROI/'
-    full_img_root = 'D:/Workspace/ResearchData/RawData/Test/UltraImageUSFullTest/UltraImageCropTransection/'
-    us_path = '../data_ultrasound_1.csv'
-    roi_dataset = MTLDataset(roi_root,us_path=us_path)
-    full_img_dataset = MTLDataset(full_img_root,us_path=us_path)
-    img, num_data, label = roi_dataset.__getitem__(0)
-    print(img)
-    print(num_data)
-    print(label)
+    data_root = "../ResearchData/UltraImageUSFullTest/UltraImageCropFull"
+    seg_root = "../seg/"
+    us_path = '../ResearchData/data_ultrasound_1.csv'
+    NUM_CLASSES = 4
+    BATCH_SIZE = 16
+    rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA',
+                    'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA',
+                    'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
+    train_dataset = SegDataset(
+        str(data_root) + 'TRAIN/', seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+        screener=rf_sort_list, screen_num=10)
+    train_dataloader = data.DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    # target为一个batch的值
+    target = iter(train_dataloader).next()
+    DEVICE = torch.device('cuda:' + str(1) if torch.cuda.is_available() else 'cpu')
+    img = target[1]
+    seg_label = target[2].to(DEVICE)
+    print(img.shape)
+    print(seg_label.shape)
     imshow(img)
 
 def imshow(tensor, title=None):

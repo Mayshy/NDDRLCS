@@ -12,7 +12,6 @@ from torch import optim
 from torch import nn
 import MTLLoss
 from MTLLoss import MultiLossLayer
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils import data
 from torchvision.utils import save_image
 from torchvision import transforms
@@ -22,7 +21,8 @@ from torchnet import meter
 import datetime
 import metrics
 from collections import  Counter
-
+import geomloss
+import random
 
 """
 单输入单输出分割
@@ -44,6 +44,19 @@ def get_criterion(criterion):
         return nn.CrossEntropyLoss()
     if criterion == "BCELoss":
         return nn.BCELoss()
+    if criterion == "SSLoss":
+        return
+    if criterion == "DiceLoss":
+        return MTLLoss.DiceLoss()
+    if criterion == "IOULoss":
+        return MTLLoss.mIoULoss()
+    if criterion == "GDL":
+        return MTLLoss.GDL()
+    if criterion == "TverskyLoss":
+        return
+    if criterion == "Hausdorff":
+        return geomloss.SamplesLoss(loss='hausdorff')
+
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
     if criterionUS == "XTanh":
@@ -65,7 +78,6 @@ def mixup_data(x, y0, y1, y2, alpha=1.0):
         lam = np.random.beta(alpha, alpha)
     else:
         lam = 1
-
     batch_size = x.size()[0]
     index = torch.randperm(batch_size).to(DEVICE)
 
@@ -81,13 +93,21 @@ def mixup_criterion_type(the_criterion, pred, y_a, y_b, lam):
 def mixup_criterion_numeric(the_criterion, pred, y_a, y_b, lam):
     return the_criterion(pred, lam * y_a + (1 - lam) * y_b)
 
+
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+
 # 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
-    parser.add_argument("--criterion", type=str, help="criterion", default='BCELoss')
+    parser.add_argument("--criterion", type=str, help="criterion", default='IOULoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFull')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
@@ -106,23 +126,23 @@ def parse_args(argv):
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
-    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='protoType')
+    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='0926b')
     parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
     return parser.parse_args(argv)
+
 
 # 训练
 # TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV
 def train(epoch):
     # 设置数据集
     train_dataset = MTLDataset.SegDataset(
-        str(data_root)+'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test = 'Train',screener=rf_sort_list,screen_num = 10)
+        str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+        screener=rf_sort_list, screen_num=10)
     train_dataloader = data.DataLoader(
-        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True, )
+    batch_train_loss = []
     model.train()
-
-    
-
 
     # 开始一个epoch的迭代
     for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
@@ -133,15 +153,15 @@ def train(epoch):
         US_label = US_data[:, :args.length_aux]
         label4 = label4.to(DEVICE)
 
-        
-
         # mixup
-        img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label, US_label, label4, args.alpha)
+        img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label,
+                                                                                                    US_label, label4,
+                                                                                                    args.alpha)
 
         # 执行模型，得到输出
         out = model(img)['out']
         # 可能需要做sigmoid？
-        out = nn.Softmax2D()(out)
+        out = nn.Softmax2d()(out)
 
         # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
@@ -152,26 +172,21 @@ def train(epoch):
         train_loss.backward()
         optimizer.step()
     batch_train_loss = np.array(batch_train_loss)
-    print("Epoch %d train loss MEAN %f" % np.mean(batch_train_loss))
-    print("Epoch %d train loss STD %f" % np.std(batch_train_loss))
-    
-        
-           
-
-
-    
+    print("Epoch {0} train loss MEAN {1}".format(epoch, np.mean(batch_train_loss)))
+    print("Epoch {0} train loss STD {1}".format(epoch,np.std(batch_train_loss)))
+    train_loss_list.extend(batch_train_loss)
 
 def test(epoch):
     logging.info("Epoch " + str(epoch))
 
     # 设置数据集
     test_dataset = MTLDataset.SegDataset(
-        str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test', screener=rf_sort_list,
+        str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+        screener=rf_sort_list,
         screen_num=10)
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
-
 
     # 开始这轮的迭代
     with torch.no_grad():
@@ -185,48 +200,50 @@ def test(epoch):
 
             # 输出
             output = model(img)['out']
-            output = nn.Softmax2D()(output)
+            output = nn.Softmax2d()(output)
             # seg_label 标签
             loss = criterion(output, seg_label)
 
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
             seg_test = seg_label.long()
+            output0 = output[:, 0:1, :]
+            output1 = output[:, 1:2, :]
+            seg_test0 = seg_test[:, 0:1, :]
+            seg_test1 = seg_test[:, 1:2, :]
 
-            tp = 
-
-            
             # 记录Loss，计算性能指标
-            # print("F1Raw" + str(metrics.classwise_f1(output, seg_test)))
-            print("diceLoss0 " + str(metrics.dice_loss(output[:, 0:1, :], seg_test[:, 0:1, :])))
-            print("diceLoss1 " + str(metrics.dice_loss(output[:, 1:2, :], seg_test[:, 1:2, :])))
-            print("iouReal? " + str(metrics.iou_score(output, seg_test)))
-            print("sensi " + str(metrics.sensitivity(output, seg_test)))
-            
+            print("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
+            print("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output0, seg_test0)))
+            print("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
+            print("Epoch {0} sen0 {1}".format(epoch, metrics.sensitivity(output0, seg_test0)))
+            print("Epoch {0} sen1 {1}".format(epoch, metrics.sensitivity(output1, seg_test1)))
+            print("Epoch {0} ppv0 {1}".format(epoch, metrics.ppv(output0, seg_test0)))
+            print("Epoch {0} ppv1 {1}".format(epoch, metrics.ppv(output1, seg_test1)))
+            print("Epoch {0} hau0 {1}".format(epoch, metrics.hausdorff_index(output0, seg_test0)))
+            print("Epoch {0} hau1 {1}".format(epoch, metrics.hausdorff_index(output1, seg_test1)))
 
-
-            
-
-            output_np = output.cpu().detach().numpy().copy()
-            output_np = np.argmin(output_np, axis=1)
-            seg_label_np = seg_label.cpu().detach().numpy().copy()
-            seg_label_np = np.argmin(seg_label_np, axis=1)
-
-         
+            # 试图输出图像
+            # output_np = output.cpu().detach().numpy().copy()
+            # output_np = np.argmin(output_np, axis=1)
+            # seg_label_np = seg_label.cpu().detach().numpy().copy()
+            # seg_label_np = np.argmin(seg_label_np, axis=1)
 
             # 目前每个epoch只输出第一个batch的图片
             # 利用ones_like和torch.where来
             if i == 0:
-                one = torch.ones_like(output)
-                zero = torch.zeros_like(output)
-                output = torch.where(output >= 0.5, one, output)
-                output = torch.where(output < 0.5, zero, output).cpu()
+                # one = torch.ones_like(output)
+                # zero = torch.zeros_like(output)
+                # output = torch.where(output >= 0.5, one, output)
+                # output = torch.where(output < 0.5, zero, output).cpu()
+                output = output.cpu()
                 for j in range(BATCH_SIZE):
-                    save_img = transforms.ToPILImage()(output[j]).convert('L')
+                    save_img = transforms.ToPILImage()(output[j][1]).convert('L')
                     path = '../Log/' + args.logdir + '/V' + str(j) + '/'
                     if not os.path.exists(path):
                         os.makedirs(path)
-                    save_img.save(path +'E'+ str(epoch) +'_' + ID[j] + '.jpg')
+                    save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
+
         
 
 
@@ -239,6 +256,7 @@ def test(epoch):
 # test_loss_meter = meter.AverageValueMeter()
 
 # 配置特征排序（和引用的特征量）
+setup_seed(20)
 rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA', 'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
 # 写入配置
 args = parse_args(sys.argv[1:])
@@ -259,7 +277,7 @@ BATCH_SIZE = args.n_batch_size
 NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
 
-writer = SummaryWriter('../Log/'+str(args.logdir)+'/' + str(args.s_data_root[-10:]) +'/'+ str(args.net) +'_'+ str(args.mode) )
+
 logging.basicConfig(level=args.logging_level,filename=args.log_file_name,
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
 logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
@@ -268,33 +286,24 @@ logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
 # jaccard_index = metrics.make_weighted_metric(metrics.classwise_iou)
 # f1_score = metrics.make_weighted_metric(metrics.classwise_f1)
 
-train_loss = []
-test_loss = []
+train_loss_list = []
+test_loss_list = []
 pixel_accuracy = []
 IOU = []
 DICE = []
-precision = []
-sensitivity = []
-specificity = []
 hausdorff = []
 for epoch in range(start_epoch, args.epoch):
-    batch_train_loss = []
     batch_test_loss = []
     batch_pixel_accuracy = []
     batch_IOU = []
     batch_DICE = []
-    batch_precision = []
-    batch_sensitivity = []
-    batch_specificity = []
     batch_hausdorff = []
     train(epoch)
     test(epoch)
-    train_loss.extend(batch_train_loss)
-    test_loss.extend(batch_test_loss)
+
+    test_loss_list.extend(batch_test_loss)
     pixel_accuracy.extend(batch_pixel_accuracy)
     IOU.extend(batch_IOU)
     DICE.extend(batch_DICE)
-    precision.extend(batch_precision)
-    sensitivity.extend(batch_sensitivity)
-    specificity.extend(batch_specificity)
     hausdorff.extend(batch_hausdorff)
+
