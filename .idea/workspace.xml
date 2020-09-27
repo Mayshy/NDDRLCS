@@ -4,20 +4,7 @@
     <bookmark url="file://$PROJECT_DIR$/1i1oSeg.py" line="62" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/NDDRLCS.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/0926.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MTLShow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTLDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLDataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTLLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLLoss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
-    </list>
+    <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="181" column="11" lean-forward="true" selection-start-line="181" selection-start-column="11" selection-end-line="181" selection-end-column="11" />
+            <state relative-caret-position="-1867">
+              <caret line="107" column="50" lean-forward="true" selection-start-line="107" selection-start-column="50" selection-end-line="107" selection-end-column="50" />
               <folding>
                 <element signature="e#34#43#0" expanded="true" />
               </folding>
@@ -158,9 +145,9 @@
         <option value="$PROJECT_DIR$/MTLDataset.py" />
         <option value="$PROJECT_DIR$/metrics.py" />
         <option value="$PROJECT_DIR$/MTLLoss.py" />
-        <option value="$PROJECT_DIR$/0926.sh" />
         <option value="$PROJECT_DIR$/MTLShow.py" />
         <option value="$PROJECT_DIR$/1i1oSeg.py" />
+        <option value="$PROJECT_DIR$/0926.sh" />
       </list>
     </option>
   </component>
@@ -338,18 +325,18 @@
       <workItem from="1601098151489" duration="48000" />
       <workItem from="1601098303747" duration="7448000" />
       <workItem from="1601111875156" duration="270000" />
-      <workItem from="1601120507533" duration="1516000" />
+      <workItem from="1601120507533" duration="3670000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31864000" />
+    <option name="totallyTimeSpent" value="34018000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2934519" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2934519" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -361,11 +348,11 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.2739965" />
+      <window_info anchor="bottom" id="File Transfer" order="9" visible="true" weight="0.2739965" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
       <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.2984293" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" visible="true" weight="0.29668412" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.29668412" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -379,23 +366,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="181" column="11" lean-forward="true" selection-start-line="181" selection-start-column="11" selection-end-line="181" selection-end-column="11" />
-          <folding>
-            <element signature="e#34#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/0926.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="17" selection-start-column="17" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MTLShow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="418">
@@ -453,6 +423,23 @@
           <caret line="45" column="40" selection-start-line="45" selection-start-column="40" selection-end-line="45" selection-end-column="40" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/0926.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1867">
+          <caret line="107" column="50" lean-forward="true" selection-start-line="107" selection-start-column="50" selection-end-line="107" selection-end-column="50" />
+          <folding>
+            <element signature="e#34#43#0" expanded="true" />
           </folding>
         </state>
       </provider>

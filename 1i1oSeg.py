@@ -55,7 +55,9 @@ def get_criterion(criterion):
     if criterion == "TverskyLoss":
         return
     if criterion == "Hausdorff":
-        return geomloss.SamplesLoss(loss='hausdorff')
+        return MTLLoss.GeomLoss(loss="hausdorff")
+    if criterion == "HDLoss":
+        return MTLLoss.HDLoss()
 
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
@@ -107,7 +109,7 @@ def parse_args(argv):
     parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
-    parser.add_argument("--criterion", type=str, help="criterion", default='IOULoss')
+    parser.add_argument("--criterion", type=str, help="criterion", default='HDLoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFull')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
@@ -127,7 +129,7 @@ def parse_args(argv):
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='0926b')
-    parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
+    parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
     return parser.parse_args(argv)
 
@@ -215,7 +217,7 @@ def test(epoch):
             # 记录Loss，计算性能指标
             print("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
             print("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output0, seg_test0)))
-            print("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
+            print("Epoch {0} dice1 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
             print("Epoch {0} sen0 {1}".format(epoch, metrics.sensitivity(output0, seg_test0)))
             print("Epoch {0} sen1 {1}".format(epoch, metrics.sensitivity(output1, seg_test1)))
             print("Epoch {0} ppv0 {1}".format(epoch, metrics.ppv(output0, seg_test0)))

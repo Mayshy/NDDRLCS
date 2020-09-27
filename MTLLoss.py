@@ -2,6 +2,9 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import metrics
+import geomloss
+import numpy as np
+from scipy.ndimage import distance_transform_edt as distance
 """
 语义分割常用损失函数
 https://blog.csdn.net/CaiDaoqing/article/details/90457197
@@ -73,61 +76,15 @@ class XSigmoidLoss(torch.nn.Module):
 # https://kornia.readthedocs.io/en/v0.1.2/_modules/torchgeometry/losses/dice.html
 # TODO:验证它的正确性
 class DiceLoss(nn.Module):
-    r"""Criterion that computes Sørensen-Dice Coefficient loss.
-
-    According to [1], we compute the Sørensen-Dice Coefficient as follows:
-
-    .. math::
-
-        \text{Dice}(x, class) = \frac{2 |X| \cap |Y|}{|X| + |Y|}
-
-    where:
-       - :math:`X` expects to be the scores of each class.
-       - :math:`Y` expects to be the one-hot tensor with the class labels.
-
-    the loss, is finally computed as:
-
-    .. math::
-
-        \text{loss}(x, class) = 1 - \text{Dice}(x, class)
-
-    [1] https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-
-    Shape:
-        - Input: :math:`(N, C, H, W)` where C = number of classes.
-        - Target: :math:`(N, H, W)` where each value is
-          :math:`0 ≤ targets[i] ≤ C−1`.
-
-    Examples:
-        # >>> N = 5  # num_classes
-        # >>> loss = tgm.losses.DiceLoss()
-        # >>> input = torch.randn(1, N, 3, 5, requires_grad=True)
-        # >>> target = torch.empty(1, 3, 5, dtype=torch.long).random_(N)
-        # >>> output = loss(input, target)
-        # >>> output.backward()
-    """
-
     def __init__(self) -> None:
         super(DiceLoss, self).__init__()
         self.eps: float = 1e-6
 
     def forward(
             self,
-            input: torch.Tensor,
+            inputs: torch.Tensor,
             target: torch.Tensor) -> torch.Tensor:
-        if not torch.is_tensor(input):
-            raise TypeError("Input type is not a torch.Tensor. Got {}"
-                            .format(type(input)))
-        if not len(input.shape) == 4:
-            raise ValueError("Invalid input shape, we expect BxNxHxW. Got: {}"
-                             .format(input.shape))
-        if not input.shape[-2:] == target.shape[-2:]:
-            raise ValueError("input and target shapes must be the same. Got: {}"
-                             .format(input.shape, input.shape))
-        if not input.device == target.device:
-            raise ValueError(
-                "input and target must be in the same device. Got: {}" .format(
-                    input.device, target.device))
+        
         # compute softmax over the classes axis
         # input_soft = F.softmax(input, dim=1)
 
@@ -137,12 +94,21 @@ class DiceLoss(nn.Module):
         # target_one_hot = metrics.one_hot(target, num_classes=input.shape[1], device=input.device, dtype=input.dtype)
 
         # compute the actual dice score
-        dims = (1, 2, 3)
-        intersection = torch.sum(input * target, dims)
-        cardinality = torch.sum(input + target, dims)
+ 
+        # dims = (1, 2, 3)
+        # intersection = torch.sum(input * target, dims)
+        # cardinality = torch.sum(input + target, dims)
 
-        dice_score = 2. * intersection / (cardinality + self.eps)
-        return torch.mean(1. - dice_score)
+        # dice_score = 2. * intersection / (cardinality + self.eps)
+        # return torch.mean(1. - dice_score)
+        score = inputs[:, 1, ...]
+        target = target[:, 1, ...]
+        intersect = torch.sum(score * target)
+        y_sum = torch.sum(target * target)
+        z_sum = torch.sum(score * score)
+        loss = (2 * intersect + self.eps) / (z_sum + y_sum + self.eps)
+        loss = 1 - loss
+        return loss
 '''
 
 def generalised_dice_loss_2d_ein(Y_gt, Y_pred):
@@ -221,7 +187,105 @@ class mIoULoss(nn.Module):
         loss = inter / union
 
         ## Return average loss over classes and batch
-        return -loss.mean()
+        return - loss.mean()
+        
+class BoundaryLoss(nn.Module):
+    """
+    compute boundary loss for binary segmentation
+    input: outputs_soft: softmax results,  shape=(b,2,x,y)
+           gt_sdf: sdf of ground truth (can be original or normalized sdf); shape=(b,2,x,y)
+    output: boundary_loss; sclar
+    """
+    def __init__(self):
+        super(BoundaryLoss, self).__init__()
+
+    def forward(self, outputs_soft, gt_sdf):
+        # inputs => N x Classes x H x W
+        # target_oneHot => N x Classes x H x W
+
+        pc = outputs_soft[:,1,...]
+        dc = gt_sdf[:,1,...]
+        multipled = torch.einsum('bxy, bxy->bxy', pc, dc)
+        bd_loss = multipled.mean()
+
+        return bd_loss
+
+class HDLoss(nn.Module):
+    """
+    compute huasdorff distance loss for binary segmentation
+    input: seg_soft: softmax results,  shape=(b,2,x,y,z)
+           gt: ground truth, shape=(b,x,y,z)
+           seg_dtm: segmentation distance transform map; shape=(b,2,x,y,z)
+           gt_dtm: ground truth distance transform map; shape=(b,2,x,y,z)
+    output: boundary_loss; sclar
+    """
+    def __init__(self):
+        super(HDLoss, self).__init__()
+
+    def forward(self, outputs_soft, label_batch):
+        label_batch = label_batch[:, 1, ...]
+        with torch.no_grad():
+            gt_dtm_npy = compute_dtm(label_batch.cpu().numpy(), outputs_soft.shape)
+            gt_dtm = torch.from_numpy(gt_dtm_npy).float().cuda(outputs_soft.device.index)
+            seg_dtm_npy = compute_dtm(outputs_soft[:, 1, ...].cpu().numpy()>0.5, outputs_soft.shape)
+            seg_dtm = torch.from_numpy(seg_dtm_npy).float().cuda(outputs_soft.device.index)
+
+        delta_s = (outputs_soft[:,1,...] - label_batch.float()) ** 2
+        s_dtm = seg_dtm[:,1,...] ** 2
+        g_dtm = gt_dtm[:,1,...] ** 2
+        dtm = s_dtm + g_dtm
+        multipled = torch.einsum('bxy, bxy->bxy', delta_s, dtm)
+        hd_loss = multipled.mean()
+
+        return hd_loss
+    
+
+
+def compute_dtm(img_gt, out_shape):
+        """
+        compute the distance transform map of foreground in binary mask
+        input: segmentation, shape = (batch_size, x, y, z)
+        output: the foreground Distance Map (SDM) 
+        dtm(x) = 0; x in segmentation boundary
+                inf|x-y|; x in segmentation
+        """
+
+        fg_dtm = np.zeros(out_shape)
+
+        for b in range(out_shape[0]): # batch size
+            for c in range(1, out_shape[1]):
+                posmask = img_gt[b].astype(np.bool)
+                if posmask.any():
+                    posdis = distance(posmask)
+                    fg_dtm[b][c] = posdis
+
+        return fg_dtm
+
+class TheCrossEntropy(nn.Module):
+    def __init__(self):
+        super(TheCrossEntropy, self).__init__()
+
+    def forward(self, outputs, label_batch):
+        return F.cross_entropy(outputs, label_batch[:,1,:])
+
+
+class RHD(nn.Module):
+    '''
+    set λ (for the next epoch) as the ratio of the mean of the HD-based loss term to
+    the mean of the DSC loss term. 
+    '''
+    def __init__(self):
+        super(RHD, self).__init__()
+        self.HDLoss = HDLoss()
+        self.DiceLoss = DiceLoss()
+        self.CrossEntropy = TheCrossEntropy()
+        self.lam = 1 #TODO
+
+    def forward(self, outputs, label_batch):
+        loss_hd = self.HDLoss(outputs, label_batch)
+        loss_dice = self.DiceLoss(outputs, label_batch)
+        loss_ce = self.CrossEntropy(outputs, label_batch)
+        loss = self.lam *(loss_ce+loss_seg_dice) + (1 - alpha) * loss_hd
 
 if __name__ == '__main__':
     x = 1
