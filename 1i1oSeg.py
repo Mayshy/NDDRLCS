@@ -2,7 +2,6 @@
 # 每个函数前
 import os
 import numpy as np
-import pandas as pd
 import MTLDataset
 import torchvision
 import logging
@@ -13,15 +12,10 @@ from torch import nn
 import MTLLoss
 from MTLLoss import MultiLossLayer
 from torch.utils import data
-from torchvision.utils import save_image
 from torchvision import transforms
 import sys
-import visdom
-from torchnet import meter
 import datetime
 import metrics
-from collections import  Counter
-import geomloss
 import random
 
 """
@@ -37,11 +31,18 @@ seg_label 标签 torch.Size([16, 2, 224, 224])
 # Q: 未来要做p-value
 """
 
+def log_mean(array, name, isLog = False):
+    array = np.array(array)
+    mean = np.mean(array)
+    if isLog:
+        logging.info("Epoch {0} {2} MEAN {1}".format(epoch, mean, name))
+        logging.info("Epoch {0} {2} STD {1}".format(epoch, np.std(array), name))
+    return mean
 
 # 配置分类损失函数
 def get_criterion(criterion):
-    if criterion == "CrossEntropy":
-        return nn.CrossEntropyLoss()
+    if criterion == "TheCrossEntropy":
+        return MTLLoss.TheCrossEntropy()
     if criterion == "BCELoss":
         return nn.BCELoss()
     if criterion == "SSLoss":
@@ -54,8 +55,8 @@ def get_criterion(criterion):
         return MTLLoss.GDL()
     if criterion == "TverskyLoss":
         return
-    if criterion == "Hausdorff":
-        return MTLLoss.GeomLoss(loss="hausdorff")
+    # if criterion == "Hausdorff":
+    #     return MTLLoss.GeomLoss(loss="hausdorff")
     if criterion == "HDLoss":
         return MTLLoss.HDLoss()
 
@@ -109,17 +110,17 @@ def parse_args(argv):
     parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
-    parser.add_argument("--criterion", type=str, help="criterion", default='HDLoss')
+    parser.add_argument("--criterion", type=str, help="criterion", default='TheCrossEntropy')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
-    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFull')
+    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropTransection')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
                         default='../seg/')
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
-    parser.add_argument("--log_file_name", type=str, help="logging file name", default="../Log/" +str(datetime.date.today())+'.log')
+    parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=0.0001)
+    parser.add_argument("--lr", type=float, help="learning rate", default=0.00002)
     parser.add_argument("--wd", type=float, help="weight decay", default=0.1)
     parser.add_argument("--momentum", type=float, help="momentum", default=0.1)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
@@ -128,7 +129,7 @@ def parse_args(argv):
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
-    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='0926b')
+    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='0927a')
     parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
     return parser.parse_args(argv)
@@ -137,15 +138,17 @@ def parse_args(argv):
 # 训练
 # TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV
 def train(epoch):
+
     # 设置数据集
     train_dataset = MTLDataset.SegDataset(
         str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
         screener=rf_sort_list, screen_num=10)
     train_dataloader = data.DataLoader(
-        train_dataset, batch_size=BATCH_SIZE, shuffle=True, )
-    batch_train_loss = []
-    model.train()
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
+    logging.info("Epoch " + str(epoch))
+    train_loss_list = []
+    model.train()
     # 开始一个epoch的迭代
     for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
         # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
@@ -167,20 +170,26 @@ def train(epoch):
 
         # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
-        batch_train_loss.append(train_loss.item())
+        train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
         optimizer.zero_grad()
         train_loss.backward()
         optimizer.step()
-    batch_train_loss = np.array(batch_train_loss)
-    print("Epoch {0} train loss MEAN {1}".format(epoch, np.mean(batch_train_loss)))
-    print("Epoch {0} train loss STD {1}".format(epoch,np.std(batch_train_loss)))
-    train_loss_list.extend(batch_train_loss)
+
+    train_loss_mean = log_mean(train_loss_list, "train loss", isLog= True)
+    all_train_loss_list.append(train_loss_mean)
 
 def test(epoch):
-    logging.info("Epoch " + str(epoch))
 
+    test_loss_list = []
+    dice0 = []
+    dice1 = []
+    sen0 = []
+    sen1 = []
+    ppv0 = []
+    ppv1 = []
+    hausdorff = []
     # 设置数据集
     test_dataset = MTLDataset.SegDataset(
         str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
@@ -189,6 +198,7 @@ def test(epoch):
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
+
 
     # 开始这轮的迭代
     with torch.no_grad():
@@ -215,15 +225,22 @@ def test(epoch):
             seg_test1 = seg_test[:, 1:2, :]
 
             # 记录Loss，计算性能指标
-            print("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
-            print("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output0, seg_test0)))
-            print("Epoch {0} dice1 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
-            print("Epoch {0} sen0 {1}".format(epoch, metrics.sensitivity(output0, seg_test0)))
-            print("Epoch {0} sen1 {1}".format(epoch, metrics.sensitivity(output1, seg_test1)))
-            print("Epoch {0} ppv0 {1}".format(epoch, metrics.ppv(output0, seg_test0)))
-            print("Epoch {0} ppv1 {1}".format(epoch, metrics.ppv(output1, seg_test1)))
-            print("Epoch {0} hau0 {1}".format(epoch, metrics.hausdorff_index(output0, seg_test0)))
-            print("Epoch {0} hau1 {1}".format(epoch, metrics.hausdorff_index(output1, seg_test1)))
+            # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
+            test_loss_list.append(loss.item())
+            dice0.append(metrics.dice_index(output0, seg_test0))
+            dice1.append(metrics.dice_index(output1, seg_test1))
+            sen0.append(metrics.sensitivity(output0, seg_test0))
+            sen1.append(metrics.sensitivity(output1, seg_test1))
+            ppv0.append(metrics.ppv(output0, seg_test0))
+            ppv1.append(metrics.ppv(output1, seg_test1))
+            hausdorff.append(metrics.hausdorff_index(output1, seg_test1))
+            # logging.info("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output0, seg_test0)))
+            # logging.info("Epoch {0} dice1 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
+            # logging.info("Epoch {0} sen0 {1}".format(epoch, metrics.sensitivity(output0, seg_test0)))
+            # logging.info("Epoch {0} sen1 {1}".format(epoch, metrics.sensitivity(output1, seg_test1)))
+            # logging.info("Epoch {0} ppv0 {1}".format(epoch, metrics.ppv(output0, seg_test0)))
+            # logging.info("Epoch {0} ppv1 {1}".format(epoch, metrics.ppv(output1, seg_test1)))
+            # logging.info("Epoch {0} hausdorff {1}".format(epoch, metrics.hausdorff_index(output1, seg_test1)))
 
             # 试图输出图像
             # output_np = output.cpu().detach().numpy().copy()
@@ -246,6 +263,22 @@ def test(epoch):
                         os.makedirs(path)
                     save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
 
+    test_loss_mean = log_mean(test_loss_list, "test loss", isLog= True)
+    dice0_mean = log_mean(dice0, "dice0", isLog= True)
+    dice1_mean = log_mean(dice1, "dice1", isLog= True)
+    sen0_mean = log_mean(sen0, "sen0", isLog= True)
+    sen1_mean = log_mean(sen1, "sen1", isLog= True)
+    ppv0_mean = log_mean(ppv0, "ppv0", isLog= True)
+    ppv1_mean = log_mean(ppv1, "ppv1", isLog= True)
+    hausdorff_mean = log_mean(hausdorff, "hausdorff", isLog= True)
+    all_test_loss_list.append(test_loss_mean)
+    all_dice0.append(dice0_mean)
+    all_dice1.append(dice1_mean)
+    all_sen0.append(sen0_mean)
+    all_sen1.append(sen1_mean)
+    all_ppv0.append(ppv0_mean)
+    all_ppv1.append(ppv1_mean)
+    all_hausdorff.append(hausdorff_mean)
         
 
 
@@ -280,20 +313,26 @@ NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
 
 
-logging.basicConfig(level=args.logging_level,filename=args.log_file_name,
+log_path = '../Log/' + str(args.logdir)  +'/'
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_file_name) ,
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
-logging.warning('Model: {}  Mode:{}'.format(args.net, args.mode))
+logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
 
 ## metrics
 # jaccard_index = metrics.make_weighted_metric(metrics.classwise_iou)
 # f1_score = metrics.make_weighted_metric(metrics.classwise_f1)
 
-train_loss_list = []
-test_loss_list = []
-pixel_accuracy = []
-IOU = []
-DICE = []
-hausdorff = []
+all_train_loss_list = []
+all_test_loss_list = []
+all_dice0 = []
+all_dice1 = []
+all_sen0 = []
+all_sen1 = []
+all_ppv0 = []
+all_ppv1 = []
+all_hausdorff = []
 for epoch in range(start_epoch, args.epoch):
     batch_test_loss = []
     batch_pixel_accuracy = []
@@ -303,9 +342,13 @@ for epoch in range(start_epoch, args.epoch):
     train(epoch)
     test(epoch)
 
-    test_loss_list.extend(batch_test_loss)
-    pixel_accuracy.extend(batch_pixel_accuracy)
-    IOU.extend(batch_IOU)
-    DICE.extend(batch_DICE)
-    hausdorff.extend(batch_hausdorff)
+log_mean(all_train_loss_list, "all_train_loss_list", isLog=True)
+log_mean(all_test_loss_list, "all_test_loss_list", isLog=True)
+log_mean(all_dice0, "all_dice0", isLog=True)
+log_mean(all_dice1, "all_dice1", isLog=True)
+log_mean(all_sen0, "all_sen0", isLog=True)
+log_mean(all_sen1, "all_sen1", isLog=True)
+log_mean(all_ppv0, "all_ppv0", isLog=True)
+log_mean(all_ppv0, "all_ppv0", isLog=True)
+log_mean(all_hausdorff, "all_hausdorff", isLog=True)
 

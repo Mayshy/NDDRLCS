@@ -266,7 +266,8 @@ class TheCrossEntropy(nn.Module):
         super(TheCrossEntropy, self).__init__()
 
     def forward(self, outputs, label_batch):
-        return F.cross_entropy(outputs, label_batch[:,1,:])
+        target = label_batch[:, 1, :].long()
+        return F.cross_entropy(outputs, target)
 
 
 class RHD(nn.Module):

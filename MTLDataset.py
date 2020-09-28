@@ -161,10 +161,10 @@ class SegDataset(data.Dataset):
         self.num_classes = num_classes
         self.train_or_test = train_or_test
         if(auxiliary == 'US' and us_path):
-            logging.debug('US Dataset has prepared to init.')
+            # logging.debug('US Dataset has prepared to init.')
             data = pd.read_csv(us_path,index_col=-1)
         elif(auxiliary == 'MIX' and mix_path):
-            logging.debug('MIX Dataset has prepared to init.')
+            # logging.debug('MIX Dataset has prepared to init.')
             data = pd.read_csv(mix_path,index_col=-1)
         else:
             raise Exception('Dataset Function Parameters are not avaiable, please check your Function.')
@@ -247,14 +247,14 @@ class SegDataset(data.Dataset):
             if (method == 'rf_importance'):
                 fea_name = fea_sel(data,label)[:screen_num]
                 data = data.loc[:, fea_name]
-                logging.info('Fea_name {} by rf_importance: {}'.format(screen_num,fea_name) )
+                # logging.debug('Fea_name {} by rf_importance: {}'.format(screen_num,fea_name) )
 
         elif (isinstance(method, list)):
             # method should be a list of fea_name.
             fea_name = method[:screen_num]
             data = data.loc[:, fea_name]
-            logging.info('Fea_name by list: {}'.format(fea_name))
-            
+            # logging.debug('Fea_name by list: {}'.format(fea_name))
+
         else:
             raise Exception('WARNING from SHYyyyyyy: Check your Screener Configuration.')
         data['Type'] = label
