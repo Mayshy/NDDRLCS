@@ -2,6 +2,7 @@
 # 每个函数前
 import os
 import numpy as np
+import pandas as pd
 import MTLDataset
 import torchvision
 import logging
@@ -39,8 +40,33 @@ def log_mean(array, name, isLog = False):
         logging.info("Epoch {0} {2} STD {1}".format(epoch, np.std(array), name))
     return mean
 
+def dict_sum(res, addend):
+    if not res:
+        res = addend
+    else:
+        for k, v in res.items():
+            res[k] += addend[k]
+    return res
+
+def get_model(model_name, pretrained = False):
+    model_name = model_name.strip()
+    if model_name == 'FCN_ResNet50':
+        return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=2,
+                                                            aux_loss=None).to(DEVICE)
+    if model_name == 'FCN_ResNet101':
+        return torchvision.models.segmentation.fcn_resnet101(pretrained=pretrained, progress=False, num_classes=2,
+                                                            aux_loss=None).to(DEVICE)
+    if model_name == 'DLV3__ResNet50':
+        return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=pretrained, progress=False, num_classes=2,
+                                                             aux_loss=None).to(DEVICE)
+    if model_name == 'DLV3__ResNet101':
+        return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=pretrained, progress=False, num_classes=2,
+                                                             aux_loss=None).to(DEVICE)
+
+
 # 配置分类损失函数
 def get_criterion(criterion):
+    criterion = criterion.strip()
     if criterion == "TheCrossEntropy":
         return MTLLoss.TheCrossEntropy()
     if criterion == "BCELoss":
@@ -107,7 +133,8 @@ def setup_seed(seed):
 # 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--net", type=str, help="The Main Classifier", default='NddrCrossDense')
+    parser.add_argument("--net", type=str, help="The Main Model", default='FCN_ResNet50')
+    parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='TheCrossEntropy')
@@ -129,14 +156,14 @@ def parse_args(argv):
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
-    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default='0927a')
-    parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
+    parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default=str(datetime.date.today()))
+    parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=1)
     return parser.parse_args(argv)
 
 
 # 训练
-# TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV
+# TODO 得想个办法把海量的loss都放一起处理，显得优雅 : 输出形式 log + 逐行写入CSV,待检验
 def train(epoch):
 
     # 设置数据集
@@ -198,11 +225,12 @@ def test(epoch):
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
-
-
+    epoch_quality = {}
+    batch_num = 0
     # 开始这轮的迭代
     with torch.no_grad():
         for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(test_dataloader):
+            batch_num += 1
             # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
             img = img.to(DEVICE)
             seg_label = seg_label.to(DEVICE)
@@ -219,42 +247,24 @@ def test(epoch):
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
             seg_test = seg_label.long()
-            output0 = output[:, 0:1, :]
+            # output0 = output[:, 0:1, :]
             output1 = output[:, 1:2, :]
-            seg_test0 = seg_test[:, 0:1, :]
+            # seg_test0 = seg_test[:, 0:1, :]
             seg_test1 = seg_test[:, 1:2, :]
 
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
             test_loss_list.append(loss.item())
-            dice0.append(metrics.dice_index(output0, seg_test0))
             dice1.append(metrics.dice_index(output1, seg_test1))
-            sen0.append(metrics.sensitivity(output0, seg_test0))
             sen1.append(metrics.sensitivity(output1, seg_test1))
-            ppv0.append(metrics.ppv(output0, seg_test0))
             ppv1.append(metrics.ppv(output1, seg_test1))
             hausdorff.append(metrics.hausdorff_index(output1, seg_test1))
-            # logging.info("Epoch {0} dice0 {1}".format(epoch, metrics.dice_index(output0, seg_test0)))
-            # logging.info("Epoch {0} dice1 {1}".format(epoch, metrics.dice_index(output1, seg_test1)))
-            # logging.info("Epoch {0} sen0 {1}".format(epoch, metrics.sensitivity(output0, seg_test0)))
-            # logging.info("Epoch {0} sen1 {1}".format(epoch, metrics.sensitivity(output1, seg_test1)))
-            # logging.info("Epoch {0} ppv0 {1}".format(epoch, metrics.ppv(output0, seg_test0)))
-            # logging.info("Epoch {0} ppv1 {1}".format(epoch, metrics.ppv(output1, seg_test1)))
-            # logging.info("Epoch {0} hausdorff {1}".format(epoch, metrics.hausdorff_index(output1, seg_test1)))
+            quality = metrics.get_metrics(output1, seg_test1, count_metrics)
 
-            # 试图输出图像
-            # output_np = output.cpu().detach().numpy().copy()
-            # output_np = np.argmin(output_np, axis=1)
-            # seg_label_np = seg_label.cpu().detach().numpy().copy()
-            # seg_label_np = np.argmin(seg_label_np, axis=1)
 
-            # 目前每个epoch只输出第一个batch的图片
-            # 利用ones_like和torch.where来
+
+
             if i == 0:
-                # one = torch.ones_like(output)
-                # zero = torch.zeros_like(output)
-                # output = torch.where(output >= 0.5, one, output)
-                # output = torch.where(output < 0.5, zero, output).cpu()
                 output = output.cpu()
                 for j in range(BATCH_SIZE):
                     save_img = transforms.ToPILImage()(output[j][1]).convert('L')
@@ -271,6 +281,9 @@ def test(epoch):
     ppv0_mean = log_mean(ppv0, "ppv0", isLog= True)
     ppv1_mean = log_mean(ppv1, "ppv1", isLog= True)
     hausdorff_mean = log_mean(hausdorff, "hausdorff", isLog= True)
+    for k, v in epoch_quality.items():
+        epoch_quality[k] /= batch_num
+    logging.info("Epoch {0} MEAN {1}".format(epoch, epoch_quality))
     all_test_loss_list.append(test_loss_mean)
     all_dice0.append(dice0_mean)
     all_dice1.append(dice1_mean)
@@ -279,6 +292,10 @@ def test(epoch):
     all_ppv0.append(ppv0_mean)
     all_ppv1.append(ppv1_mean)
     all_hausdorff.append(hausdorff_mean)
+
+    for k, v in epoch_quality.items():
+        all_quality[k].append(epoch_quality[k])
+
         
 
 
@@ -300,7 +317,7 @@ DEVICE = torch.device('cuda:' + str(args.GPU) if torch.cuda.is_available() else 
 torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
-model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=2, aux_loss=None).to(DEVICE)
+model = get_model(args.net, args.pretrained)
 criterion = get_criterion(args.criterion)
 criterionUS = get_criterionUS(args.criterionUS)
 multi_loss = MultiLossLayer(2)
@@ -311,9 +328,10 @@ NUM_CLASSES = 4
 BATCH_SIZE = args.n_batch_size
 NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
+count_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+quality_keys = ['dice', 'jaccard', 'precision', 'recall', 'false_positive_rate','false_negtive_rate','volume_similarity', 'Hausdorff', '95_surface_distance', 'mean_surface_distance', 'median_surface_distance', 'std_surface_distance']
 
-
-log_path = '../Log/' + str(args.logdir)  +'/'
+log_path = '../Log/' + str(args.logdir).strip()  +'/'
 if not os.path.exists(log_path):
     os.makedirs(log_path)
 logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_file_name) ,
@@ -333,6 +351,8 @@ all_sen1 = []
 all_ppv0 = []
 all_ppv1 = []
 all_hausdorff = []
+all_quality = dict.fromkeys(quality_keys, [])
+
 for epoch in range(start_epoch, args.epoch):
     batch_test_loss = []
     batch_pixel_accuracy = []
@@ -351,4 +371,17 @@ log_mean(all_sen1, "all_sen1", isLog=True)
 log_mean(all_ppv0, "all_ppv0", isLog=True)
 log_mean(all_ppv0, "all_ppv0", isLog=True)
 log_mean(all_hausdorff, "all_hausdorff", isLog=True)
+all_quality['train_loss'] = all_train_loss_list
+all_quality['test_loss'] = all_test_loss_list
+df = pd.DataFrame(all_quality)
+df.to_csv(log_path + str(args.log_file_name) + ".csv")
+# res = []
+# res.append(all_train_loss_list)
+# res.append(all_test_loss_list)
+# res.append(all_dice1)
+# res.append(all_sen1)
+# res.append(all_ppv1)
+# res.append(all_hausdorff)
+# res.append(all_train_loss_list)
+# res.append(all_train_loss_list)
 

@@ -6,6 +6,10 @@ from torch.utils import data
 import MTLDataset
 import torchvision
 from hausdorff import hausdorff_distance
+import SimpleITK as sitk
+import seg_metrics.seg_metrics as sg
+import numpy as np
+import copy
 
 # https://zhuanlan.zhihu.com/p/117435908
 """
@@ -28,66 +32,32 @@ https://blog.csdn.net/baidu_36511315/article/details/105217674
 使用方式：
 1. pred[:, 0:1, :] pred[:, 1:2, :]
 """
-def dice_index(pred, gt,  activation='none'):
+def dice_index(pred, gt):
     """This definition generalize to real valued pred and target vector.
 This should be differentiable.
     pred: tensor with first dimension as batch
     target: tensor with first dimension as batch
     """
-    if activation is None or activation == "none":
-        activation_fn = lambda x: x
-    elif activation == "sigmoid":
-        activation_fn = nn.Sigmoid()
-    elif activation == "softmax2d":
-        activation_fn = nn.Softmax2d()
-    else:
-        raise NotImplementedError("Activation implemented for sigmoid and softmax2d")
- 
-    pred = activation_fn(pred)
     smooth = EPSILON
-    N = gt.size(0)
-    pred_flat = pred.view(N, -1)
-    gt_flat = gt.view(N, -1)
- 
-    intersection = (pred_flat * gt_flat).sum()
-    return ((2. * intersection + smooth) / (pred_flat.sum() + gt_flat.sum() + smooth)).item()
-    # tp = torch.sum(gt_flat * pred_flat, dim=1)
-    # fp = torch.sum(pred_flat, dim=1) - tp
-    # fn = torch.sum(gt_flat, dim=1) - tp
-    # loss = (2 * tp + EPSILON) / (2 * tp + fp + fn + EPSILON)
-    # return (loss.sum() / N).item()
+    if torch.is_tensor(pred):
+        output = pred.data.cpu().numpy()
+    if torch.is_tensor(gt):
+        target = gt.data.cpu().numpy()
+    size = pred.shape[0]
+    sum = 0.0
+    for i in range(size):
+        the_output = output[i, 0, ...]
+        the_target = target[i, 0, ...]
+        intersection = (the_output * the_target).sum()
+        sum += ((2. * intersection + smooth) / (the_output.sum() + the_target.sum() + smooth))
+    return sum / size
 
 
 
-# 应该是对滴
-def sensitivity(output, target):
-    if torch.is_tensor(output):
-        output = output.data.cpu().numpy()
-    if torch.is_tensor(target):
-        target = target.data.cpu().numpy()
 
-    intersection = (output * target).sum()
 
-    return (intersection + EPSILON) / (output.sum() + target.sum() + EPSILON)
 
-"""
-iou = dice / (2 - dice)
-https://blog.csdn.net/weixin_40519315/article/details/105158547
-Right
-"""
-def iou_score(output, target):
-    if torch.is_tensor(output):
-        # output = torch.sigmoid(output).data.cpu().numpy()
-        output = output.data.cpu().numpy()
-    if torch.is_tensor(target):
-        target = target.data.cpu().numpy()
 
-    output_ = output > 0.5
-    target_ = target
-    intersection = (output_ & target_).sum()
-    union = (output_ | target_).sum()
-
-    return (intersection + EPSILON) / (union + EPSILON)
 
 # Positive predictive value
 def ppv(output, target):
@@ -107,12 +77,128 @@ def hausdorff_index(output, target, name="euclidean"):
     if torch.is_tensor(target):
         target = target.data.cpu().numpy()
     assert output.shape == target.shape
-    assert len(output.shape) == 4
+    # assert len(output.shape) == 4
     size = output.shape[0]
     sum = 0
     for i in range(size):
         sum += hausdorff_distance(output[i, 0], target[i, 0], distance = name)
     return sum/size
+
+
+
+
+# output (16,1,224,224)
+# target (16,1,224,224)
+# ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+def get_metrics(batch_output, batch_target, metrics_type):
+
+    if torch.is_tensor(batch_output):
+        batch_output = batch_output.data.cpu().numpy()
+    if torch.is_tensor(batch_target):
+        batch_target = batch_target.data.cpu().numpy()
+    assert batch_output.shape == batch_target.shape
+    assert len(batch_output.shape) == 4
+    spacing = (1, 1)
+    size = batch_output.shape[0]
+    metrics = dict.fromkeys(metrics_type, 0)
+    for i in range(size):
+        output = batch_output[i, 0]
+        target = batch_target[i, 0]
+        labelPred = sitk.GetImageFromArray(output, isVector=False)
+        labelPred.SetSpacing(spacing)
+        labelTrue = sitk.GetImageFromArray(target, isVector=False)
+        labelTrue.SetSpacing(spacing)  # spacing order (x, y, z)
+        # voxel_metrics
+        pred = output.astype(int)
+        gdth = target.astype(int)
+        fp_array = copy.deepcopy(pred)  # keep pred unchanged
+        fn_array = copy.deepcopy(gdth)
+        gdth_sum = np.sum(gdth)
+        pred_sum = np.sum(pred)
+        intersection = gdth & pred
+        union = gdth | pred
+        intersection_sum = np.count_nonzero(intersection)
+        union_sum = np.count_nonzero(union)
+
+        tp_array = intersection
+
+        tmp = pred - gdth
+        fp_array[tmp < 1] = 0
+
+        tmp2 = gdth - pred
+        fn_array[tmp2 < 1] = 0
+
+        tn_array = np.ones(gdth.shape) - union
+
+        tp, fp, fn, tn = np.sum(tp_array), np.sum(fp_array), np.sum(fn_array), np.sum(tn_array)
+
+        smooth = EPSILON
+        precision = (tp + smooth) / (pred_sum + smooth)
+        recall = (tp + smooth) / (gdth_sum + smooth)
+
+        false_positive_rate = (fp + smooth) / (fp + tn + smooth)
+        false_negtive_rate = (fn + smooth) / (fn + tp + smooth)
+
+        jaccard = (intersection_sum + smooth) / (union_sum + smooth)
+        dice = (2 * intersection_sum + smooth) / (gdth_sum + pred_sum + smooth)
+
+        dicecomputer = sitk.LabelOverlapMeasuresImageFilter()
+        dicecomputer.Execute(labelTrue > 0.5, labelPred > 0.5)
+
+        # distance_metrics
+        signed_distance_map = sitk.SignedMaurerDistanceMap(labelTrue > 0.5, squaredDistance=False,
+                                                          useImageSpacing=True)  # It need to be adapted.
+
+        ref_distance_map = sitk.Abs(signed_distance_map)
+
+        ref_surface = sitk.LabelContour(labelTrue > 0.5, fullyConnected=True)
+        # ref_surface_array = sitk.GetArrayViewFromImage(ref_surface)
+
+        statistics_image_filter = sitk.StatisticsImageFilter()
+        statistics_image_filter.Execute(ref_surface > 0.5)
+
+        num_ref_surface_pixels = int(statistics_image_filter.GetSum())
+
+        signed_distance_map_pred = sitk.SignedMaurerDistanceMap(labelPred > 0.5, squaredDistance=False,
+                                                                useImageSpacing=True)
+
+        seg_distance_map = sitk.Abs(signed_distance_map_pred)
+
+        seg_surface = sitk.LabelContour(labelPred > 0.5, fullyConnected=True)
+        # seg_surface_array = sitk.GetArrayViewFromImage(seg_surface)
+
+        seg2ref_distance_map = ref_distance_map * sitk.Cast(seg_surface, sitk.sitkFloat32)
+
+        ref2seg_distance_map = seg_distance_map * sitk.Cast(ref_surface, sitk.sitkFloat32)
+
+        statistics_image_filter.Execute(seg_surface > 0.5)
+
+        num_seg_surface_pixels = int(statistics_image_filter.GetSum())
+
+        seg2ref_distance_map_arr = sitk.GetArrayViewFromImage(seg2ref_distance_map)
+        seg2ref_distances = list(seg2ref_distance_map_arr[seg2ref_distance_map_arr != 0])
+        seg2ref_distances = seg2ref_distances + list(np.zeros(num_seg_surface_pixels - len(seg2ref_distances)))
+        ref2seg_distance_map_arr = sitk.GetArrayViewFromImage(ref2seg_distance_map)
+        ref2seg_distances = list(ref2seg_distance_map_arr[ref2seg_distance_map_arr != 0])
+        ref2seg_distances = ref2seg_distances + list(np.zeros(num_ref_surface_pixels - len(ref2seg_distances)))  #
+        all_surface_distances = seg2ref_distances + ref2seg_distances
+
+        metrics['dice'] += dice
+        metrics['jaccard'] += jaccard
+        metrics['precision'] += precision
+        metrics['recall'] += recall
+        metrics['fpr'] += false_positive_rate
+        metrics['fnr'] += false_negtive_rate
+        metrics['vs'] += dicecomputer.GetVolumeSimilarity()
+        metrics["msd"] += np.mean(all_surface_distances)
+        metrics["mdsd"] += np.median(all_surface_distances)
+        metrics["stdsd"] += np.std(all_surface_distances)
+        metrics["hd95"] += np.percentile(all_surface_distances, 95)
+        metrics["hd"] += np.max(all_surface_distances)
+
+    for key in metrics:
+        metrics[key] /= size
+    return metrics
 
 
 def one_hot(labels: torch.Tensor,
@@ -201,63 +287,21 @@ def virtual_test():
          [1, 0, 0, 1]]]])
 
     pred2 = torch.Tensor([[
+        [[0, 0.6, 0.4, 0],
+         [1, 0, 0, 1],
+         [1, 0, 0, 1],
+         [0, 1, 1, 0]]
+       ]])
+    pred2[pred2 >= 0.5] = 1
+    pred2[pred2 < 0.5] = 0
+    gt2 = torch.Tensor([[
         [[0, 1, 0, 0],
          [1, 0, 0, 1],
          [1, 0, 0, 1],
-         [0, 1, 1, 0]],
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 1, 1, 0],
-         [0, 0, 0, 0]],
-        [[1, 0, 1, 1],
-         [0, 1, 1, 0],
-         [0, 0, 0, 0],
-         [1, 0, 0, 1]]],
-        [
-            [[0, 1, 0, 0],
-             [1, 0, 0, 1],
-             [1, 0, 0, 1],
-             [0, 1, 1, 0]],
-            [[0, 0, 0, 0],
-             [0, 0, 0, 0],
-             [0, 1, 1, 0],
-             [0, 0, 0, 0]],
-            [[1, 0, 1, 1],
-             [0, 1, 1, 0],
-             [0, 0, 0, 0],
-             [1, 0, 0, 1]]]
-    ])
-
-    gt2 = torch.Tensor([[
-        [[0, 1, 1, 0],
-         [1, 0, 0, 1],
-         [1, 0, 0, 1],
-         [0, 1, 1, 0]],
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 1, 1, 0],
-         [0, 0, 0, 0]],
-        [[1, 0, 0, 1],
-         [0, 1, 1, 0],
-         [0, 0, 0, 0],
-         [1, 0, 0, 1]]],
-        [
-            [[0, 1, 1, 0],
-             [1, 0, 0, 1],
-             [1, 0, 0, 1],
-             [0, 1, 1, 0]],
-            [[0, 0, 0, 0],
-             [0, 0, 0, 0],
-             [0, 1, 1, 0],
-             [0, 0, 0, 0]],
-            [[1, 0, 0, 1],
-             [0, 1, 1, 0],
-             [0, 0, 0, 0],
-             [1, 0, 0, 1]]]
-    ])
-    print(pred.shape)
+         [0, 1, 1, 0]]
+    ]])
     print("dice " + str(dice_index(pred, gt)))
-    print("iouReal? " + str(iou_score(pred, gt)))
+    # print("iouReal? " + str(iou_score(pred, gt)))
     print("sensi " + str(sensitivity(pred, gt)))
 
     print("dice " + str(dice_index(pred2, gt2)))
@@ -267,8 +311,14 @@ def virtual_test():
     print("ppv0 " + str(ppv(pred2[:, 0:1, :], gt2[:, 0:1, :])))
     print("ppv1 " + str(ppv(pred2[:, 1:2, :], gt2[:, 1:2, :])))
     print("ppv2 " + str(ppv(pred2[:, 2:3, :], gt2[:, 2:3, :])))
-    print("iouReal? " + str(iou_score(pred2, gt2)))
+    # print("iouReal? " + str(iou_score(pred2, gt2)))
     print("sensi " + str(sensitivity(pred2, gt2)))
+    theP = pred2[0, 0, :].detach().cpu().numpy()
+    theT = gt2[0, 0, :].detach().cpu().numpy()
+    print(hausdorff_distance(theP, theT, distance="haversine"))
+    test_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs', 'hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+    quality = sg.computeQualityMeasures(theP, theT, (1, 1), test_metrics)
+    print(quality)
 
 def data_test():
     data_root = "../ResearchData/UltraImageUSFullTest/UltraImageCropFull"
@@ -286,7 +336,7 @@ def data_test():
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     # target为一个batch的值
     target = iter(train_dataloader).next()
-    DEVICE = torch.device('cuda:' + str(1) if torch.cuda.is_available() else 'cpu')
+    DEVICE = torch.device('cuda:' + str(0) if torch.cuda.is_available() else 'cpu')
     img = target[1]
     seg_label = target[2].to(DEVICE)
     print(seg_label.shape)
@@ -297,20 +347,20 @@ def data_test():
     output = model(img.to(DEVICE))['out']
 
     soft_output = nn.Softmax2d()(output)
-    # print("iou 0: {0}".format(iou_score(soft_output, seg_label)))
-    # print("iou 0: {0}".format(iou_score(soft_output[:, 0:1, :], seg_label[:, 0:1, :])))
-    # print("iou 1: {0}".format(iou_score(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("dice_index 0: {0}".format(dice_index(soft_output[:, 0:1, :], seg_label[:, 0:1, :])))
+    soft_output[soft_output >= 0.5] = 1
+    soft_output[soft_output < 0.5] = 0
+
+    print(soft_output[:, 1:2, :].shape)
     print("dice_index 1: {0}".format(dice_index(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("ppv 0: {0}".format(ppv(soft_output[:, 0:1, :], seg_label[:, 0:1, :])))
     print("ppv 1: {0}".format(ppv(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("sensitivity 0: {0}".format(sensitivity(soft_output[:, 0:1, :], seg_label[:, 0:1, :])))
     print("sensitivity 1: {0}".format(sensitivity(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("Hausdorff 0: {0}".format(hausdorff_index(soft_output[:, 0:1, :], seg_label[:, 0:1, :])))
     print("Hausdorff 1: {0}".format(hausdorff_index(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print(seg_label.shape)
-    print(seg_label.sum())
+
+    test_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+
+    print(get_metrics(soft_output[:, 1:2, :],seg_label[:, 1:2, :], test_metrics))
 
 if __name__ == '__main__':
     data_test()
+    # virtual_test()
 
