@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/1i1oSeg.py" line="91" />
+    <bookmark url="file://$PROJECT_DIR$/1i1oSeg.py" line="92" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preScreen.sh" beforeDir="false" afterPath="$PROJECT_DIR$/preScreen.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,8 +19,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/metrics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="291">
-              <caret line="201" lean-forward="true" selection-start-line="201" selection-end-line="201" />
+            <state relative-caret-position="316">
+              <caret line="194" column="18" lean-forward="true" selection-start-line="194" selection-start-column="18" selection-end-line="194" selection-end-column="18" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -51,8 +49,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/seg_metrics/seg_metrics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="307">
-              <caret line="111" lean-forward="true" selection-start-line="111" selection-end-line="111" />
+            <state relative-caret-position="329">
+              <caret line="106" lean-forward="true" selection-start-line="106" selection-end-line="106" />
               <folding>
                 <element signature="e#2#20#0" expanded="true" />
               </folding>
@@ -80,8 +78,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="233">
-              <caret line="255" column="61" selection-start-line="255" selection-start-column="61" selection-end-line="255" selection-end-column="61" />
+            <state relative-caret-position="75">
+              <caret line="273" column="6" lean-forward="true" selection-start-line="273" selection-start-column="6" selection-end-line="273" selection-end-column="6" />
               <folding>
                 <element signature="e#34#43#0" expanded="true" />
               </folding>
@@ -129,13 +127,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Softmax2</find>
-      <find>Softmax2D</find>
-      <find>dice_loss</find>
-      <find>one_hot</find>
-      <find>criterion</find>
-      <find>0.672957181930542</find>
-      <find>0.5071103756166209</find>
       <find>0.50711037561</find>
       <find>0.5071</find>
       <find>mean</find>
@@ -147,16 +138,25 @@
       <find>Fea</find>
       <find>95</find>
       <find>metrics_type</find>
-      <find>dice</find>
       <find>slice_idx</find>
-      <find>print</find>
       <find>dice_index</find>
       <find>CUDA</find>
       <find>gpu</find>
       <find>labelTrue</find>
       <find>distance_metrics</find>
       <find>seg_surface_array</find>
+      <find>batch_test_loss</find>
+      <find>epoch_quality</find>
+      <find>quality</find>
+      <find>epoch</find>
+      <find>BATCH_SIZE</find>
+      <find>args.n_batch_size</find>
+      <find>n_batch_size</find>
       <find>intersection_sum</find>
+      <find>dice</find>
+      <find>0.017684771878176204</find>
+      <find>all_quality</find>
+      <find>print</find>
     </findStrings>
     <replaceStrings>
       <replace>dice_index</replace>
@@ -235,14 +235,11 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.metrics">
+  <component name="RunManager" selected="Python.1i1oSeg">
     <configuration name="1i1oSeg" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -323,8 +320,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.metrics" />
         <item itemvalue="Python.1i1oSeg" />
+        <item itemvalue="Python.metrics" />
         <item itemvalue="Python.MTLDataset" />
       </list>
     </recent_temporary>
@@ -361,12 +358,12 @@
       <workItem from="1601900167590" duration="1233000" />
       <workItem from="1601901466633" duration="574000" />
       <workItem from="1601902062498" duration="5656000" />
-      <workItem from="1601952612994" duration="9592000" />
+      <workItem from="1601952612994" duration="14005000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="70598000" />
+    <option name="totallyTimeSpent" value="75011000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
@@ -388,7 +385,7 @@
       <window_info anchor="bottom" id="Database Changes" order="10" />
       <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.38917977" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.42757416" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.46422338" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -526,8 +523,8 @@
     </entry>
     <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/seg_metrics/seg_metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="111" lean-forward="true" selection-start-line="111" selection-end-line="111" />
+        <state relative-caret-position="329">
+          <caret line="106" lean-forward="true" selection-start-line="106" selection-end-line="106" />
           <folding>
             <element signature="e#2#20#0" expanded="true" />
           </folding>
@@ -536,8 +533,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="291">
-          <caret line="201" lean-forward="true" selection-start-line="201" selection-end-line="201" />
+        <state relative-caret-position="316">
+          <caret line="194" column="18" lean-forward="true" selection-start-line="194" selection-start-column="18" selection-end-line="194" selection-end-column="18" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
@@ -546,8 +543,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="255" column="61" selection-start-line="255" selection-start-column="61" selection-end-line="255" selection-end-column="61" />
+        <state relative-caret-position="75">
+          <caret line="273" column="6" lean-forward="true" selection-start-line="273" selection-start-column="6" selection-end-line="273" selection-end-column="6" />
           <folding>
             <element signature="e#34#43#0" expanded="true" />
           </folding>

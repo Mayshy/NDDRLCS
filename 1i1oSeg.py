@@ -18,6 +18,7 @@ import sys
 import datetime
 import metrics
 import random
+import collections
 
 """
 单输入单输出分割
@@ -44,7 +45,7 @@ def dict_sum(res, addend):
     if not res:
         res = addend
     else:
-        for k, v in res.items():
+        for k in res:
             res[k] += addend[k]
     return res
 
@@ -205,18 +206,10 @@ def train(epoch):
         optimizer.step()
 
     train_loss_mean = log_mean(train_loss_list, "train loss", isLog= True)
-    all_train_loss_list.append(train_loss_mean)
+    all_quality['train_loss'].append(train_loss_mean)
 
 def test(epoch):
-
     test_loss_list = []
-    dice0 = []
-    dice1 = []
-    sen0 = []
-    sen1 = []
-    ppv0 = []
-    ppv1 = []
-    hausdorff = []
     # 设置数据集
     test_dataset = MTLDataset.SegDataset(
         str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
@@ -255,15 +248,8 @@ def test(epoch):
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
             test_loss_list.append(loss.item())
-            dice1.append(metrics.dice_index(output1, seg_test1))
-            sen1.append(metrics.sensitivity(output1, seg_test1))
-            ppv1.append(metrics.ppv(output1, seg_test1))
-            hausdorff.append(metrics.hausdorff_index(output1, seg_test1))
-            quality = metrics.get_metrics(output1, seg_test1, count_metrics)
-
-
-
-
+            quality = metrics.get_sum_metrics(output1, seg_test1, count_metrics)
+            epoch_quality = dict_sum(epoch_quality, quality)
             if i == 0:
                 output = output.cpu()
                 for j in range(BATCH_SIZE):
@@ -274,27 +260,13 @@ def test(epoch):
                     save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
 
     test_loss_mean = log_mean(test_loss_list, "test loss", isLog= True)
-    dice0_mean = log_mean(dice0, "dice0", isLog= True)
-    dice1_mean = log_mean(dice1, "dice1", isLog= True)
-    sen0_mean = log_mean(sen0, "sen0", isLog= True)
-    sen1_mean = log_mean(sen1, "sen1", isLog= True)
-    ppv0_mean = log_mean(ppv0, "ppv0", isLog= True)
-    ppv1_mean = log_mean(ppv1, "ppv1", isLog= True)
-    hausdorff_mean = log_mean(hausdorff, "hausdorff", isLog= True)
-    for k, v in epoch_quality.items():
-        epoch_quality[k] /= batch_num
+    for k in epoch_quality:
+        epoch_quality[k] /= len(test_dataset)
     logging.info("Epoch {0} MEAN {1}".format(epoch, epoch_quality))
-    all_test_loss_list.append(test_loss_mean)
-    all_dice0.append(dice0_mean)
-    all_dice1.append(dice1_mean)
-    all_sen0.append(sen0_mean)
-    all_sen1.append(sen1_mean)
-    all_ppv0.append(ppv0_mean)
-    all_ppv1.append(ppv1_mean)
-    all_hausdorff.append(hausdorff_mean)
 
-    for k, v in epoch_quality.items():
+    for k in epoch_quality:
         all_quality[k].append(epoch_quality[k])
+    all_quality['test_loss'].append(test_loss_mean)
 
         
 
@@ -302,10 +274,7 @@ def test(epoch):
 # 启动配置
 # ------------------------------------------------------------------------------------------------------------------------------------------
 # # Meter用于度量波动区间
-# batch_train_loss_meter = meter.AverageValueMeter()
-# train_loss_meter = meter.AverageValueMeter()
-# batch_test_loss_meter = meter.AverageValueMeter()
-# test_loss_meter = meter.AverageValueMeter()
+
 
 # 配置特征排序（和引用的特征量）
 setup_seed(20)
@@ -328,8 +297,8 @@ NUM_CLASSES = 4
 BATCH_SIZE = args.n_batch_size
 NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
-count_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
-quality_keys = ['dice', 'jaccard', 'precision', 'recall', 'false_positive_rate','false_negtive_rate','volume_similarity', 'Hausdorff', '95_surface_distance', 'mean_surface_distance', 'median_surface_distance', 'std_surface_distance']
+count_metrics = ['dice', 'jaccard', 'ppv', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+all_metrics = ['train_loss', 'test_loss', 'ppv', 'dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
 
 log_path = '../Log/' + str(args.logdir).strip()  +'/'
 if not os.path.exists(log_path):
@@ -338,50 +307,13 @@ logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_f
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
 logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
 
-## metrics
-# jaccard_index = metrics.make_weighted_metric(metrics.classwise_iou)
-# f1_score = metrics.make_weighted_metric(metrics.classwise_f1)
-
-all_train_loss_list = []
-all_test_loss_list = []
-all_dice0 = []
-all_dice1 = []
-all_sen0 = []
-all_sen1 = []
-all_ppv0 = []
-all_ppv1 = []
-all_hausdorff = []
-all_quality = dict.fromkeys(quality_keys, [])
-
+all_quality = collections.defaultdict(list)
 for epoch in range(start_epoch, args.epoch):
-    batch_test_loss = []
-    batch_pixel_accuracy = []
-    batch_IOU = []
-    batch_DICE = []
-    batch_hausdorff = []
     train(epoch)
     test(epoch)
+    if epoch == 2:
+        df = pd.DataFrame(all_quality)
+        df.to_csv(log_path + str(args.log_file_name) + ".csv")
+        assert 1 == 0
 
-log_mean(all_train_loss_list, "all_train_loss_list", isLog=True)
-log_mean(all_test_loss_list, "all_test_loss_list", isLog=True)
-log_mean(all_dice0, "all_dice0", isLog=True)
-log_mean(all_dice1, "all_dice1", isLog=True)
-log_mean(all_sen0, "all_sen0", isLog=True)
-log_mean(all_sen1, "all_sen1", isLog=True)
-log_mean(all_ppv0, "all_ppv0", isLog=True)
-log_mean(all_ppv0, "all_ppv0", isLog=True)
-log_mean(all_hausdorff, "all_hausdorff", isLog=True)
-all_quality['train_loss'] = all_train_loss_list
-all_quality['test_loss'] = all_test_loss_list
-df = pd.DataFrame(all_quality)
-df.to_csv(log_path + str(args.log_file_name) + ".csv")
-# res = []
-# res.append(all_train_loss_list)
-# res.append(all_test_loss_list)
-# res.append(all_dice1)
-# res.append(all_sen1)
-# res.append(all_ppv1)
-# res.append(all_hausdorff)
-# res.append(all_train_loss_list)
-# res.append(all_train_loss_list)
 

@@ -59,16 +59,7 @@ This should be differentiable.
 
 
 
-# Positive predictive value
-def ppv(output, target):
-    smooth = EPSILON
-    if torch.is_tensor(output):
-        output = output.data.cpu().numpy()
-    if torch.is_tensor(target):
-        target = target.data.cpu().numpy()
 
-    intersection = (output * target).sum()
-    return (intersection + smooth) / (output.sum() + smooth)
 
 # 默认为传进来的时候已经切片过了，(16,1,224,224)
 def hausdorff_index(output, target, name="euclidean"):
@@ -90,7 +81,14 @@ def hausdorff_index(output, target, name="euclidean"):
 # output (16,1,224,224)
 # target (16,1,224,224)
 # ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
-def get_metrics(batch_output, batch_target, metrics_type):
+def get_average_metrics(batch_output, batch_target, metrics_type):
+    size = batch_output.shape[0]
+    metrics = get_sum_metrics(batch_output, batch_target, metrics_type)
+    for key in metrics:
+        metrics[key] /= size
+    return metrics
+
+def get_sum_metrics(batch_output, batch_target, metrics_type):
 
     if torch.is_tensor(batch_output):
         batch_output = batch_output.data.cpu().numpy()
@@ -141,7 +139,7 @@ def get_metrics(batch_output, batch_target, metrics_type):
 
         jaccard = (intersection_sum + smooth) / (union_sum + smooth)
         dice = (2 * intersection_sum + smooth) / (gdth_sum + pred_sum + smooth)
-
+        ppv = (intersection_sum + smooth) / (pred_sum + smooth)
         dicecomputer = sitk.LabelOverlapMeasuresImageFilter()
         dicecomputer.Execute(labelTrue > 0.5, labelPred > 0.5)
 
@@ -152,7 +150,6 @@ def get_metrics(batch_output, batch_target, metrics_type):
         ref_distance_map = sitk.Abs(signed_distance_map)
 
         ref_surface = sitk.LabelContour(labelTrue > 0.5, fullyConnected=True)
-        # ref_surface_array = sitk.GetArrayViewFromImage(ref_surface)
 
         statistics_image_filter = sitk.StatisticsImageFilter()
         statistics_image_filter.Execute(ref_surface > 0.5)
@@ -165,7 +162,6 @@ def get_metrics(batch_output, batch_target, metrics_type):
         seg_distance_map = sitk.Abs(signed_distance_map_pred)
 
         seg_surface = sitk.LabelContour(labelPred > 0.5, fullyConnected=True)
-        # seg_surface_array = sitk.GetArrayViewFromImage(seg_surface)
 
         seg2ref_distance_map = ref_distance_map * sitk.Cast(seg_surface, sitk.sitkFloat32)
 
@@ -190,16 +186,13 @@ def get_metrics(batch_output, batch_target, metrics_type):
         metrics['fpr'] += false_positive_rate
         metrics['fnr'] += false_negtive_rate
         metrics['vs'] += dicecomputer.GetVolumeSimilarity()
+        metrics['ppv'] += ppv
         metrics["msd"] += np.mean(all_surface_distances)
         metrics["mdsd"] += np.median(all_surface_distances)
         metrics["stdsd"] += np.std(all_surface_distances)
         metrics["hd95"] += np.percentile(all_surface_distances, 95)
         metrics["hd"] += np.max(all_surface_distances)
-
-    for key in metrics:
-        metrics[key] /= size
     return metrics
-
 
 def one_hot(labels: torch.Tensor,
             num_classes: int,
@@ -312,7 +305,6 @@ def virtual_test():
     print("ppv1 " + str(ppv(pred2[:, 1:2, :], gt2[:, 1:2, :])))
     print("ppv2 " + str(ppv(pred2[:, 2:3, :], gt2[:, 2:3, :])))
     # print("iouReal? " + str(iou_score(pred2, gt2)))
-    print("sensi " + str(sensitivity(pred2, gt2)))
     theP = pred2[0, 0, :].detach().cpu().numpy()
     theT = gt2[0, 0, :].detach().cpu().numpy()
     print(hausdorff_distance(theP, theT, distance="haversine"))
@@ -353,10 +345,8 @@ def data_test():
     print(soft_output[:, 1:2, :].shape)
     print("dice_index 1: {0}".format(dice_index(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
     print("ppv 1: {0}".format(ppv(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("sensitivity 1: {0}".format(sensitivity(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("Hausdorff 1: {0}".format(hausdorff_index(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
 
-    test_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
+    test_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd', 'ppv']
 
     print(get_metrics(soft_output[:, 1:2, :],seg_label[:, 1:2, :], test_metrics))
 
