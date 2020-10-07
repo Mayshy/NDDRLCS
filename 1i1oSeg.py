@@ -311,9 +311,8 @@ all_quality = collections.defaultdict(list)
 for epoch in range(start_epoch, args.epoch):
     train(epoch)
     test(epoch)
-    if epoch == 2:
-        df = pd.DataFrame(all_quality)
-        df.to_csv(log_path + str(args.log_file_name) + ".csv")
-        assert 1 == 0
+
+df = pd.DataFrame(all_quality)
+df.to_csv(log_path + str(args.log_file_name) + ".csv")
 
 
