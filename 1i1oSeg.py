@@ -197,7 +197,7 @@ def train(epoch):
         out = nn.Softmax2d()(out)
 
         # 取损失函数
-        train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
+        train_loss = mixup_criterion_type(criterion, out, seg_label_a[:, 1:2, :], seg_label_b[:, 1:2, :], lam)
         train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
