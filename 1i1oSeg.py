@@ -195,7 +195,7 @@ def train(epoch):
         # 执行模型，得到输出
         out = model(img)['out']
         # 可能需要做sigmoid？
-        out = nn.Softmax2d()(out)
+        out = nn.Sigmoid()(out)
 
         # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
@@ -234,7 +234,7 @@ def test(epoch):
 
             # 输出
             output = model(img)['out']
-            output = nn.Softmax2d()(output)
+            output = nn.Sigmoid()(output)
             # seg_label 标签
             loss = criterion(output, seg_label)
 
