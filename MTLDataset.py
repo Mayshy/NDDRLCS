@@ -207,18 +207,11 @@ class SegDataset(data.Dataset):
             seg_label = np.array(seg_label)
             seg_label[seg_label > 0] = 1
             seg_label[seg_label == 0] = 0
-            # print('0' + str(seg_label.shape))
             seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
-            # print(seg_label.sum())
-            # reverse_seg_label = seg_label.clone()
-            # reverse_seg_label[reverse_seg_label == 1] = -1
-            # reverse_seg_label[reverse_seg_label == 0] = 1
-            # reverse_seg_label[reverse_seg_label == -1] = 0
-            # print(reverse_seg_label.sum())
-            # seg_label = torch.cat((seg_label, reverse_seg_label),dim = 0).long()
-            # print('1' + str(seg_label.shape))
-            seg_label = metrics.one_hot(seg_label, 2)
-            seg_label = torch.squeeze(seg_label, 0)
+
+            # seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
+            # seg_label = metrics.one_hot(seg_label, 2)
+            # seg_label = torch.squeeze(seg_label, 0)
 
 
         

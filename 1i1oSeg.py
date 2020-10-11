@@ -52,16 +52,16 @@ def dict_sum(res, addend):
 def get_model(model_name, pretrained = False):
     model_name = model_name.strip()
     if model_name == 'FCN_ResNet50':
-        return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=2,
+        return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=1,
                                                             aux_loss=None).to(DEVICE)
     if model_name == 'FCN_ResNet101':
-        return torchvision.models.segmentation.fcn_resnet101(pretrained=pretrained, progress=False, num_classes=2,
+        return torchvision.models.segmentation.fcn_resnet101(pretrained=pretrained, progress=False, num_classes=1,
                                                             aux_loss=None).to(DEVICE)
     if model_name == 'DLV3__ResNet50':
-        return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=pretrained, progress=False, num_classes=2,
+        return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=pretrained, progress=False, num_classes=1,
                                                              aux_loss=None).to(DEVICE)
     if model_name == 'DLV3__ResNet101':
-        return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=pretrained, progress=False, num_classes=2,
+        return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=pretrained, progress=False, num_classes=1,
                                                              aux_loss=None).to(DEVICE)
 
 
@@ -92,15 +92,16 @@ def get_criterionUS(criterionUS):
     if criterionUS == "XTanh":
         return MTLLoss.XTanhLoss()
 # 配置优化器
-def get_optimizer(optimizer, multi_loss):
+def get_optimizer(optimizer):
     if (optimizer == 'Adam'):
-        return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
+        # return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
+        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
     elif (optimizer == 'SGD'):
-        return optim.SGD([{'params':model.parameters()}, {'params':multi_loss.parameters()}], lr=LEARNING_RATE, momentum = MOMENTUM)
+        return optim.SGD(params=model.parameters(), lr=LEARNING_RATE, momentum = MOMENTUM)
     elif (optimizer == 'AdamW'):
-        return optim.AdamW([{'params':model.parameters()}, {'params':multi_loss.parameters()}], lr=LEARNING_RATE, weight_decay = WEIGHT_DECAY)
+        return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay = WEIGHT_DECAY)
     elif (optimizer == 'AmsgradW'):
-        return optim.AdamW([{'params':model.parameters()}, {'params':multi_loss.parameters()}], lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
+        return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
             
 # mixup 数据增强器，帮助提升小数据集下训练与测试的稳定性
 def mixup_data(x, y0, y1, y2, alpha=1.0):
@@ -138,7 +139,7 @@ def parse_args(argv):
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
-    parser.add_argument("--criterion", type=str, help="criterion", default='TheCrossEntropy')
+    parser.add_argument("--criterion", type=str, help="criterion", default='IOULoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropTransection')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
@@ -197,7 +198,7 @@ def train(epoch):
         out = nn.Softmax2d()(out)
 
         # 取损失函数
-        train_loss = mixup_criterion_type(criterion, out, seg_label_a[:, 1:2, :], seg_label_b[:, 1:2, :], lam)
+        train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
         train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
@@ -241,9 +242,9 @@ def test(epoch):
             output[output < 0.5] = 0
             seg_test = seg_label.long()
             # output0 = output[:, 0:1, :]
-            output1 = output[:, 1:2, :]
+            output1 = output
             # seg_test0 = seg_test[:, 0:1, :]
-            seg_test1 = seg_test[:, 1:2, :]
+            seg_test1 = seg_test
 
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
@@ -253,7 +254,7 @@ def test(epoch):
             if i == 0:
                 output = output.cpu()
                 for j in range(BATCH_SIZE):
-                    save_img = transforms.ToPILImage()(output[j][1]).convert('L')
+                    save_img = transforms.ToPILImage()(output[j][0]).convert('L')
                     path = '../Log/' + args.logdir + '/V' + str(j) + '/'
                     if not os.path.exists(path):
                         os.makedirs(path)
@@ -287,11 +288,12 @@ torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
 model = get_model(args.net, args.pretrained)
-criterion = get_criterion(args.criterion)
+criterion = get_criterion(args.criterion).to(DEVICE)
 criterionUS = get_criterionUS(args.criterionUS)
-multi_loss = MultiLossLayer(2)
-multi_loss.to(DEVICE)
-optimizer = get_optimizer(args.optim, multi_loss)
+# multi_loss = MultiLossLayer(2)
+# multi_loss.to(DEVICE)
+# optimizer = get_optimizer(args.optim, multi_loss)
+optimizer = get_optimizer(args.optim)
 data_root = args.s_data_root.strip()
 NUM_CLASSES = 4
 BATCH_SIZE = args.n_batch_size

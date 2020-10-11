@@ -131,15 +131,15 @@ def get_sum_metrics(batch_output, batch_target, metrics_type):
         tp, fp, fn, tn = np.sum(tp_array), np.sum(fp_array), np.sum(fn_array), np.sum(tn_array)
 
         smooth = EPSILON
-        precision = (tp + smooth) / (pred_sum + smooth)
-        recall = (tp + smooth) / (gdth_sum + smooth)
+        precision = (tp) / (pred_sum + smooth)
+        recall = (tp) / (gdth_sum + smooth)
 
-        false_positive_rate = (fp + smooth) / (fp + tn + smooth)
-        false_negtive_rate = (fn + smooth) / (fn + tp + smooth)
+        false_positive_rate = (fp) / (fp + tn + smooth)
+        false_negtive_rate = (fn) / (fn + tp + smooth)
 
-        jaccard = (intersection_sum + smooth) / (union_sum + smooth)
-        dice = (2 * intersection_sum + smooth) / (gdth_sum + pred_sum + smooth)
-        ppv = (intersection_sum + smooth) / (pred_sum + smooth)
+        jaccard = (intersection_sum) / (union_sum + smooth)
+        dice = (2 * intersection_sum) / (gdth_sum + pred_sum + smooth)
+        ppv = (intersection_sum) / (pred_sum + smooth)
         dicecomputer = sitk.LabelOverlapMeasuresImageFilter()
         dicecomputer.Execute(labelTrue > 0.5, labelPred > 0.5)
 
