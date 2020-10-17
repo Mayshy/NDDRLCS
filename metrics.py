@@ -50,9 +50,35 @@ This should be differentiable.
         the_target = target[i, 0, ...]
         intersection = (the_output * the_target).sum()
         sum += ((2. * intersection + smooth) / (the_output.sum() + the_target.sum() + smooth))
+        # print("i {0} {1} {2} {3}".format(i, intersection, the_output.sum(), the_target.sum()))
     return sum / size
 
+def dice_index2(batch_output, batch_target):
+    """This definition generalize to real valued pred and target vector.
+This should be differentiable.
+    pred: tensor with first dimension as batch
+    target: tensor with first dimension as batch
+    """
+    smooth = EPSILON
+    if torch.is_tensor(batch_output):
+        batch_output = batch_output.data.cpu().numpy()
+    if torch.is_tensor(batch_target):
+        batch_target = batch_target.data.cpu().numpy()
 
+    size = batch_output.shape[0]
+    sum = 0.0
+    for i in range(size):
+        output = batch_output[i]
+        target = batch_target[i]
+        pred = output.astype(int)
+        gdth = target.astype(int)
+        gdth_sum = np.sum(gdth)
+        pred_sum = np.sum(pred)
+        intersection = gdth & pred
+        intersection_sum = np.count_nonzero(intersection)
+        sum += (2 * intersection_sum) / (gdth_sum + pred_sum + smooth)
+        # print("i {0} {1} {2} {3}".format(i, intersection_sum, pred_sum, gdth_sum))
+    return sum / size
 
 
 
@@ -81,14 +107,14 @@ def hausdorff_index(output, target, name="euclidean"):
 # output (16,1,224,224)
 # target (16,1,224,224)
 # ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
-def get_average_metrics(batch_output, batch_target, metrics_type):
+def get_average_metrics(batch_output, batch_target, metrics_type, test = False):
     size = batch_output.shape[0]
-    metrics = get_sum_metrics(batch_output, batch_target, metrics_type)
+    metrics = get_sum_metrics(batch_output, batch_target, metrics_type, test)
     for key in metrics:
         metrics[key] /= size
     return metrics
 
-def get_sum_metrics(batch_output, batch_target, metrics_type):
+def get_sum_metrics(batch_output, batch_target, metrics_type, test = False):
 
     if torch.is_tensor(batch_output):
         batch_output = batch_output.data.cpu().numpy()
@@ -295,15 +321,12 @@ def virtual_test():
     ]])
     print("dice " + str(dice_index(pred, gt)))
     # print("iouReal? " + str(iou_score(pred, gt)))
-    print("sensi " + str(sensitivity(pred, gt)))
 
     print("dice " + str(dice_index(pred2, gt2)))
     print("dice0 " + str(dice_index(pred2[:, 0:1, :], gt2[:, 0:1, :])))
     print("dice1 " + str(dice_index(pred2[:, 1:2, :], gt2[:, 1:2, :])))
     print("dice2 " + str(dice_index(pred2[:, 2:3, :], gt2[:, 2:3, :])))
-    print("ppv0 " + str(ppv(pred2[:, 0:1, :], gt2[:, 0:1, :])))
-    print("ppv1 " + str(ppv(pred2[:, 1:2, :], gt2[:, 1:2, :])))
-    print("ppv2 " + str(ppv(pred2[:, 2:3, :], gt2[:, 2:3, :])))
+
     # print("iouReal? " + str(iou_score(pred2, gt2)))
     theP = pred2[0, 0, :].detach().cpu().numpy()
     theT = gt2[0, 0, :].detach().cpu().numpy()
@@ -331,9 +354,9 @@ def data_test():
     DEVICE = torch.device('cuda:' + str(0) if torch.cuda.is_available() else 'cpu')
     img = target[1]
     seg_label = target[2].to(DEVICE)
-    print(seg_label.shape)
 
-    model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=2,
+
+    model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=1,
                                                          aux_loss=None).to(DEVICE)
 
     output = model(img.to(DEVICE))['out']
@@ -341,14 +364,15 @@ def data_test():
     soft_output = nn.Softmax2d()(output)
     soft_output[soft_output >= 0.5] = 1
     soft_output[soft_output < 0.5] = 0
-
-    print(soft_output[:, 1:2, :].shape)
-    print("dice_index 1: {0}".format(dice_index(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
-    print("ppv 1: {0}".format(ppv(soft_output[:, 1:2, :], seg_label[:, 1:2, :])))
+    print(soft_output.shape)
+    print(seg_label.shape)
+    print("dice_index 1: {0}".format(dice_index(soft_output, seg_label)))
+    print("dice_index 2: {0}".format(dice_index2(soft_output, seg_label)))
 
     test_metrics = ['dice', 'jaccard', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd', 'ppv']
 
-    print(get_metrics(soft_output[:, 1:2, :],seg_label[:, 1:2, :], test_metrics))
+    print(get_average_metrics(soft_output,seg_label, test_metrics))
+    print(get_average_metrics(soft_output, seg_label, test_metrics, test=True))
 
 if __name__ == '__main__':
     data_test()

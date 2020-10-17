@@ -212,10 +212,6 @@ class SegDataset(data.Dataset):
             # seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
             # seg_label = metrics.one_hot(seg_label, 2)
             # seg_label = torch.squeeze(seg_label, 0)
-
-
-        
-
         numeric_data = img_ID_data[:-1]
         type_label = img_ID_data[-1]
         type_label4 = type_label.long()
@@ -225,9 +221,6 @@ class SegDataset(data.Dataset):
             type_label2 = torch.from_numpy(np.array(1,dtype=np.int64))
         # type_label2 = type_label2.long()
         # logging.error(img.shape,numeric_data.shape,type_label)
-
-
-
         return img_ID, img, seg_label, numeric_data, type_label4, type_label2
 
     def __len__(self):
@@ -256,6 +249,7 @@ class SegDataset(data.Dataset):
 
 
 
+
 def moduleTest():
     data_root = "../ResearchData/UltraImageUSFullTest/UltraImageCropFull"
     seg_root = "../seg/"
@@ -272,12 +266,12 @@ def moduleTest():
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     # target为一个batch的值
     target = iter(train_dataloader).next()
-    DEVICE = torch.device('cuda:' + str(1) if torch.cuda.is_available() else 'cpu')
+    DEVICE = torch.device('cuda:' + str(0) if torch.cuda.is_available() else 'cpu')
     img = target[1]
-    seg_label = target[2].to(DEVICE)
+    seg_label = target[2]
     print(img.shape)
     print(seg_label.shape)
-    imshow(img)
+    # imshow(img)
 
 def imshow(tensor, title=None):
     # plt.ion()

@@ -84,31 +84,12 @@ class DiceLoss(nn.Module):
             self,
             inputs: torch.Tensor,
             target: torch.Tensor) -> torch.Tensor:
-        
-        # compute softmax over the classes axis
-        # input_soft = F.softmax(input, dim=1)
+        dims = (1, 2, 3)
+        intersection = torch.sum(inputs * target, dims)
+        cardinality = torch.sum(inputs + target, dims)
 
-        # create the labels one hot tensor
-        # target_one_hot = target
-        # 这里，target传进来时就是one-hot了
-        # target_one_hot = metrics.one_hot(target, num_classes=input.shape[1], device=input.device, dtype=input.dtype)
-
-        # compute the actual dice score
- 
-        # dims = (1, 2, 3)
-        # intersection = torch.sum(input * target, dims)
-        # cardinality = torch.sum(input + target, dims)
-
-        # dice_score = 2. * intersection / (cardinality + self.eps)
-        # return torch.mean(1. - dice_score)
-        score = inputs[:, 1, ...]
-        target = target[:, 1, ...]
-        intersect = torch.sum(score * target)
-        y_sum = torch.sum(target * target)
-        z_sum = torch.sum(score * score)
-        loss = (2 * intersect + self.eps) / (z_sum + y_sum + self.eps)
-        loss = 1 - loss
-        return loss
+        dice_score = 2. * intersection / (cardinality + self.eps)
+        return torch.mean(1. - dice_score)
 '''
 
 def generalised_dice_loss_2d_ein(Y_gt, Y_pred):
@@ -161,20 +142,20 @@ class GDL(nn.Module):
 
 # soft IOU https://discuss.pytorch.org/t/how-to-implement-soft-iou-loss/15152
 class mIoULoss(nn.Module):
-    def __init__(self, weight=None, size_average=True, n_classes=2):
+    def __init__(self, weight=None, size_average=True, n_classes=1):
         super(mIoULoss, self).__init__()
         self.classes = n_classes
 
     def forward(self, inputs, target_oneHot):
         # inputs => N x Classes x H x W
         # target_oneHot => N x Classes x H x W
-
         N = inputs.size()[0]
 
         # predicted probabilities for each pixel along channel
-        inputs = F.softmax(inputs, dim=1)
+        # inputs = F.softmax(inputs, dim=1)
 
         # Numerator Product
+
         inter = inputs * target_oneHot
         ## Sum over all pixels N x C x H x W => N x C
         inter = inter.view(N, self.classes, -1).sum(2)

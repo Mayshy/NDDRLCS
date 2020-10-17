@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/1i1oSeg.py" line="92" />
+    <bookmark url="file://$PROJECT_DIR$/1i1oSeg.py" line="108" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/2i1oSeg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Model/MechanicsModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MTLDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLDataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTLLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLLoss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/U-Net.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/UNet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,55 +23,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/metrics.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3300">
-              <caret line="177" column="56" lean-forward="true" selection-start-line="177" selection-start-column="56" selection-end-line="177" selection-end-column="56" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/hausdorff/hausdorff.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="770">
-              <caret line="38" column="4" selection-start-line="38" selection-start-column="4" selection-end-line="38" selection-end-column="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/seg_metrics/seg_metrics.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2156">
-              <caret line="106" selection-start-line="106" selection-end-line="106" />
-              <folding>
-                <element signature="e#2#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/5155201/-759174728/hausdorff/hausdorff.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="44" column="38" selection-start-line="44" selection-start-column="38" selection-end-line="44" selection-end-column="38" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="142">
-              <caret line="151" column="82" lean-forward="true" selection-start-line="151" selection-start-column="82" selection-end-line="151" selection-end-column="82" />
+            <state relative-caret-position="410">
+              <caret line="182" column="31" lean-forward="true" selection-start-line="182" selection-start-column="31" selection-end-line="182" selection-end-column="31" />
               <folding>
                 <element signature="e#34#43#0" expanded="true" />
               </folding>
@@ -76,12 +35,56 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/MTLDataset.py">
+        <entry file="file://$PROJECT_DIR$/Model/UNet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="156">
-              <caret line="208" column="41" lean-forward="true" selection-start-line="208" selection-start-column="41" selection-end-line="208" selection-end-column="41" />
+            <state relative-caret-position="351">
+              <caret line="405" column="34" selection-start-line="405" selection-start-column="33" selection-end-line="405" selection-end-column="34" />
               <folding>
-                <element signature="e#0#12#0" expanded="true" />
+                <element signature="e#390#402#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/MechanicsModel.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="396">
+              <caret line="18" selection-start-line="18" selection-end-line="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/conv.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="142">
+              <caret line="334" column="73" selection-start-line="334" selection-start-column="73" selection-end-line="334" selection-end-column="73" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/upsampling.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="134" column="13" lean-forward="true" selection-start-line="134" selection-start-column="13" selection-end-line="134" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/activation.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2310">
+              <caret line="105" column="26" lean-forward="true" selection-start-line="105" selection-start-column="26" selection-end-line="105" selection-end-column="26" />
+              <folding>
+                <element signature="e#0#15#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -90,7 +93,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MTLModel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="5302">
+              <caret line="251" selection-start-line="251" selection-end-line="251" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -99,10 +103,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/U-Net.py">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/functional.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            <state relative-caret-position="349">
+              <caret line="1105" column="4" selection-start-line="1105" selection-start-column="4" selection-end-line="1105" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -110,20 +114,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MTLLoss.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3190">
-              <caret line="151" column="32" selection-start-line="151" selection-start-column="32" selection-end-line="151" selection-end-column="32" />
+            <state relative-caret-position="1782">
+              <caret line="87" column="55" selection-start-line="87" selection-start-column="55" selection-end-line="87" selection-end-column="55" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/pandas/core/generic.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="64680">
-              <caret line="3041" column="8" selection-start-line="3041" selection-start-column="8" selection-end-line="3041" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -139,36 +134,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>log_file_name</find>
-      <find>logdir</find>
-      <find>rf</find>
-      <find>rf_sort_list</find>
-      <find>logging</find>
-      <find>Fea</find>
-      <find>95</find>
-      <find>metrics_type</find>
-      <find>slice_idx</find>
-      <find>dice_index</find>
-      <find>CUDA</find>
-      <find>gpu</find>
       <find>labelTrue</find>
       <find>distance_metrics</find>
       <find>seg_surface_array</find>
       <find>batch_test_loss</find>
-      <find>epoch_quality</find>
       <find>quality</find>
       <find>epoch</find>
       <find>BATCH_SIZE</find>
       <find>args.n_batch_size</find>
       <find>n_batch_size</find>
       <find>intersection_sum</find>
-      <find>dice</find>
       <find>0.017684771878176204</find>
       <find>all_quality</find>
-      <find>print</find>
       <find>--net</find>
       <find>loss</find>
       <find>criter</find>
+      <find>Soft</find>
+      <find>test_loss_list</find>
+      <find>test_loss</find>
+      <find>isL</find>
+      <find>Seg</find>
+      <find>'Seg</find>
+      <find>epoch_quality</find>
+      <find>args.criterion</find>
+      <find>dice</find>
+      <find>smooth</find>
+      <find>autoencoder</find>
+      <find>setup_seed</find>
+      <find>Up</find>
+      <find>print</find>
+      <find>D</find>
     </findStrings>
     <replaceStrings>
       <replace>dice_index</replace>
@@ -183,19 +178,23 @@
         <option value="$PROJECT_DIR$/MTLShow.py" />
         <option value="$PROJECT_DIR$/0926.sh" />
         <option value="$PROJECT_DIR$/preScreen.sh" />
-        <option value="$PROJECT_DIR$/MTLLoss.py" />
         <option value="$PROJECT_DIR$/Model/U-Net.py" />
         <option value="$PROJECT_DIR$/MTLDataset.py" />
+        <option value="$PROJECT_DIR$/MTLLoss.py" />
+        <option value="$PROJECT_DIR$/Model/KiUNet.py" />
         <option value="$PROJECT_DIR$/metrics.py" />
+        <option value="$PROJECT_DIR$/Model/UNet.py" />
         <option value="$PROJECT_DIR$/1i1oSeg.py" />
+        <option value="$PROJECT_DIR$/Model/DilatedUNet.py" />
+        <option value="$PROJECT_DIR$/Model/MechanicsModel.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-30" />
-    <option name="y" value="-30" />
+    <option name="x" value="-12" />
+    <option name="y" value="33" />
     <option name="width" value="1710" />
-    <option name="height" value="1605" />
+    <option name="height" value="1107" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -240,6 +239,11 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Workspace\MTL\NDDRLCS" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -380,7 +384,14 @@
       <workItem from="1601901466633" duration="574000" />
       <workItem from="1601902062498" duration="5656000" />
       <workItem from="1601952612994" duration="15983000" />
-      <workItem from="1602381348253" duration="2282000" />
+      <workItem from="1602381348253" duration="3078000" />
+      <workItem from="1602469755121" duration="1499000" />
+      <workItem from="1602565121545" duration="18942000" />
+      <workItem from="1602595669346" duration="4294000" />
+      <workItem from="1602641694029" duration="1198000" />
+      <workItem from="1602832683075" duration="6729000" />
+      <workItem from="1602857228922" duration="743000" />
+      <workItem from="1602895564688" duration="16429000" />
     </task>
     <task id="LOCAL-00001" summary="Train Split">
       <created>1602381633304</created>
@@ -389,21 +400,34 @@
       <option name="project" value="LOCAL" />
       <updated>1602381633304</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Get the binary output">
+      <created>1602383676595</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1602383676595</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Sigmoid">
+      <created>1602383978004</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1602383978004</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="79271000" />
+    <option name="totallyTimeSpent" value="129901000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25383994" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19725141" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32984293" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -413,9 +437,35 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.2652705" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.32286212" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" visible="true" weight="0.27748692" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.27748692" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.38917977" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.17626527" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Remote Host" order="3" weight="0.32983023" />
+      <window_info anchor="right" id="SciView" order="4" weight="0.32983023" />
+      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="5" side_tool="true" weight="0.28779304" />
+      <window_info anchor="right" id="Database" order="6" />
+    </layout>
+    <layout-to-restore>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.261924" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32984293" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.2652705" />
+      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.32286212" />
+      <window_info anchor="bottom" id="Database Changes" order="10" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.27748692" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.56893545" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -423,7 +473,7 @@
       <window_info anchor="right" id="SciView" order="4" weight="0.32983023" />
       <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="5" side_tool="true" weight="0.32983023" />
       <window_info anchor="right" id="Database" order="6" />
-    </layout>
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -453,10 +503,26 @@
         </entry>
       </map>
     </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Train Split" />
-    <option name="LAST_COMMIT_MESSAGE" value="Train Split" />
+    <MESSAGE value="Get the binary output" />
+    <MESSAGE value="Sigmoid" />
+    <option name="LAST_COMMIT_MESSAGE" value="Sigmoid" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/0926.sh">
@@ -514,13 +580,6 @@
     <entry file="file://$PROJECT_DIR$/IOULoss.out">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/segmentation/segmentation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1826">
-          <caret line="87" selection-start-line="87" selection-end-line="87" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/segmentation/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -544,31 +603,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/seg_metrics/seg_metrics.py">
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/5155201/-759174728/hausdorff/hausdorff.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2156">
-          <caret line="106" selection-start-line="106" selection-end-line="106" />
+        <state relative-caret-position="902">
+          <caret line="44" column="38" selection-start-line="44" selection-start-column="38" selection-end-line="44" selection-end-column="38" />
           <folding>
-            <element signature="e#2#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MTLModel.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MTLLoss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3190">
-          <caret line="151" column="32" selection-start-line="151" selection-start-column="32" selection-end-line="151" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -580,52 +620,136 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/U-Net.py">
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/seg_metrics/seg_metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/5155201/-759174728/hausdorff/hausdorff.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="44" column="38" selection-start-line="44" selection-start-column="38" selection-end-line="44" selection-end-column="38" />
+        <state relative-caret-position="217">
+          <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="156">
-          <caret line="208" column="41" lean-forward="true" selection-start-line="208" selection-start-column="41" selection-end-line="208" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
+            <element signature="e#2#20#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3300">
-          <caret line="177" column="56" lean-forward="true" selection-start-line="177" selection-start-column="56" selection-end-line="177" selection-end-column="56" />
+        <state relative-caret-position="1496">
+          <caret line="79" column="84" selection-start-line="79" selection-start-column="84" selection-end-line="79" selection-end-column="84" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10472">
+          <caret line="483" column="60" selection-start-line="483" selection-start-column="60" selection-end-line="483" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/segmentation/segmentation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1584">
+          <caret line="76" column="9" selection-start-line="76" selection-start-column="9" selection-end-line="76" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5082">
+          <caret line="242" selection-start-line="242" selection-end-line="242" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MTLModel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5302">
+          <caret line="251" selection-start-line="251" selection-end-line="251" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/KiUNet.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MTLLoss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1782">
+          <caret line="87" column="55" selection-start-line="87" selection-start-column="55" selection-end-line="87" selection-end-column="55" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/upsampling.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="134" column="13" lean-forward="true" selection-start-line="134" selection-start-column="13" selection-end-line="134" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/activation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2310">
+          <caret line="105" column="26" lean-forward="true" selection-start-line="105" selection-start-column="26" selection-end-line="105" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/functional.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="349">
+          <caret line="1105" column="4" selection-start-line="1105" selection-start-column="4" selection-end-line="1105" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/conv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="142">
-          <caret line="151" column="82" lean-forward="true" selection-start-line="151" selection-start-column="82" selection-end-line="151" selection-end-column="82" />
+          <caret line="334" column="73" selection-start-line="334" selection-start-column="73" selection-end-line="334" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/DilatedUNet.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="410">
+          <caret line="182" column="31" lean-forward="true" selection-start-line="182" selection-start-column="31" selection-end-line="182" selection-end-column="31" />
           <folding>
             <element signature="e#34#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/MechanicsModel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="18" selection-start-line="18" selection-end-line="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/UNet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="405" column="34" selection-start-line="405" selection-start-column="33" selection-end-line="405" selection-end-column="34" />
+          <folding>
+            <element signature="e#390#402#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>

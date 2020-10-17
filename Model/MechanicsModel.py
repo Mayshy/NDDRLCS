@@ -3,8 +3,8 @@
 """ 
 @author:shy
 @license: Apache Licence 
-@file: U-Net.py 
-@time: 2020/10/07
+@file: MechanicsModel.py 
+@time: 2020/10/17
 @contact: justbeshy@outlook.com
 @site:  
 @software: PyCharm 
@@ -15,3 +15,4 @@
 # Good code is its own best documentation.
 # Focus on your question, not your function.
 """
+
