@@ -395,9 +395,9 @@ class DilatedUNet(nn.Module):
         self.bilinear = bilinear
 
         self.inc = DoubleConv(n_channels, 32)
-        self.encoder = Encoder(32, n_block=3)
+        self.encoder = Encoder(32, n_block=4)
         self.bottleneck = BottleNeck(32 * (2 **self.encoder.n_blocks), n_layers=6)
-        self.decoder = Decoder(32 * (2 ** (self.encoder.n_blocks)), n_block=3)
+        self.decoder = Decoder(32 * (2 ** (self.encoder.n_blocks)), n_block=4)
         self.outc = OutConv(16, n_classes)
     def forward(self, x):
         x = self.inc(x)

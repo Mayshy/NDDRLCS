@@ -12,9 +12,11 @@ from torch import optim
 from torch import nn
 import MTLLoss
 from Model import UNet
+from Model import InputLevelFusion
 from MTLLoss import MultiLossLayer
 from torch.utils import data
 from torchvision import transforms
+import torch.nn.functional as F
 import sys
 import datetime
 import metrics
@@ -22,16 +24,16 @@ import random
 import collections
 
 """
-单输入单输出分割
+双输入单输出分割，结合力学影响数据
 
-seg_label 标签 torch.Size([16, 2, 224, 224])
+可能要使用弱监督
 
-要使用的性能指标:
-1. pixel_accuray , 参考
-2. 
+TODO:
+1. 数据集DataLoader 30min
+2. 模型？？
+3. 其他的微调即可
 
-# Q：灰度图是否归一化？？？
-# Q: 未来要做p-value
+
 """
 
 def log_mean(array, name, isLog = False):
@@ -52,30 +54,34 @@ def dict_sum(res, addend):
 
 def get_model(model_name, pretrained = False):
     model_name = model_name.strip()
-    if model_name == 'FCN_ResNet50':
-        return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=1,
-                                                            aux_loss=None)
+    # input-level
+        # if model_name == 'FCN_ResNet50':
+        #     return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=1,
+        #                                                         aux_loss=None)
     if model_name == 'FCN_ResNet101':
-        return torchvision.models.segmentation.fcn_resnet101(pretrained=pretrained, progress=False, num_classes=1,
-                                                            aux_loss=None)
-    if model_name == 'DLV3__ResNet50':
-        return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=pretrained, progress=False, num_classes=1,
-                                                             aux_loss=None)
-    if model_name == 'DLV3__ResNet101':
-        return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=pretrained, progress=False, num_classes=1,
-                                                             aux_loss=None)
+        return InputLevelFusion.FCNResNet101(in_channels=6, n_classes=1)
     if model_name == "unet":
-        return UNet.UNet(n_channels=3, n_classes=1)
+        return InputLevelFusion.ILFUNet(in_channels=6, n_classes=1)
     if model_name == "kinet":
-        return UNet.KiNet(n_channels=3, n_classes=1)
+        return UNet.KiNet(n_channels=6, n_classes=1)
+    if model_name == "dunet":
+        return UNet.DilatedUNet(n_channels=6, n_classes=1)
+        # if model_name == 'DLV3__ResNet50':
+        #     return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=pretrained, progress=False, num_classes=1,
+        #                                                          aux_loss=None)
+        # if model_name == 'DLV3__ResNet101':
+        #     return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=pretrained, progress=False, num_classes=1,
+        #                                                          aux_loss=None)
+    # layer-level
+
+
     if model_name == "autoencoder":
         return UNet.autoencoder()
     if model_name == "kiunet":
         return UNet.kiunet()
     if model_name == "kinetwithsk":
         return UNet.kinetwithsk()
-    if model_name == "dunet":
-        return UNet.DilatedUNet(n_channels=3, n_classes=1)
+
     # elif model_name == "pspnet":
     #     return psp.PSPNet(layers=5, bins=(1, 2, 3, 6), dropout=0.1, classes=21, zoom_factor=1, use_ppm=True,
     #                        pretrained=False).cuda()
@@ -88,8 +94,8 @@ def get_criterion(criterion):
         return MTLLoss.TheCrossEntropy()
     if criterion == "BCELoss":
         return nn.BCELoss()
-    if criterion == "SSLoss":
-        return
+    # if criterion == "SSLoss":
+    #     return
     if criterion == "DiceLoss":
         return MTLLoss.DiceLoss()
     if criterion == "IOULoss":
@@ -154,15 +160,17 @@ def setup_seed(seed):
 # 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--net", type=str, help="The Main Model", default='dunet')
+    parser.add_argument("--net", type=str, help="The Main Model", default='unet')
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='DiceLoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
-    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFull')
+    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFullResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
-                        default='../seg/')
+                        default='../BlurBinaryLabel/')
+    parser.add_argument("--fluid_root", type=str, help="fluid data root",
+                        default='../flowImage/')
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
     parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
@@ -173,12 +181,12 @@ def parse_args(argv):
     parser.add_argument("--momentum", type=float, help="momentum", default=0)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
     parser.add_argument("--epoch", type=int, help="number of epoch", default=900)
-    parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=16)
+    parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=8)
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default=str(datetime.date.today()))
-    parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
+    parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=0)
     return parser.parse_args(argv)
 
@@ -187,20 +195,20 @@ def parse_args(argv):
 def train(epoch):
 
     # 设置数据集
-    train_dataset = MTLDataset.SegDataset(
-        str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+    train_dataset = MTLDataset.FluidSegDataset(
+        str(data_root) + 'TRAIN/', args.seg_root, args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
         screener=rf_sort_list, screen_num=10)
     train_dataloader = data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-
     logging.info("Epoch " + str(epoch))
     train_loss_list = []
     model.train()
     # 开始一个epoch的迭代
-    for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
+    for i, (ID, img, fluid_img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
         # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
         img = img.to(DEVICE)
         seg_label = seg_label.to(DEVICE)
+        fluid_img = fluid_img.to(DEVICE)
         if args.criterion.strip() == 'BCELoss':
             seg_label = seg_label.float()
         US_data = US_data.to(DEVICE)
@@ -208,19 +216,17 @@ def train(epoch):
         label4 = label4.to(DEVICE)
 
         # mixup
-        img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label,
-                                                                                                    US_label, label4,
-                                                                                                    args.alpha)
+        # img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label,
+        #                                                                                             US_label, label4,
+        #                                                                                             args.alpha)
 
         # 执行模型，得到输出
-        # out = model(img)['out']
-        out = model(img)
+        out = model(img, fluid_img)
         out = nn.Sigmoid()(out)
 
         # 取损失函数
-        # train_loss = criterion(out, seg_label)
-        # out = (out >= 0.5).float().requires_grad_()
-        train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
+        train_loss = criterion(out, seg_label)
+        # train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
         train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
@@ -235,8 +241,8 @@ def test(epoch):
     test_loss_list = []
     dice2_list = []
     # 设置数据集
-    test_dataset = MTLDataset.SegDataset(
-        str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+    test_dataset = MTLDataset.FluidSegDataset(
+        str(data_root) + 'TEST/', args.seg_root, args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
         screener=rf_sort_list,
         screen_num=10)
     test_dataloader = data.DataLoader(
@@ -246,11 +252,12 @@ def test(epoch):
     batch_num = 0
     # 开始这轮的迭代
     with torch.no_grad():
-        for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(test_dataloader):
+        for i, (ID, img, fluid_img, seg_label, US_data, label4, label2) in enumerate(test_dataloader):
             batch_num += 1
             # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
             img = img.to(DEVICE)
             seg_label = seg_label.to(DEVICE)
+            fluid_img = fluid_img.to(DEVICE)
             if args.criterion.strip() == 'BCELoss':
                 seg_label = seg_label.float()
             US_data = US_data.to(DEVICE)
@@ -258,18 +265,19 @@ def test(epoch):
             label4 = label4.to(DEVICE)
 
             # 输出
-            output = model(img)
+            output = model(img, fluid_img)
             output = nn.Sigmoid()(output)
 
-            # seg_label 标签
-            loss = criterion(output, seg_label)
+
 
 
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
+            output = F.interpolate(output, size=(512, 512), mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
-
+            # seg_label 标签, 注意此时的loss含义已然不同了，未来考虑把这个值去掉
+            loss = criterion(output, seg_label)
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
             test_loss_list.append(loss.item())

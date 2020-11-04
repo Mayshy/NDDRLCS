@@ -10,6 +10,7 @@ import argparse
 import torch
 from torch import optim
 from torch import nn
+import torch.nn.functional as F
 import MTLLoss
 from Model import UNet
 from MTLLoss import MultiLossLayer
@@ -26,12 +27,8 @@ import collections
 
 seg_label 标签 torch.Size([16, 2, 224, 224])
 
-要使用的性能指标:
-1. pixel_accuray , 参考
-2. 
-
-# Q：灰度图是否归一化？？？
-# Q: 未来要做p-value
+训练方案：https://blog.csdn.net/qq_34914551/article/details/87699317
+https://zhuanlan.zhihu.com/p/93624972
 """
 
 def log_mean(array, name, isLog = False):
@@ -121,7 +118,9 @@ def get_optimizer(optimizer):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay = WEIGHT_DECAY)
     if (optimizer == 'AmsgradW'):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
-            
+
+
+
 # mixup 数据增强器，帮助提升小数据集下训练与测试的稳定性
 def mixup_data(x, y0, y1, y2, alpha=1.0):
     if alpha > 0:
@@ -154,21 +153,21 @@ def setup_seed(seed):
 # 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--net", type=str, help="The Main Model", default='dunet')
+    parser.add_argument("--net", type=str, help="The Main Model", default='unet')
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='DiceLoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
-    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFull')
+    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFullResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
-                        default='../seg/')
+                        default='../BlurBinaryLabel/')
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
     parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=0.0001)
+    parser.add_argument("--lr", type=float, help="learning rate", default=10e-4)
     parser.add_argument("--wd", type=float, help="weight decay", default=0.1)
     parser.add_argument("--momentum", type=float, help="momentum", default=0)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
@@ -178,7 +177,7 @@ def parse_args(argv):
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default=str(datetime.date.today()))
-    parser.add_argument("--GPU", type=int, help="GPU ID", default=1)
+    parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=0)
     return parser.parse_args(argv)
 
@@ -197,6 +196,7 @@ def train(epoch):
     train_loss_list = []
     model.train()
     # 开始一个epoch的迭代
+
     for i, (ID, img, seg_label, US_data, label4, label2) in enumerate(train_dataloader):
         # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
         img = img.to(DEVICE)
@@ -211,11 +211,11 @@ def train(epoch):
         img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label,
                                                                                                     US_label, label4,
                                                                                                     args.alpha)
-
         # 执行模型，得到输出
         # out = model(img)['out']
         out = model(img)
         out = nn.Sigmoid()(out)
+        # out = F.interpolate(out, size= , mode='bilinear')
 
         # 取损失函数
         # train_loss = criterion(out, seg_label)
@@ -230,6 +230,7 @@ def train(epoch):
 
     train_loss_mean = log_mean(train_loss_list, "train loss", isLog= True)
     all_quality['train_loss'].append(train_loss_mean)
+    return train_loss_mean
 
 def test(epoch):
     test_loss_list = []
@@ -262,11 +263,12 @@ def test(epoch):
             output = nn.Sigmoid()(output)
 
             # seg_label 标签
-            loss = criterion(output, seg_label)
-
 
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
+            output = F.interpolate(output, size=(512, 512), mode='bilinear', align_corners=True)
+            loss = criterion(output, seg_label)
+
             seg_test = seg_label.long()
 
 
@@ -297,9 +299,6 @@ def test(epoch):
     all_quality['test_loss'].append(test_loss_mean)
     all_quality['dice2'].append(dice2_mean)
 
-        
-
-
 # 启动配置
 # ------------------------------------------------------------------------------------------------------------------------------------------
 # # Meter用于度量波动区间
@@ -316,7 +315,8 @@ torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
 MOMENTUM = args.momentum
-model = get_model(args.net, args.pretrained).to(DEVICE)
+# model = get_model(args.net, args.pretrained).to(DEVICE)
+model = torch.nn.DataParallel(get_model(args.net, args.pretrained), device_ids=[0, 1]).cuda()
 criterion = get_criterion(args.criterion).to(DEVICE)
 # criterionUS = get_criterionUS(args.criterionUS)
 # multi_loss = MultiLossLayer(2)
@@ -339,9 +339,21 @@ logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_f
 logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
 
 all_quality = collections.defaultdict(list)
+last_train_loss = float('inf')
+count_loss_improve = 0
 for epoch in range(start_epoch, args.epoch):
-    train(epoch)
+    cur_train_loss = train(epoch)
+    if (cur_train_loss >= last_train_loss):
+        count_loss_improve += 1
+    else:
+        count_loss_improve = 0
+    last_train_loss = cur_train_loss
+    # if (count_loss_improve != 0 & count_loss_improve % 3 == 0):
+    #     optimizer.param_groups[0]['lr'] *= 0.8
     test(epoch)
+    if (count_loss_improve == 8):
+        break
+
 
 df = pd.DataFrame(all_quality)
 df.to_csv(log_path + str(args.log_file_name) + ".csv")
