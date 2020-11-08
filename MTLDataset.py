@@ -23,7 +23,7 @@ transformer = {'Train':transforms.Compose([
 ]),
 'All':transforms.Compose([
     transforms.Resize((336,336)),
-    transforms.Grayscale(3),
+    # transforms.Grayscale(3), 可能需要做一次简单的对比来校验是否加
     transforms.ToTensor(), 
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ]),
@@ -449,8 +449,11 @@ def moduleTest():
     rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA',
                     'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA',
                     'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
-    train_dataset = FluidSegDatasetPureSeg(
-        str(data_root) + '/', seg_root, fluid_root, train_or_test='Train')
+    train_dataset = SegDataset(
+        str(data_root) + '/', seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+    screener=rf_sort_list,
+    screen_num=10)
+    print(len(train_dataset))
     test_dataset = FluidSegDatasetPureSeg(
         str(data_root) + 'TEST/', seg_root, fluid_root, train_or_test='Test')
     # test_dataset = FluidSegDatasetPureSeg(

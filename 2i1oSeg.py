@@ -60,6 +60,10 @@ def get_model(model_name, pretrained = False):
         #                                                         aux_loss=None)
     if model_name == 'FCN_ResNet101':
         return InputLevelFusion.FCNResNet101(in_channels=6, n_classes=1)
+    if model_name == 'DLV3__ResNet50':
+        return InputLevelFusion.ILFDLV3ResNet50(in_channels=6, n_classes=1)
+    if model_name == 'DLV3__ResNet101':
+        return InputLevelFusion.ILFDLV3ResNet101(in_channels=6, n_classes=1)
     if model_name == "unet":
         return InputLevelFusion.ILFUNet(in_channels=6, n_classes=1)
     if model_name == "kinet":
@@ -117,14 +121,17 @@ def get_criterionUS(criterionUS):
 def get_optimizer(optimizer):
     if (optimizer == 'Adam'):
         # return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
-        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE, eps=1e-8, weight_decay=WEIGHT_DECAY, amsgrad=True)
+    if (optimizer == 'Amsgrad'):
+        # return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
+        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE, eps=1e-8, weight_decay=WEIGHT_DECAY, amsgrad=True)
     if (optimizer == 'RMSprop'):
         return optim.RMSprop(params=model.parameters(), lr=LEARNING_RATE, alpha=0.99, eps=1e-08, weight_decay=0,
                              momentum=MOMENTUM, centered=False)
-    if (optimizer == 'SGD'):
-        return optim.SGD(params=model.parameters(), lr=LEARNING_RATE, momentum = MOMENTUM)
+    if (optimizer == 'SGDN'):
+        return optim.SGD(params=model.parameters(), lr=LEARNING_RATE, momentum = MOMENTUM, nesterov=True)
     if (optimizer == 'AdamW'):
-        return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay = WEIGHT_DECAY)
+        return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     if (optimizer == 'AmsgradW'):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
             
@@ -143,6 +150,21 @@ def mixup_data(x, y0, y1, y2, alpha=1.0):
     y2_a, y2_b = y2, y2[index]
     return mixed_x, y0_a, y0_b, y1_a, y1_b, y2_a, y2_b, lam
 
+def mixup_data2(x0, x1, y0, y1, y2, alpha=1.0):
+    if alpha > 0:
+        lam = np.random.beta(alpha, alpha)
+    else:
+        lam = 1
+    batch_size = x0.size()[0]
+    index = torch.randperm(batch_size).to(DEVICE)
+
+    mixed_x0 = lam * x0 + (1 - lam) * x0[index, :]
+    mixed_x1 = lam * x1 + (1 - lam) * x1[index, :]
+    y0_a, y0_b = y0, y0[index]
+    y1_a, y1_b = y1, y1[index]
+    y2_a, y2_b = y2, y2[index]
+    return mixed_x0, mixed_x1, y0_a, y0_b, y1_a, y1_b, y2_a, y2_b, lam
+
 def mixup_criterion_type(the_criterion, pred, y_a, y_b, lam):
     return lam * the_criterion(pred, y_a) + (1 - lam) * the_criterion(pred, y_b)
 
@@ -160,27 +182,27 @@ def setup_seed(seed):
 # 参数解析
 def parse_args(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--net", type=str, help="The Main Model", default='unet')
+    parser.add_argument("--net", type=str, help="The Main Model", default='FCN_ResNet101')
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
-    parser.add_argument("--criterion", type=str, help="criterion", default='DiceLoss')
+    parser.add_argument("--criterion", type=str, help="criterion", default='BCELoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFullResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
                         default='../BlurBinaryLabel/')
     parser.add_argument("--fluid_root", type=str, help="fluid data root",
-                        default='../flowImage/')
+                        default='../flowImage/')  # or '../BinaryFlowImage/'
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
     parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=0.0001)
-    parser.add_argument("--wd", type=float, help="weight decay", default=0.1)
-    parser.add_argument("--momentum", type=float, help="momentum", default=0)
+    parser.add_argument("--lr", type=float, help="learning rate", default=0.0002)
+    parser.add_argument("--wd", type=float, help="weight decay", default=0.01)
+    parser.add_argument("--momentum", type=float, help="momentum", default=0.9)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
-    parser.add_argument("--epoch", type=int, help="number of epoch", default=900)
+    parser.add_argument("--epoch", type=int, help="number of epoch", default=400)
     parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=8)
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
@@ -188,6 +210,7 @@ def parse_args(argv):
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default=str(datetime.date.today()))
     parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=0)
+    parser.add_argument("--ifDataParallel", type=int, help="If use mixup", default=0)
     return parser.parse_args(argv)
 
 
@@ -216,17 +239,17 @@ def train(epoch):
         label4 = label4.to(DEVICE)
 
         # mixup
-        # img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data(img, seg_label,
-        #                                                                                             US_label, label4,
-        #                                                                                             args.alpha)
+        img, fluid_img, seg_label_a, seg_label_b, US_label_a, US_label_b, label4_a, label4_b, lam = mixup_data2(img, fluid_img, seg_label,
+                                                                                                    US_label, label4,
+                                                                                                    args.alpha)
 
         # 执行模型，得到输出
         out = model(img, fluid_img)
         out = nn.Sigmoid()(out)
 
         # 取损失函数
-        train_loss = criterion(out, seg_label)
-        # train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
+        # train_loss = criterion(out, seg_label)
+        train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
         train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
@@ -255,6 +278,7 @@ def test(epoch):
         for i, (ID, img, fluid_img, seg_label, US_data, label4, label2) in enumerate(test_dataloader):
             batch_num += 1
             # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
+            actual_batch_size = len(ID)
             img = img.to(DEVICE)
             seg_label = seg_label.to(DEVICE)
             fluid_img = fluid_img.to(DEVICE)
@@ -283,8 +307,9 @@ def test(epoch):
             test_loss_list.append(loss.item())
             dice2 = metrics.dice_index(output, seg_test)
             dice2_list.append(dice2)
-            quality = metrics.get_sum_metrics(output, seg_test, count_metrics)
+            quality, dices = metrics.get_sum_metrics(output, seg_test, count_metrics, printDice=True)
             epoch_quality = dict_sum(epoch_quality, quality)
+            # 可视化第一个BATCH
             if i == 0:
                 output = output.cpu()
                 for j in range(BATCH_SIZE):
@@ -293,6 +318,12 @@ def test(epoch):
                     if not os.path.exists(path):
                         os.makedirs(path)
                     save_img.save(path + 'E' + str(epoch) + '_' + ID[j] + '.jpg')
+    #       record dice of every img
+            for j in range(actual_batch_size):
+                all_img_dice[ID[j]].append(dices[j])
+
+
+
 
     test_loss_mean = log_mean(test_loss_list, "test loss", isLog= True)
     dice2_mean = log_mean(dice2_list, "dice2", isLog= True)
@@ -314,17 +345,20 @@ def test(epoch):
 
 
 # 配置特征排序（和引用的特征量）
-# setup_seed(20)
+setup_seed(20)
 rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA', 'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
 # 写入配置
 args = parse_args(sys.argv[1:])
-start_epoch = 1
+start_epoch = 0
 DEVICE = torch.device('cuda:' + str(args.GPU) if torch.cuda.is_available() else 'cpu')
 torch.cuda.set_device(args.GPU)
 LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
 MOMENTUM = args.momentum
-model = get_model(args.net, args.pretrained).to(DEVICE)
+if args.ifDataParallel:
+    model = torch.nn.DataParallel(get_model(args.net, args.pretrained), device_ids=[0, 1]).cuda()
+else:
+    model = get_model(args.net, args.pretrained).to(DEVICE)
 criterion = get_criterion(args.criterion).to(DEVICE)
 # criterionUS = get_criterionUS(args.criterionUS)
 # multi_loss = MultiLossLayer(2)
@@ -347,11 +381,14 @@ logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_f
 logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
 
 all_quality = collections.defaultdict(list)
+all_img_dice = collections.defaultdict(list)
 for epoch in range(start_epoch, args.epoch):
     train(epoch)
     test(epoch)
 
 df = pd.DataFrame(all_quality)
 df.to_csv(log_path + str(args.log_file_name) + ".csv")
+df_img_dice_analysis = pd.DataFrame(all_img_dice)
+df_img_dice_analysis.to_csv(log_path + str(args.log_file_name) + "_imgDice.csv")
 
 

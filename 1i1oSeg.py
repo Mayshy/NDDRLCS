@@ -172,13 +172,15 @@ def parse_args(argv):
     parser.add_argument("--momentum", type=float, help="momentum", default=0)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
     parser.add_argument("--epoch", type=int, help="number of epoch", default=900)
-    parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=16)
+    parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=8)
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
     parser.add_argument("--save_optim", type=int, help="if saving optim", default=0)    
     parser.add_argument("--logdir", type=str, help="Please input the tensorboard logdir.", default=str(datetime.date.today()))
     parser.add_argument("--GPU", type=int, help="GPU ID", default=0)
     parser.add_argument("--alpha", type=int, help="If use mixup", default=0)
+    parser.add_argument("--ifDataParallel", type=int, help="If use mixup", default=0)
+
     return parser.parse_args(argv)
 
 
@@ -305,7 +307,7 @@ def test(epoch):
 
 
 # 配置特征排序（和引用的特征量）
-# setup_seed(20)
+setup_seed(20)
 rf_sort_list = ['SizeOfPlaqueLong', 'SizeOfPlaqueShort', 'DegreeOfCASWtihDiameter', 'Age', 'PSVOfCCA', 'PSVOfICA', 'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA', 'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
 # 写入配置
 args = parse_args(sys.argv[1:])
@@ -316,12 +318,12 @@ LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
 MOMENTUM = args.momentum
 # model = get_model(args.net, args.pretrained).to(DEVICE)
-model = torch.nn.DataParallel(get_model(args.net, args.pretrained), device_ids=[0, 1]).cuda()
+if args.ifDataParallel:
+    model = torch.nn.DataParallel(get_model(args.net, args.pretrained), device_ids=[0, 1]).cuda()
+else:
+    model = get_model(args.net, args.pretrained).to(DEVICE)
 criterion = get_criterion(args.criterion).to(DEVICE)
-# criterionUS = get_criterionUS(args.criterionUS)
-# multi_loss = MultiLossLayer(2)
-# multi_loss.to(DEVICE)
-# optimizer = get_optimizer(args.optim, multi_loss)
+
 optimizer = get_optimizer(args.optim)
 data_root = args.s_data_root.strip()
 NUM_CLASSES = 4

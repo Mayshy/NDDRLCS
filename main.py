@@ -1,19 +1,15 @@
 from sklearn.metrics import roc_curve, auc,precision_recall_curve, average_precision_score,r2_score,mean_squared_error,mean_absolute_error
-from torchnet import meter 
-from torchvision import transforms, utils
-from torchsummary import summary
+from torchnet import meter
 from torch.utils.tensorboard import SummaryWriter
 import torch
-import torch.cuda as cuda
 import torch.nn as nn
 from torch import optim 
 from torch.utils import data 
 import sys
-import os
 import logging
 import argparse
 import datetime
-import MTLModel
+from Model import MTLModel
 import MTLDataset
 import MTLLoss
 import numpy as np

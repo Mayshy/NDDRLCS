@@ -82,7 +82,7 @@ class _DenseLayer(nn.Module):
                                      training=self.training)
         return new_features
 
-# 
+
 class _DenseBlock(nn.Module):
     _version = 2
     __constants__ = ['layers']
@@ -154,6 +154,8 @@ def _load_state_dict(model, model_url, progress):
 
 class NddrDenseNet(nn.Module):
     __constants__ = ['features']
+    modes = ['NddrPure', 'NddrLSC', 'NddrLS', 'NddrCross3', 'NddrCross5', 'NddrCross35',
+             'SingleTasks', 'MultiTasks', 'SIDCCross3', 'SIDCCross34', 'SIDCCross345', 'SIDCCross35', 'SIDCPure']
     def __init__(self, growth_rate=48, block_config=(6, 12, 36, 24),
                  num_init_features=96, bn_size=4, drop_rate=0, num_classes=4, length_aux = 10 , mode = None, nddr_drop_rate = 0, memory_efficient=True):
 
@@ -393,9 +395,6 @@ class NddrDenseNet(nn.Module):
             sluice0_aux = F.adaptive_avg_pool2d(sluice0_aux, (1, 1))
             sluice0_aux = torch.flatten(sluice0_aux, 1)
             sluice0_aux = self.sluice0_aux_reshape(sluice0_aux)
-            #TODO
-            # while β parameters control which layer outputs are used for prediction.
-
 
             transition0, transition0_aux = self.nddr0(transition0, transition0_aux)
 
@@ -560,10 +559,6 @@ class NddrDenseNet(nn.Module):
             out_aux = self.f_classifier_aux(out_aux)
 
             return out, out_aux
-        
-        
-        
-            # done
         elif (self.mode == 'NddrCross3'):
             features = self.features(x)
             features_aux = self.features_aux(x)
@@ -1088,5 +1083,3 @@ class NddrLayer(nn.Module):
         net0 = self.nddr_bn_task0(net0)
         net1 = self.nddr_bn_task1(net1)
         return net0, net1
-
-        

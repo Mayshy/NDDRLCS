@@ -114,7 +114,7 @@ def get_average_metrics(batch_output, batch_target, metrics_type, test = False):
         metrics[key] /= size
     return metrics
 
-def get_sum_metrics(batch_output, batch_target, metrics_type, test = False):
+def get_sum_metrics(batch_output, batch_target, metrics_type, test = False, printDice=False):
 
     if torch.is_tensor(batch_output):
         batch_output = batch_output.data.cpu().numpy()
@@ -125,6 +125,7 @@ def get_sum_metrics(batch_output, batch_target, metrics_type, test = False):
     spacing = (1, 1)
     size = batch_output.shape[0]
     metrics = dict.fromkeys(metrics_type, 0)
+    dices = []
     for i in range(size):
         output = batch_output[i, 0]
         target = batch_target[i, 0]
@@ -218,6 +219,10 @@ def get_sum_metrics(batch_output, batch_target, metrics_type, test = False):
         metrics["stdsd"] += np.std(all_surface_distances)
         metrics["hd95"] += np.percentile(all_surface_distances, 95)
         metrics["hd"] += np.max(all_surface_distances)
+        if printDice:
+            dices.append(dice)
+    if printDice:
+        return metrics, dices
     return metrics
 
 def one_hot(labels: torch.Tensor,
