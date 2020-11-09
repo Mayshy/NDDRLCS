@@ -10,15 +10,13 @@ from collections import OrderedDict
 import torch
 from torch import nn
 from torch.nn import functional as F
+import math
 import torch.hub as hub
 from typing import Dict
 from torchvision.models import resnet, densenet, vgg, inception
-from Model.Backbone import DenseNet_BB
-from Model.Classifier import DeepLabHead, FCNHead
-from Model._utils import IntermediateLayerGetter
-
-
-
+from Model.Backbone import DenseNet_BB, TwoInput_NDDRLSC_BB
+from Model.Classifier import DeepLabV3Head, FCNHead
+from Model._utils import IntermediateLayerGetter, get_criterion
 
 
 class SimpleSegmentationModel(nn.Module):
@@ -28,6 +26,20 @@ class SimpleSegmentationModel(nn.Module):
         self.classifier = classifier
         self.aux_classifier = aux_classifier
 
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                # nn.init.xavier_normal_(m.weight)
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                stdv = 1./ math.sqrt(m.weight.size(1))
+                nn.init.uniform_(m.weight,-stdv,stdv)
+                # nn.init.normal_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
     def forward(self, x):
         input_shape = x.shape[-2:]
         # contract: features is a dict of tensors
@@ -47,75 +59,35 @@ class SimpleSegmentationModel(nn.Module):
 
         return result
 
-
-
-
-# ------------------------------------- Temp Useless --------------------
-model_urls = {
-    'fcn_resnet50_coco': 'https://download.pytorch.org/models/fcn_resnet50_coco-1167a1af.pth',
-    'fcn_resnet101_coco': 'https://download.pytorch.org/models/fcn_resnet101_coco-7ecb50ca.pth',
-    'deeplabv3_resnet50_coco': 'https://download.pytorch.org/models/deeplabv3_resnet50_coco-cd0a2569.pth',
-    'deeplabv3_resnet101_coco': 'https://download.pytorch.org/models/deeplabv3_resnet101_coco-586e9e4e.pth',
-}
-
-
-def _segm_resnet(name, backbone_name, num_classes, aux, pretrained_backbone=True):
-    backbone = resnet.__dict__[backbone_name](
-        pretrained=pretrained_backbone,
-        replace_stride_with_dilation=[False, True, True])
-
-    return_layers = {'layer4': 'out'}
-    if aux:
-        return_layers['layer3'] = 'aux'
-    backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
-
-    aux_classifier = None
-    if aux:
-        inplanes = 1024
-        aux_classifier = FCNHead(inplanes, num_classes)
-
-    model_map = {
-        'deeplabv3': (DeepLabHead, DeepLabV3),
-        'fcn': (FCNHead, FCN),
-    }
-    inplanes = 2048
-    classifier = model_map[name][0](inplanes, num_classes)
-    base_model = model_map[name][1]
-
-    model = base_model(backbone, classifier, aux_classifier)
-    return model
-
-
-
-def fcn_resnet50(pretrained=False, progress=True,
-                 num_classes=21, aux_loss=None, **kwargs):
-    """Constructs a Fully-Convolutional Network model with a ResNet-50 backbone.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on COCO train2017 which
-            contains the same classes as Pascal VOC
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    return _load_model('fcn', 'resnet50', pretrained, progress, num_classes, aux_loss, **kwargs)
-
-class _SimpleSegmentationModel(nn.Module):
-    __constants__ = ['aux_classifier']
-
+class TwoInputSegmentationModel(nn.Module):
     def __init__(self, backbone, classifier, aux_classifier=None):
-        super(_SimpleSegmentationModel, self).__init__()
+        super(TwoInputSegmentationModel, self).__init__()
         self.backbone = backbone
         self.classifier = classifier
         self.aux_classifier = aux_classifier
 
-    def forward(self, x):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.xavier_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                stdv = 1./ math.sqrt(m.weight.size(1))
+                nn.init.uniform_(m.weight,-stdv,stdv)
+                # nn.init.normal_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+    def forward(self, x, y):
         input_shape = x.shape[-2:]
         # contract: features is a dict of tensors
-        features = self.backbone(x)
+        features = self.backbone(x, y)
 
         result = OrderedDict()
-        x = features["out"]
-        x = self.classifier(x)
+        x = self.classifier(features)
         x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
         result["out"] = x
+
         if self.aux_classifier is not None:
             x = features["aux"]
             x = self.aux_classifier(x)
@@ -124,79 +96,14 @@ class _SimpleSegmentationModel(nn.Module):
 
         return result
 
-class FCN(_SimpleSegmentationModel):
-    """
-    Implements a Fully-Convolutional Network for semantic segmentation.
-    Arguments:
-        backbone (nn.Module): the network used to compute the features for the model.
-            The backbone should return an OrderedDict[Tensor], with the key being
-            "out" for the last feature map used, and "aux" if an auxiliary classifier
-            is used.
-        classifier (nn.Module): module that takes the "out" element returned from
-            the backbone and returns a dense prediction.
-        aux_classifier (nn.Module, optional): auxiliary classifier used during training
-    """
-    pass
 
 
 
 
-class DeepLabV3(_SimpleSegmentationModel):
-    """
-    Implements DeepLabV3 model from
-    `"Rethinking Atrous Convolution for Semantic Image Segmentation"
-    <https://arxiv.org/abs/1706.05587>`_.
-    Arguments:
-        backbone (nn.Module): the network used to compute the features for the model.
-            The backbone should return an OrderedDict[Tensor], with the key being
-            "out" for the last feature map used, and "aux" if an auxiliary classifier
-            is used.
-        classifier (nn.Module): module that takes the "out" element returned from
-            the backbone and returns a dense prediction.
-        aux_classifier (nn.Module, optional): auxiliary classifier used during training
-    """
-    pass
 
-# 整合backbone与model
-def _segm_backbone(name, backbone_name, num_classes, aux, pretrained_backbone=True):
-    backbone = resnet.__dict__[backbone_name](
-        pretrained=pretrained_backbone,
-        replace_stride_with_dilation=[False, True, True])
 
-    return_layers = {'layer4': 'out'}
-    if aux:
-        return_layers['layer3'] = 'aux'
-    backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
 
-    aux_classifier = None
-    if aux:
-        inplanes = 1024
-        aux_classifier = FCNHead(inplanes, num_classes)
 
-    model_map = {
-        'deeplabv3': (DeepLabHead, DeepLabV3),
-        'fcn': (FCNHead, FCN),
-    }
-    inplanes = 2048
-    classifier = model_map[name][0](inplanes, num_classes)
-    base_model = model_map[name][1]
-
-    model = base_model(backbone, classifier, aux_classifier)
-    return model
-
-def _load_model(arch_type, backbone, pretrained, progress, num_classes, aux_loss, **kwargs):
-    if pretrained:
-        aux_loss = True
-    model = _segm_resnet(arch_type, backbone, num_classes, aux_loss, **kwargs)
-    if pretrained:
-        arch = arch_type + '_' + backbone + '_coco'
-        model_url = model_urls[arch]
-        if model_url is None:
-            raise NotImplementedError('pretrained {} is not supported as of now'.format(arch))
-        else:
-            state_dict = hub.load_state_dict_from_url(model_url, progress=progress)
-            model.load_state_dict(state_dict)
-    return model
 
 
 def testModel(model):
@@ -204,12 +111,54 @@ def testModel(model):
     out = model(input)
     print(out['out'].shape)
     print(out)
-if __name__ == '__main__':
-    backbone = DenseNet_BB(3)
-    classifier = DeepLabHead(backbone.out_channels, 1)
-    model = SimpleSegmentationModel(backbone, classifier)
-    testModel(model)
 
+def test2IModel(model):
+    input0 = torch.rand((4, 3, 224, 224))
+    input1 = torch.rand((4, 3, 224, 224))
+    out = model(input0, input1)
+    print(out['out'].shape)
+    print(out)
+
+def testBackward(model):
+    label = torch.rand((4, 1, 224, 224))
+    input = torch.rand((4, 5, 224, 224))
+    testEpoch = 3
+    for epoch in range(testEpoch):
+
+        output = model(input)
+        output = nn.Sigmoid()(output)
+        print(output.shape)
+        criterion = get_criterion('BCELoss')
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=5e-4, eps=1e-8)
+        loss = criterion(output, label)
+        print(loss.item())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+def test2IBackward(model):
+    label = torch.rand((4, 1, 224, 224))
+    input0 = torch.rand((4, 3, 224, 224))
+    input1 = torch.rand((4, 1, 224, 224))
+    testEpoch = 3
+    for epoch in range(testEpoch):
+
+        output = model(input0, input1)['out']
+        output = nn.Sigmoid()(output)
+        print(output.shape)
+        criterion = get_criterion('BCELoss')
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=5e-4, eps=1e-8)
+        loss = criterion(output, label)
+        print(loss.item())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+if __name__ == '__main__':
+    backbone = TwoInput_NDDRLSC_BB(3, 1)
+    classifier = DeepLabV3Head(backbone.out_channels, 1)
+    model = TwoInputSegmentationModel(backbone, classifier)
+    # test2IModel(model)
+    test2IBackward(model)
 
 
 # 原始torchvision给出 backbone-classfier模型：backbone 将input(c, h, w) 变为 （2048， h/8, w/8)， 二分类为(1, h/8, w/8), 最后再插值回去。

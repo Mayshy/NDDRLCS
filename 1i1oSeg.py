@@ -22,6 +22,9 @@ import metrics
 import random
 import collections
 
+from Model.InputLevelFusion import ILFFCNResNet101
+from Model._utils import get_criterion
+
 """
 单输入单输出分割
 
@@ -79,26 +82,7 @@ def get_model(model_name, pretrained = False):
 
 
 # 配置分类损失函数
-def get_criterion(criterion):
-    criterion = criterion.strip()
-    if criterion == "TheCrossEntropy":
-        return MTLLoss.TheCrossEntropy()
-    if criterion == "BCELoss":
-        return nn.BCELoss()
-    if criterion == "SSLoss":
-        return
-    if criterion == "DiceLoss":
-        return MTLLoss.DiceLoss()
-    if criterion == "IOULoss":
-        return MTLLoss.mIoULoss()
-    if criterion == "GDL":
-        return MTLLoss.GDL()
-    if criterion == "TverskyLoss":
-        return
-    # if criterion == "Hausdorff":
-    #     return MTLLoss.GeomLoss(loss="hausdorff")
-    if criterion == "HDLoss":
-        return MTLLoss.HDLoss()
+
 
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
@@ -118,6 +102,37 @@ def get_optimizer(optimizer):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay = WEIGHT_DECAY)
     if (optimizer == 'AmsgradW'):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
+
+def get_dataloader(dataset_type):
+    assert dataset_type == 'train' or 'test'
+    if dataset_type == 'train':
+        if args.intersection == 1:
+            train_dataset = MTLDataset.SegDataset(
+                str(data_root) + 'TRAIN/', args.seg_root, fluid_root=args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+                screener=rf_sort_list, screen_num=10)
+            print(len(train_dataset))
+        else:
+            train_dataset = MTLDataset.SegDataset(
+                str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+                screener=rf_sort_list, screen_num=10)
+            print(len(train_dataset))
+        return data.DataLoader(
+            train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    else:
+        if args.intersection == 1:
+            test_dataset = MTLDataset.SegDataset(
+                str(data_root) + 'TEST/', args.seg_root, fluid_root=args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+                screener=rf_sort_list, screen_num=10)
+        else:
+            test_dataset = MTLDataset.SegDataset(
+                str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+                screener=rf_sort_list, screen_num=10)
+            return data.DataLoader(
+                test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+
+
+
 
 
 
@@ -159,9 +174,13 @@ def parse_args(argv):
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='DiceLoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
-    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFullResize')
+    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropWithoutMannualResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
                         default='../BlurBinaryLabel/')
+    parser.add_argument("--fluid_root", type=str, help="fluid data root",
+                        default='../flowImage/')
+    parser.add_argument("--intersection", type=int, help="if use the intersection of fluid_root",
+                        default=0)
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
     parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
@@ -184,15 +203,12 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
+
 # 训练
 def train(epoch):
 
     # 设置数据集
-    train_dataset = MTLDataset.SegDataset(
-        str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
-        screener=rf_sort_list, screen_num=10)
-    train_dataloader = data.DataLoader(
-        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    train_dataloader = get_dataloader('train')
 
     logging.info("Epoch " + str(epoch))
     train_loss_list = []
@@ -214,8 +230,8 @@ def train(epoch):
                                                                                                     US_label, label4,
                                                                                                     args.alpha)
         # 执行模型，得到输出
-        # out = model(img)['out']
-        out = model(img)
+        out = model(img)['out']
+        # out = model(img)
         out = nn.Sigmoid()(out)
         # out = F.interpolate(out, size= , mode='bilinear')
 
@@ -238,12 +254,7 @@ def test(epoch):
     test_loss_list = []
     dice2_list = []
     # 设置数据集
-    test_dataset = MTLDataset.SegDataset(
-        str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
-        screener=rf_sort_list,
-        screen_num=10)
-    test_dataloader = data.DataLoader(
-        test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    test_dataloader = get_dataloader('test')
     model.eval()
     epoch_quality = {}
     batch_num = 0
@@ -261,7 +272,7 @@ def test(epoch):
             label4 = label4.to(DEVICE)
 
             # 输出
-            output = model(img)
+            output = model(img)['out']
             output = nn.Sigmoid()(output)
 
             # seg_label 标签
@@ -293,7 +304,7 @@ def test(epoch):
     test_loss_mean = log_mean(test_loss_list, "test loss", isLog= True)
     dice2_mean = log_mean(dice2_list, "dice2", isLog= True)
     for k in epoch_quality:
-        epoch_quality[k] /= len(test_dataset)
+        epoch_quality[k] /= len(test_dataloader)
     logging.info("Epoch {0} MEAN {1}".format(epoch, epoch_quality))
 
     for k in epoch_quality:

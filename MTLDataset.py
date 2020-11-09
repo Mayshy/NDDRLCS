@@ -27,6 +27,12 @@ transformer = {'Train':transforms.Compose([
     transforms.ToTensor(), 
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ]),
+'BinaryFluid':transforms.Compose([
+    transforms.Resize((336,336)),
+    transforms.Grayscale(3),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+]),
 'SegTrain':transforms.Compose([
     transforms.Resize((336,336)),
     transforms.Grayscale(1)
@@ -158,7 +164,7 @@ class MTLDataset(data.Dataset):
 class SegDataset(data.Dataset):
     # auxiliary: optional propertiy: 'US','MIX'
     # filter: input can be any 1D list object, or specified methods ---- 'rf_importance' 
-    def __init__(self,img_root,seg_label_root,fluid_root = None, my_transformer = transformer,ref_data_root = '../ResearchData/data_ultrasound_-1.csv',num_classes = 4,auxiliary = 'US',us_path=None,mix_path=None,screener='rf_importance',screen_num = 10, train_or_test = 'Test'): #TODO
+    def __init__(self,img_root,seg_label_root,fluid_root=None, my_transformer = transformer,ref_data_root = '../ResearchData/data_ultrasound_-1.csv',num_classes = 4,auxiliary = 'US',us_path=None,mix_path=None,screener='rf_importance',screen_num = 10, train_or_test = 'Test'): #TODO
         self.transformer = my_transformer
         self.datatype = auxiliary
         self.num_classes = num_classes
@@ -262,13 +268,14 @@ class SegDataset(data.Dataset):
 class FluidSegDataset(data.Dataset):
     # auxiliary: optional propertiy: 'US','MIX'
     # filter: input can be any 1D list object, or specified methods ---- 'rf_importance'
-    def __init__(self, img_root, seg_label_root, fluid_root, my_transformer=transformer,
+    def __init__(self, img_root, seg_label_root, fluid_root, binary_fluid=False, my_transformer=transformer,
                  ref_data_root='../ResearchData/data_ultrasound_-1.csv', num_classes=4, auxiliary='US', us_path=None,
                  mix_path=None, screener='rf_importance', screen_num=10, train_or_test='Test'):
         self.transformer = my_transformer
         self.datatype = auxiliary
         self.num_classes = num_classes
         self.train_or_test = train_or_test
+        self.binary_fluid = binary_fluid
         if (auxiliary == 'US' and us_path):
             # logging.debug('US Dataset has prepared to init.')
             data = pd.read_csv(us_path, index_col=-1)
@@ -318,7 +325,9 @@ class FluidSegDataset(data.Dataset):
             elif (self.train_or_test == 'Test'):
                 img = self.transformer['All'](pil_img)
         with Image.open(self.fluid_img_list[index]) as f_img:
-            if (self.train_or_test == 'Train'):
+            if self.binary_fluid:
+                fluid_img = self.transformer['BinaryFluid'](f_img)
+            elif (self.train_or_test == 'Train'):
                 fluid_img = self.transformer['All'](self.transformer['Train'](f_img))
             elif (self.train_or_test == 'Test'):
                 fluid_img = self.transformer['All'](f_img)
@@ -450,7 +459,7 @@ def moduleTest():
                     'DiameterOfCCA', 'DiameterOfICA', 'EDVOfICA', 'EDVOfCCA', 'RIOfCCA', 'RIOfICA', 'IMT', 'IMTOfICA',
                     'IMTOfCCA', 'Positio0fPlaque', 'Sex', 'IfAnabrosis', 'X0Or0']
     train_dataset = SegDataset(
-        str(data_root) + '/', seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+        str(data_root) + 'TEST/', seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
     screener=rf_sort_list,
     screen_num=10)
     print(len(train_dataset))

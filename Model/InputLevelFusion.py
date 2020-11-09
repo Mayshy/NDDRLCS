@@ -13,9 +13,9 @@ import math
 
 
 
-class FCNResNet101(nn.Module):
+class ILFFCNResNet101(nn.Module):
     def __init__(self, in_channels, n_classes, pretrained=False):
-        super(FCNResNet101, self).__init__()
+        super(ILFFCNResNet101, self).__init__()
         self.base_model = torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=n_classes,
                                                      aux_loss=None)
         self.base_model.backbone.conv1 = nn.Conv2d(in_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
@@ -145,7 +145,7 @@ class ILFModel(nn.Module):
 
 
 if __name__ == '__main__':
-    model = FCNResNet101(in_channels=5, n_classes=1)
+    model = ILFFCNResNet101(in_channels=5, n_classes=1)
     input1 = torch.rand((16,3,224,224))
     input2 = torch.rand((16, 2, 224, 224))
     print(model(input1, input2))

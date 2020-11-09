@@ -5,10 +5,66 @@ from collections import OrderedDict
 import torch.nn as nn
 from resnest.torch import resnest50, resnest101, resnest200, resnest269
 import torch.nn.functional as F
+from torchvision.models.inception import BasicConv2d
+
 from Model.MTLModel import NddrDenseNet, apply_cross, NddrLayer, _DenseBlock, _Transition
 from Model._utils import IntermediateLayerGetter
 from torchvision import models
 import torch
+
+
+class Inception_BB(nn.Module):
+    version_set = ['inception_v3']
+
+    def __init__(self, in_channels, pretrained=False, version='inception_v3'):
+        super(Inception_BB, self).__init__()
+        version = version.strip()
+        if version == 'inception_v3':
+            inception = models.inception_v3(pretrained, init_weights=True)
+        else:
+            raise NotImplementedError('version {} is not supported as of now'.format(version))
+        print(inception)
+
+        inception.Conv2d_1a_3x3 = BasicConv2d(in_channels, 32, kernel_size=3, stride=2)
+        return_layers = {'Mixed_7c': 'out'}
+        self.backbone = IntermediateLayerGetter(inception, return_layers)
+        self.out_channels = 2048
+
+    def forward(self, x):
+        return self.backbone(x)
+
+class VGG_BB(nn.Module):
+    version_set = ['vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn', 'vgg19_bn', 'vgg19']
+
+    def __init__(self, in_channels, pretrained=False, version='vgg19_bn'):
+        super(VGG_BB, self).__init__()
+        version = version.strip()
+        if version == 'vgg11':
+            vgg = models.vgg11(pretrained)
+        elif version == 'vgg11_bn':
+            vgg = models.vgg11_bn(pretrained)
+        elif version == 'vgg13':
+            vgg = models.vgg13(pretrained)
+        elif version == 'vgg13_bn':
+            vgg = models.vgg13_bn(pretrained)
+        elif version == 'vgg16':
+            vgg = models.vgg16(pretrained)
+        elif version == 'vgg16_bn':
+            vgg = models.vgg16_bn(pretrained)
+        elif version == 'vgg19_bn':
+            vgg = models.vgg19_bn(pretrained)
+        elif version == 'vgg19':
+            vgg = models.vgg19(pretrained)
+        else:
+            raise NotImplementedError('version {} is not supported as of now'.format(version))
+        print(vgg)
+        vgg.features[0] = nn.Conv2d(in_channels, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        return_layers = {'features': 'out'}
+        self.backbone = IntermediateLayerGetter(vgg, return_layers)
+        self.out_channels = 512
+
+    def forward(self, x):
+        return self.backbone(x)
 
 
 class ResNet_BB(nn.Module):
@@ -58,9 +114,19 @@ class ResNet_BB(nn.Module):
         return self.backbone(x)
 
 class DenseNet_BB(nn.Module):
-    def __init__(self, in_channels, pretrained=False):
+    version_set = ['densenet121', 'densenet169', 'densenet201', 'densenet161']
+    def __init__(self, in_channels, pretrained=False, version='densenet161'):
         super(DenseNet_BB, self).__init__()
-        denseNet = models.densenet161(pretrained=pretrained)
+        if version == 'densenet161':
+            denseNet = models.densenet161(pretrained=pretrained)
+        elif version == 'densenet121':
+            denseNet = models.densenet121(pretrained=pretrained)
+        elif version == 'densenet169':
+            denseNet = models.densenet169(pretrained=pretrained)
+        elif version == 'densenet161':
+            denseNet = models.densenet161(pretrained=pretrained)
+        else:
+            raise NotImplementedError('version {} is not supported as of now'.format(version))
         denseNet.features.conv0 = nn.Conv2d(in_channels, 96, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         return_layers = {'denseblock4': 'out'}
         self.backbone = IntermediateLayerGetter(denseNet.features, return_layers)
@@ -70,10 +136,11 @@ class DenseNet_BB(nn.Module):
         return self.backbone(x)
 
 class TwoInput_NDDRLSC_BB(nn.Module):
-    modes = ['NddrPure', 'NddrLSC', 'NddrLS', 'NddrCross3', 'NddrCross5', 'NddrCross35',
+    model_modes = ['NddrPure', 'NddrLSC', 'NddrLS', 'NddrCross3', 'NddrCross5', 'NddrCross35',
              'SingleTasks', 'MultiTasks', 'SIDCCross3', 'SIDCCross34', 'SIDCCross345', 'SIDCCross35', 'SIDCPure']
-    def __init__(self, in_channels, growth_rate=48, block_config=(6, 12, 36, 24),
-                 num_init_features=96, bn_size=4, drop_rate=0, num_classes=4, length_aux = 10 , mode = None, nddr_drop_rate = 0, memory_efficient=True):
+    modes = {'LayersLearningMixutres', 'EasyCat', 'WeightCat', 'LayersWeightCat', 'WeightMixtures'}
+    def __init__(self, in_channels, in_aux_channels, growth_rate=48, block_config=(6, 12, 36, 24),
+                 num_init_features=96, bn_size=4, drop_rate=0, num_classes=4, length_aux = 10 , mode='WeightMixtures', nddr_drop_rate = 0, memory_efficient=True):
         super(TwoInput_NDDRLSC_BB, self).__init__()
         self.features = nn.Sequential(OrderedDict([
             ('conv0', nn.Conv2d(in_channels, num_init_features, kernel_size=7, stride=2,
@@ -84,7 +151,7 @@ class TwoInput_NDDRLSC_BB(nn.Module):
         ]))
 
         self.features_aux = nn.Sequential(OrderedDict([
-            ('conv0_aux', nn.Conv2d(in_channels, num_init_features, kernel_size=7, stride=2,
+            ('conv0_aux', nn.Conv2d(in_aux_channels, num_init_features, kernel_size=7, stride=2,
                                     padding=3, bias=False)),
             ('norm0_aux', nn.BatchNorm2d(num_init_features)),
             ('relu0_aux', nn.ReLU(inplace=True)),
@@ -172,8 +239,8 @@ class TwoInput_NDDRLSC_BB(nn.Module):
         self.betas_2layer = nn.Parameter(torch.tensor([0.7, 0.3]))
         self.betas_8layer = nn.Parameter(torch.tensor([0.05, 0.05, 0.1, 0.1, 0.15, 0.15, 0.2, 0.2]))
 
-        self.sigmoid = nn.Sigmoid()
         self.mode = mode
+        self.out_channels = 2208
 
     def forward(self, x, y):
         features = self.features(x)
@@ -273,20 +340,18 @@ class TwoInput_NDDRLSC_BB(nn.Module):
             out = torch.cat((out_0, out_1, out_2, out_3, out_4, out_5, out_6, out_7), dim=1)
             return out
 
-        # cat or 加权cat or 加权求和 or 多层次加权求和
-        # 默认加权求和
-        out = torch.mul(transition3, self.betas_2layer[0]) + torch.mul(transition3_aux, self.betas_2layer[1])
+        if self.mode == 'WeightMixtures':
+            out = torch.mul(transition3, self.betas_2layer[0]) + torch.mul(transition3_aux, self.betas_2layer[1])
 
-        return out
+            return out
 
 
 def testModel(model):
     theModel = model(6)
-    input = torch.rand((4, 3, 224, 224))
+    input = torch.rand((4, 6, 448, 448))
     out = theModel(input)
     print(out)
-    print(out[0].shape)
-    print(out[1].shape)
+    print(out['out'].shape)
 
 def test2IModel(model):
     theModel = model(3, mode = 'LayersWeightCat')
@@ -298,4 +363,5 @@ def test2IModel(model):
 
 # 原始torchvision给出 backbone-classfier模型：backbone 将input(c, h, w) 变为 （2048， h/8, w/8)， 二分类为(1, h/8, w/8), 最后再插值回去。
 if __name__ == '__main__':
-    test2IModel(TwoInput_NDDRLSC_BB)
+    testModel(Inception_BB)
+    # test2IModel(TwoInput_NDDRLSC_BB)

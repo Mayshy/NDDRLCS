@@ -23,6 +23,8 @@ import metrics
 import random
 import collections
 
+from Model._utils import get_criterion
+
 """
 双输入单输出分割，结合力学影响数据
 
@@ -59,7 +61,7 @@ def get_model(model_name, pretrained = False):
         #     return torchvision.models.segmentation.fcn_resnet50(pretrained=pretrained, progress=False, num_classes=1,
         #                                                         aux_loss=None)
     if model_name == 'FCN_ResNet101':
-        return InputLevelFusion.FCNResNet101(in_channels=6, n_classes=1)
+        return InputLevelFusion.ILFFCNResNet101(in_channels=6, n_classes=1)
     if model_name == 'DLV3__ResNet50':
         return InputLevelFusion.ILFDLV3ResNet50(in_channels=6, n_classes=1)
     if model_name == 'DLV3__ResNet101':
@@ -91,27 +93,6 @@ def get_model(model_name, pretrained = False):
     #                        pretrained=False).cuda()
 
 
-# 配置分类损失函数
-def get_criterion(criterion):
-    criterion = criterion.strip()
-    if criterion == "TheCrossEntropy":
-        return MTLLoss.TheCrossEntropy()
-    if criterion == "BCELoss":
-        return nn.BCELoss()
-    # if criterion == "SSLoss":
-    #     return
-    if criterion == "DiceLoss":
-        return MTLLoss.DiceLoss()
-    if criterion == "IOULoss":
-        return MTLLoss.mIoULoss()
-    if criterion == "GDL":
-        return MTLLoss.GDL()
-    if criterion == "TverskyLoss":
-        return
-    # if criterion == "Hausdorff":
-    #     return MTLLoss.GeomLoss(loss="hausdorff")
-    if criterion == "HDLoss":
-        return MTLLoss.HDLoss()
 
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
@@ -121,7 +102,7 @@ def get_criterionUS(criterionUS):
 def get_optimizer(optimizer):
     if (optimizer == 'Adam'):
         # return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
-        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE, eps=1e-8, weight_decay=WEIGHT_DECAY, amsgrad=True)
+        return optim.Adam(params=model.parameters(), lr=LEARNING_RATE, eps=1e-8, weight_decay=WEIGHT_DECAY)
     if (optimizer == 'Amsgrad'):
         # return optim.Adam([{'params':model.parameters()},{'params':multi_loss.parameters()}],lr=LEARNING_RATE)
         return optim.Adam(params=model.parameters(), lr=LEARNING_RATE, eps=1e-8, weight_decay=WEIGHT_DECAY, amsgrad=True)
@@ -134,7 +115,7 @@ def get_optimizer(optimizer):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     if (optimizer == 'AmsgradW'):
         return optim.AdamW(params=model.parameters(), lr=LEARNING_RATE,weight_decay = WEIGHT_DECAY, amsgrad=True)
-            
+
 # mixup 数据增强器，帮助提升小数据集下训练与测试的稳定性
 def mixup_data(x, y0, y1, y2, alpha=1.0):
     if alpha > 0:
@@ -188,11 +169,13 @@ def parse_args(argv):
     parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
     parser.add_argument("--criterion", type=str, help="criterion", default='BCELoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
-    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropFullResize')
+    parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropWithoutMannualResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
                         default='../BlurBinaryLabel/')
     parser.add_argument("--fluid_root", type=str, help="fluid data root",
                         default='../flowImage/')  # or '../BinaryFlowImage/'
+    parser.add_argument("--binary_fluid", type=int, help="fluid data root",
+                        default=0)  # or '../BinaryFlowImage/'
     parser.add_argument("--logging_level", type=int, help="logging level", default=20)
     parser.add_argument("--log_file_name", type=str, help="logging file name", default=str(datetime.date.today())+'.log')
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
@@ -219,7 +202,7 @@ def train(epoch):
 
     # 设置数据集
     train_dataset = MTLDataset.FluidSegDataset(
-        str(data_root) + 'TRAIN/', args.seg_root, args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+        str(data_root) + 'TRAIN/', args.seg_root, args.fluid_root, binary_fluid=args.binary_fluid, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
         screener=rf_sort_list, screen_num=10)
     train_dataloader = data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -265,7 +248,7 @@ def test(epoch):
     dice2_list = []
     # 设置数据集
     test_dataset = MTLDataset.FluidSegDataset(
-        str(data_root) + 'TEST/', args.seg_root, args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
+        str(data_root) + 'TEST/', args.seg_root, args.fluid_root, binary_fluid=args.binary_fluid, us_path=us_path,  num_classes=NUM_CLASSES, train_or_test='Test',
         screener=rf_sort_list,
         screen_num=10)
     test_dataloader = data.DataLoader(
