@@ -11,9 +11,8 @@ import torch
 from torch import optim
 from torch import nn
 import torch.nn.functional as F
-import MTLLoss
+from Loss import MTLLoss
 from Model import UNet
-from MTLLoss import MultiLossLayer
 from torch.utils import data
 from torchvision import transforms
 import sys
@@ -22,7 +21,6 @@ import metrics
 import random
 import collections
 
-from Model.InputLevelFusion import ILFFCNResNet101
 from Model._utils import get_criterion
 
 """
@@ -110,25 +108,24 @@ def get_dataloader(dataset_type):
             train_dataset = MTLDataset.SegDataset(
                 str(data_root) + 'TRAIN/', args.seg_root, fluid_root=args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
                 screener=rf_sort_list, screen_num=10)
-            print(len(train_dataset))
         else:
             train_dataset = MTLDataset.SegDataset(
                 str(data_root) + 'TRAIN/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
                 screener=rf_sort_list, screen_num=10)
-            print(len(train_dataset))
         return data.DataLoader(
             train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     else:
         if args.intersection == 1:
             test_dataset = MTLDataset.SegDataset(
-                str(data_root) + 'TEST/', args.seg_root, fluid_root=args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
+                str(data_root) + 'TEST/', args.seg_root, fluid_root=args.fluid_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
                 screener=rf_sort_list, screen_num=10)
+
         else:
             test_dataset = MTLDataset.SegDataset(
                 str(data_root) + 'TEST/', args.seg_root, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Test',
                 screener=rf_sort_list, screen_num=10)
-            return data.DataLoader(
-                test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+        return data.DataLoader(
+            test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 
 
@@ -349,7 +346,7 @@ if not os.path.exists(log_path):
     os.makedirs(log_path)
 logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_file_name) ,
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
-logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
+logging.warning('Model: {}  Mode:{} LR:{} Loss:{} Data:{}'.format(args.net, args.mode, args.lr, args.criterion, args.s_data_root))
 
 all_quality = collections.defaultdict(list)
 last_train_loss = float('inf')

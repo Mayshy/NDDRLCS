@@ -4,16 +4,14 @@ import os
 import numpy as np
 import pandas as pd
 import MTLDataset
-import torchvision
 import logging
 import argparse
 import torch
 from torch import optim
 from torch import nn
-import MTLLoss
+from Loss import MTLLoss
 from Model import UNet
 from Model import InputLevelFusion
-from MTLLoss import MultiLossLayer
 from torch.utils import data
 from torchvision import transforms
 import torch.nn.functional as F
@@ -166,7 +164,7 @@ def parse_args(argv):
     parser.add_argument("--net", type=str, help="The Main Model", default='FCN_ResNet101')
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
-    parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
+    parser.add_argument("--optim", type=str, help="Optimizer", default='AdamW')
     parser.add_argument("--criterion", type=str, help="criterion", default='BCELoss')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropWithoutMannualResize')
@@ -181,8 +179,8 @@ def parse_args(argv):
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=0.0002)
-    parser.add_argument("--wd", type=float, help="weight decay", default=0.01)
+    parser.add_argument("--lr", type=float, help="learning rate", default=0.0005)
+    parser.add_argument("--wd", type=float, help="weight decay", default=0.3)
     parser.add_argument("--momentum", type=float, help="momentum", default=0.9)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
     parser.add_argument("--epoch", type=int, help="number of epoch", default=400)

@@ -11,9 +11,9 @@ import argparse
 import datetime
 from Model import MTLModel
 import MTLDataset
-import MTLLoss
+from Loss import MTLLoss
 import numpy as np
-from MTLLoss import MultiLossLayer
+from Loss.MTLLoss import MultiLossLayer
 
 
 

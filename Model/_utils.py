@@ -2,8 +2,7 @@ import torch.nn as nn
 from typing import Dict
 from collections import OrderedDict
 import torch
-import MTLLoss
-
+from Loss import MTLLoss
 
 
 def get_criterion(criterion):
@@ -22,7 +21,7 @@ def get_criterion(criterion):
         return MTLLoss.IouLoss()
     if criterion == "GDL":
         return MTLLoss.GDL()
-    if criterion == "TverskyLoss":
+    if criterion == "lovasz_softmax":
         return
     # if criterion == "Hausdorff":
     #     return MTLLoss.GeomLoss(loss="hausdorff")

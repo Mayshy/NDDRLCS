@@ -7,6 +7,9 @@ import geomloss
 import numpy as np
 from math import exp
 from scipy.ndimage import distance_transform_edt as distance
+
+from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax
+
 """
 语义分割常用损失函数
 https://blog.csdn.net/CaiDaoqing/article/details/90457197
@@ -399,6 +402,23 @@ class MSSSIM(torch.nn.Module):
         # TODO: store window between calls if possible,
         return msssim(img1, img2, window_size=self.window_size, size_average=self.size_average, normalize=True)
 
+
+class LovaszSoftmax(torch.nn.Module):
+    def __init__(self, per_image=False):
+        super(LovaszSoftmax, self).__init__()
+        self.per_image = per_image
+
+    def forward(self, outputs_soft, label_batch):
+        return lovasz_softmax(outputs_soft, label_batch, classes=[1], per_image=self.per_image)
+
+class LovaszHinge(torch.nn.Module):
+    def __init__(self, per_image=False):
+        super(LovaszHinge, self).__init__()
+        self.per_image = per_image
+
+    def forward(self, outputs_soft, label_batch):
+        return lovasz_hinge(outputs_soft, label_batch, per_image=self.per_image)
+
 def testLoss(model, Loss):
     input = torch.rand((4, 3, 224, 224))
     label = torch.rand((4, 1, 224, 224))
@@ -421,4 +441,6 @@ if __name__ == '__main__':
     # testLoss(model, HDLoss())  待有GPU时测试
     # testLoss(model, BoundaryLoss())
     # testLoss(model, nn.BCELoss())
-    testLoss(model, MSSSIM())
+    # loss = lovasz_hinge
+    loss = LovaszHinge()
+    testLoss(model, loss)
