@@ -5,17 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Loss/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Loss/lovasz_losses.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/DeepMadSeg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Loss/GeneralisedLoss.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Loss/elastic_loss.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Loss/fair_logloss.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/2i1oSeg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTLLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/MTLLoss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/UNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/UNet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Loss/MTLLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/MTLLoss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Loss/lovasz_losses.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/lovasz_losses.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seg.py" beforeDir="false" afterPath="$PROJECT_DIR$/seg.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,46 +22,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="87">
-              <caret line="129" lean-forward="true" selection-start-line="129" selection-end-line="129" />
-              <folding>
-                <element signature="e#48#60#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="21" selection-start-line="21" selection-end-line="26" selection-end-column="44" />
-              <folding>
-                <element signature="e#213#248#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="171" lean-forward="true" selection-start-line="171" selection-end-line="171" />
-              <folding>
-                <element signature="e#74#95#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MTLDataset.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="286" column="16" lean-forward="true" selection-start-line="286" selection-start-column="16" selection-end-line="286" selection-end-column="16" />
+            <state relative-caret-position="6006">
+              <caret line="286" column="16" selection-start-line="286" selection-start-column="16" selection-end-line="286" selection-end-column="16" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -76,10 +36,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Loss/lovasz_losses.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="371">
-              <caret line="288" column="23" selection-start-line="288" selection-start-column="11" selection-end-line="288" selection-end-column="23" />
+            <state relative-caret-position="159">
+              <caret line="260" selection-start-line="260" selection-end-line="291" selection-end-column="25" />
               <folding>
                 <element signature="e#109#156#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Loss/GeneralisedLoss.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="63">
+              <caret line="218" column="4" selection-start-line="218" selection-start-column="4" selection-end-line="219" selection-end-column="27" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -88,8 +60,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Loss/MTLLoss.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97">
-              <caret line="444" column="22" selection-start-line="444" selection-start-column="22" selection-end-line="444" selection-end-column="22" />
+            <state relative-caret-position="313">
+              <caret line="580" column="25" lean-forward="true" selection-start-line="580" selection-start-column="25" selection-end-line="580" selection-end-column="25" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -98,10 +70,28 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Loss/fair_logloss.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="110">
+              <caret line="5" column="35" lean-forward="true" selection-start-line="5" selection-start-column="35" selection-end-line="5" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/fft/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="506">
+              <caret line="32" column="46" lean-forward="true" selection-start-line="32" selection-start-column="46" selection-end-line="32" selection-end-column="46" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="197">
-              <caret line="182" column="77" lean-forward="true" selection-start-line="182" selection-start-column="77" selection-end-line="182" selection-end-column="77" />
+              <caret line="279" column="27" selection-start-line="279" selection-start-column="26" selection-end-line="279" selection-end-column="27" />
               <folding>
                 <element signature="e#34#43#0" expanded="true" />
               </folding>
@@ -112,8 +102,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
-              <caret line="156" lean-forward="true" selection-start-line="156" selection-end-line="156" />
+            <state relative-caret-position="2970">
+              <caret line="156" selection-start-line="156" selection-end-line="156" />
               <folding>
                 <element signature="e#34#43#0" expanded="true" />
               </folding>
@@ -124,8 +114,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="24" column="14" selection-start-line="24" selection-start-column="14" selection-end-line="24" selection-end-column="14" />
+            <state relative-caret-position="462">
+              <caret line="25" column="34" selection-start-line="25" selection-start-column="34" selection-end-line="25" selection-end-column="34" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -136,8 +126,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/FCDenseNet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1694">
-              <caret line="98" column="34" lean-forward="true" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
+            <state relative-caret-position="2090">
+              <caret line="98" column="34" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
               <folding>
                 <element signature="e#49#61#0" expanded="true" />
               </folding>
@@ -156,9 +146,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>model_urls</find>
-      <find>requ</find>
-      <find>label_nbr</find>
       <find>Unet_dict</find>
       <find>Sig</find>
       <find>elf.sigmoid = nn.Sigmoid()</find>
@@ -186,6 +173,9 @@
       <find>lovasz</find>
       <find>seed</find>
       <find>sigm</find>
+      <find>fft</find>
+      <find>cuda</find>
+      <find>&lt;</find>
     </findStrings>
     <replaceStrings>
       <replace>dice_index</replace>
@@ -229,7 +219,10 @@
         <option value="$PROJECT_DIR$/1i1oSeg.py" />
         <option value="$PROJECT_DIR$/Loss.py" />
         <option value="$PROJECT_DIR$/Model/_utils.py" />
+        <option value="$PROJECT_DIR$/Loss/fair_logloss.py" />
+        <option value="$PROJECT_DIR$/Loss/elastic_loss.py" />
         <option value="$PROJECT_DIR$/Loss/lovasz_losses.py" />
+        <option value="$PROJECT_DIR$/Loss/GeneralisedLoss.py" />
         <option value="$PROJECT_DIR$/Loss/MTLLoss.py" />
       </list>
     </option>
@@ -245,6 +238,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -266,7 +260,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -311,61 +304,17 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.MTLLoss">
-    <configuration name="2i1oSeg" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="GeneralisedLoss" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Loss" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/2i1oSeg.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DUC" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DUC.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DeepMadSeg" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DeepMadSeg.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Loss/GeneralisedLoss.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -415,10 +364,51 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="elastic_loss" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Loss" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Loss/elastic_loss.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fair_logloss" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Loss" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Loss/fair_logloss.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="lovasz_losses" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Loss" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -437,10 +427,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.MTLLoss" />
+        <item itemvalue="Python.GeneralisedLoss" />
+        <item itemvalue="Python.elastic_loss" />
+        <item itemvalue="Python.fair_logloss" />
         <item itemvalue="Python.lovasz_losses" />
-        <item itemvalue="Python.2i1oSeg" />
-        <item itemvalue="Python.DeepMadSeg" />
-        <item itemvalue="Python.DUC" />
       </list>
     </recent_temporary>
   </component>
@@ -514,7 +504,8 @@
       <workItem from="1604824150749" duration="15524000" />
       <workItem from="1604893485316" duration="13178000" />
       <workItem from="1604921818430" duration="13473000" />
-      <workItem from="1604984686609" duration="8651000" />
+      <workItem from="1604984686609" duration="9343000" />
+      <workItem from="1605014031403" duration="11049000" />
     </task>
     <task id="LOCAL-00001" summary="Train Split">
       <created>1602381633304</created>
@@ -541,13 +532,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="281506000" />
+    <option name="totallyTimeSpent" value="293247000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24818109" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25222313" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -561,16 +552,16 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.2652705" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.28795812" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.43106458" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.15881327" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" visible="true" weight="0.41535777" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.58987784" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32983023" />
-      <window_info anchor="right" id="SciView" order="4" weight="0.32983023" />
-      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="5" side_tool="true" weight="0.28779304" />
-      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="4" side_tool="true" weight="0.4898949" />
+      <window_info anchor="right" id="Database" order="5" />
+      <window_info anchor="right" id="SciView" order="6" weight="0.32983023" />
     </layout>
     <layout-to-restore>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.261924" />
@@ -652,24 +643,6 @@
     <SUITE FILE_PATH="coverage/NDDRLCS$MTLLoss.coverage" NAME="MTLLoss Coverage Results" MODIFIED="1604926887156" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Model/KiUNet.py" />
-    <entry file="file://$PROJECT_DIR$/Model/DilatedUNet.py" />
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/random.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#17#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/segmentation/segmentation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1298">
-          <caret line="63" selection-start-line="63" selection-end-line="63" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/activation.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2068">
@@ -958,10 +931,11 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Loss.py" />
     <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="87">
-          <caret line="129" lean-forward="true" selection-start-line="129" selection-end-line="129" />
+        <state relative-caret-position="2728">
+          <caret line="129" selection-start-line="129" selection-end-line="129" />
           <folding>
             <element signature="e#48#60#0" expanded="true" />
           </folding>
@@ -970,7 +944,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
+        <state relative-caret-position="242">
           <caret line="21" selection-start-line="21" selection-end-line="26" selection-end-column="44" />
           <folding>
             <element signature="e#213#248#0" expanded="true" />
@@ -978,22 +952,86 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3652">
+          <caret line="171" selection-start-line="171" selection-end-line="171" />
+          <folding>
+            <element signature="e#74#95#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6006">
+          <caret line="286" column="16" selection-start-line="286" selection-start-column="16" selection-end-line="286" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2970">
+          <caret line="156" selection-start-line="156" selection-end-line="156" />
+          <folding>
+            <element signature="e#34#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="25" column="34" selection-start-line="25" selection-start-column="34" selection-end-line="25" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Model/FCDenseNet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1694">
-          <caret line="98" column="34" lean-forward="true" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
+        <state relative-caret-position="2090">
+          <caret line="98" column="34" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
           <folding>
             <element signature="e#49#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
+    <entry file="file://$PROJECT_DIR$/Loss/fair_logloss.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="171" lean-forward="true" selection-start-line="171" selection-end-line="171" />
+        <state relative-caret-position="110">
+          <caret line="5" column="35" lean-forward="true" selection-start-line="5" selection-start-column="35" selection-end-line="5" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/fft/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="32" column="46" lean-forward="true" selection-start-line="32" selection-start-column="46" selection-end-line="32" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Loss/elastic_loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="122" lean-forward="true" selection-start-line="122" selection-end-line="122" />
           <folding>
-            <element signature="e#74#95#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Loss/lovasz_losses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="260" selection-start-line="260" selection-end-line="291" selection-end-column="25" />
+          <folding>
+            <element signature="e#109#156#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1001,60 +1039,27 @@
     <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="197">
-          <caret line="182" column="77" lean-forward="true" selection-start-line="182" selection-start-column="77" selection-end-line="182" selection-end-column="77" />
+          <caret line="279" column="27" selection-start-line="279" selection-start-column="26" selection-end-line="279" selection-end-column="27" />
           <folding>
             <element signature="e#34#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Loss.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
+    <entry file="file://$PROJECT_DIR$/Loss/GeneralisedLoss.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="286" column="16" lean-forward="true" selection-start-line="286" selection-start-column="16" selection-end-line="286" selection-end-column="16" />
+        <state relative-caret-position="63">
+          <caret line="218" column="4" selection-start-line="218" selection-start-column="4" selection-end-line="219" selection-end-column="27" />
           <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="24" column="14" selection-start-line="24" selection-start-column="14" selection-end-line="24" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="156" lean-forward="true" selection-start-line="156" selection-end-line="156" />
-          <folding>
-            <element signature="e#34#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Loss/lovasz_losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
-          <caret line="288" column="23" selection-start-line="288" selection-start-column="11" selection-end-line="288" selection-end-column="23" />
-          <folding>
-            <element signature="e#109#156#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Loss/MTLLoss.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="444" column="22" selection-start-line="444" selection-start-column="22" selection-end-line="444" selection-end-column="22" />
+        <state relative-caret-position="313">
+          <caret line="580" column="25" lean-forward="true" selection-start-line="580" selection-start-column="25" selection-end-line="580" selection-end-column="25" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>

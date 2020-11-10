@@ -8,7 +8,8 @@ import numpy as np
 from math import exp
 from scipy.ndimage import distance_transform_edt as distance
 
-from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax
+from Loss.GeneralisedLoss import GeneralizedWassersteinDiceLoss
+from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax, symmetric_lovasz
 
 """
 语义分割常用损失函数
@@ -419,19 +420,155 @@ class LovaszHinge(torch.nn.Module):
     def forward(self, outputs_soft, label_batch):
         return lovasz_hinge(outputs_soft, label_batch, per_image=self.per_image)
 
+
+class SymmetricLovasz(torch.nn.Module):
+    def __init__(self, per_image=False):
+        super(SymmetricLovasz, self).__init__()
+        self.per_image = per_image
+
+    def forward(self, outputs_soft, label_batch):
+        return symmetric_lovasz(outputs_soft, label_batch, per_image=self.per_image)
+
+
+# https://www.zhihu.com/question/272988870/answer/562262315
+# 在loss后面再加这个？
+def focal_loss(output, target, alpha, gamma, OHEM_percent):
+        output = output.contiguous().view(-1)
+        target = target.contiguous().view(-1)
+
+        max_val = (-output).clamp(min=0)
+        loss = output - output * target + max_val + ((-max_val).exp() + (-output - max_val).exp()).log()
+
+        # This formula gives us the log sigmoid of 1-p if y is 0 and of p if y is 1
+        invprobs = F.logsigmoid(-output * (target * 2 - 1))
+        focal_loss = alpha * (invprobs * gamma).exp() * loss
+
+        # Online Hard Example Mining: top x% losses (pixel-wise). Refer to http://www.robots.ox.ac.uk/~tvg/publications/2017/0026.pdf
+        OHEM, _ = focal_loss.topk(k=int(OHEM_percent * [*focal_loss.shape][0]))
+        return OHEM.mean()
+
+class FocalLoss(torch.nn.Module):
+    def __init__(self, per_image=False):
+        super(FocalLoss, self).__init__()
+        self.per_image = per_image
+
+    def forward(self, outputs_soft, label_batch):
+        return symmetric_lovasz(outputs_soft, label_batch, per_image=self.per_image)
+
+# https://github.com/LucasFidon/GeneralizedWassersteinDiceLoss
+# 用于num_class=1时的二分类，其他时候请调整dist_mat和output
+class GWDL(torch.nn.Module):
+    # weighting_mode='default', GWDL
+    # weighting_mode='GDL', GDL
+    def __init__(self, weighting_mode='default', reduction='mean', if_cuda=False):
+        super(GWDL, self).__init__()
+        dist_mat = np.array([
+            [0., 1.],
+            [1., 0.],
+        ])
+        self.gwdl = GeneralizedWassersteinDiceLoss(dist_mat, weighting_mode=weighting_mode, reduction=reduction, if_cuda=if_cuda)
+
+    def forward(self, outputs_soft, label_batch):
+        two_channel_output = torch.cat((outputs_soft, 1 - outputs_soft), dim=1)
+        return self.gwdl(two_channel_output, label_batch)
+
+# https://github.com/dmitrysarov/clDice
+# https://github.com/LucasFidon/GeneralizedWassersteinDiceLoss
+class CLDiceLoss(torch.nn.Module):
+    def __init__(self, target_skeleton=None, combination=False):
+        super(CLDiceLoss, self).__init__()
+        self.target_skeleton = target_skeleton
+        self.combination = combination
+        if combination:
+            dist_mat = np.array([
+                [0., 1.],
+                [1., 0.],
+            ])
+            self.soft_dice = GeneralizedWassersteinDiceLoss(dist_mat, weighting_mode='GDL')
+
+
+    def forward(self, outputs_soft, label_batch):
+        if self.combination:
+            # 只支持二分类
+            two_channel_output = torch.cat((outputs_soft, 1 - outputs_soft),dim=1)
+            return 0.5 * torch.mean(CLDiceLoss.soft_cldice_loss(outputs_soft, label_batch, target_skeleton=self.target_skeleton)) + 0.5 * self.soft_dice(two_channel_output, label_batch)
+        return torch.mean(CLDiceLoss.soft_cldice_loss(outputs_soft, label_batch, target_skeleton=self.target_skeleton))
+
+    @staticmethod
+    def soft_cldice_loss(pred, target, target_skeleton=None):
+        '''
+        inputs shape  (batch, channel, height, width).
+        calculate clDice loss
+        Because pred and target at moment of loss calculation will be a torch tensors
+        it is preferable to calculate target_skeleton on the step of batch forming,
+        when it will be in numpy array format by means of opencv
+        '''
+        cl_pred = CLDiceLoss.soft_skeletonize(pred)
+        if target_skeleton is None:
+            target_skeleton = CLDiceLoss.soft_skeletonize(target)
+        iflat = CLDiceLoss.norm_intersection(cl_pred, target)
+        tflat = CLDiceLoss.norm_intersection(target_skeleton, pred)
+        intersection = iflat * tflat
+
+        return -((2. * intersection) /
+                 (iflat + tflat))
+    @staticmethod
+    def soft_skeletonize(x, thresh_width=10):
+        '''
+        Differenciable aproximation of morphological skelitonization operaton
+        thresh_width - maximal expected width of vessel
+        '''
+        for i in range(thresh_width):
+            min_pool_x = torch.nn.functional.max_pool2d(x * -1, (3, 3), 1, 1) * -1
+            contour = torch.nn.functional.relu(torch.nn.functional.max_pool2d(min_pool_x, (3, 3), 1, 1) - min_pool_x)
+            x = torch.nn.functional.relu(x - contour)
+        return x
+
+    @staticmethod
+    def norm_intersection(center_line, vessel):
+        '''
+        inputs shape  (batch, channel, height, width)
+        intersection formalized by first ares
+        x - suppose to be centerline of vessel (pred or gt) and y - is vessel (pred or gt)
+        '''
+        smooth = 1.
+        clf = center_line.view(*center_line.shape[:2], -1)
+        vf = vessel.view(*vessel.shape[:2], -1)
+        intersection = (clf * vf).sum(-1)
+        return (intersection + smooth) / (clf.sum(-1) + smooth)
+    @staticmethod
+    def dice_loss(pred, target):
+        '''
+        inputs shape  (batch, channel, height, width).
+        calculate dice loss per batch and channel of sample.
+        E.g. if batch shape is [64, 1, 128, 128] -> [64, 1]
+        '''
+        smooth = 1.
+        iflat = pred.view(*pred.shape[:2], -1)  # batch, channel, -1
+        tflat = target.view(*target.shape[:2], -1)
+        intersection = (iflat * tflat).sum(-1)
+        return -((2. * intersection + smooth) /
+                 (iflat.sum(-1) + tflat.sum(-1) + smooth))
+
+
+
 def testLoss(model, Loss):
-    input = torch.rand((4, 3, 224, 224))
-    label = torch.rand((4, 1, 224, 224))
-    testEpoch = 3
+    input = torch.rand((8, 3, 224, 224))
+    label = torch.rand((8, 1, 224, 224))
+    label[label < 0.5] = 0
+    label[label >= 0.5] = 1
+    testEpoch = 10
     for epoch in range(testEpoch):
         output = model(input)['out']
         output = nn.Sigmoid()(output)
         optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
         loss = Loss(output, label)
-        print(loss.item())
+        print(loss)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
+
 
 
 if __name__ == '__main__':
@@ -442,5 +579,5 @@ if __name__ == '__main__':
     # testLoss(model, BoundaryLoss())
     # testLoss(model, nn.BCELoss())
     # loss = lovasz_hinge
-    loss = LovaszHinge()
+    loss = GWDL(weighting_mode='GDL')
     testLoss(model, loss)

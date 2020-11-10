@@ -2,7 +2,7 @@
 Lovasz-Softmax and Jaccard hinge loss in PyTorch
 Maxim Berman 2018 ESAT-PSI KU Leuven (MIT License)
 """
-
+# https://github.com/bermanmaxim/LovaszSoftmax
 from __future__ import print_function, division
 
 import random
@@ -151,6 +151,8 @@ def binary_xloss(logits, labels, ignore=None):
     loss = StableBCELoss()(logits, Variable(labels.float()))
     return loss
 
+def symmetric_lovasz(outputs, targets, per_image):
+    return (lovasz_hinge(outputs, targets, per_image=per_image) + lovasz_hinge(-outputs, 1 - targets, per_image=per_image)) / 2
 
 # --------------------------- MULTICLASS LOSSES ---------------------------
 

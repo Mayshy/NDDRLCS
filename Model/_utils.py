@@ -21,8 +21,10 @@ def get_criterion(criterion):
         return MTLLoss.IouLoss()
     if criterion == "GDL":
         return MTLLoss.GDL()
-    if criterion == "lovasz_softmax":
-        return
+    if criterion == "LovaszSoftmax":
+        return MTLLoss.LovaszSoftmax()
+    if criterion == "LovaszHinge":
+        return MTLLoss.LovaszHinge()
     # if criterion == "Hausdorff":
     #     return MTLLoss.GeomLoss(loss="hausdorff")
     if criterion == "HDLoss":
