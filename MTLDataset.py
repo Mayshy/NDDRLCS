@@ -21,17 +21,21 @@ transformer = {'Train':transforms.Compose([
     # transforms.RandomVerticalFlip(p=0.5),
     # transforms.ToTensor(),
 ]),
-'All':transforms.Compose([
+
+'Gray':transforms.Compose([
     transforms.Resize((336,336)),
-    # transforms.Grayscale(3), 可能需要做一次简单的对比来校验是否加
-    transforms.ToTensor(), 
+    transforms.Grayscale(3),
+    transforms.ToTensor(),
+]),
+'ColorAll':transforms.Compose([
+    transforms.Resize((336,336)),
+    transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ]),
 'BinaryFluid':transforms.Compose([
     transforms.Resize((336,336)),
     transforms.Grayscale(3),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ]),
 'SegTrain':transforms.Compose([
     transforms.Resize((336,336)),
@@ -80,7 +84,7 @@ def get_label(data,ref_data_root):
 class MTLDataset(data.Dataset):
     # auxiliary: optional propertiy: 'US','MIX'
     # filter: input can be any 1D list object, or specified methods ---- 'rf_importance' 
-    def __init__(self,img_root,my_transformer = transformer,ref_data_root = '../ResearchData/data_ultrasound_-1.csv',num_classes = 4,auxiliary = 'US',us_path=None,mix_path=None,screener='rf_importance',screen_num = 10, train_or_test = 'Test'): #TODO
+    def __init__(self,img_root,my_transformer=transformer,ref_data_root = '../ResearchData/data_ultrasound_-1.csv',num_classes = 4,auxiliary = 'US',us_path=None,mix_path=None,screener='rf_importance',screen_num = 10, train_or_test = 'Test'): #TODO
         self.transformer = my_transformer
         self.datatype = auxiliary
         self.num_classes = num_classes
@@ -101,11 +105,11 @@ class MTLDataset(data.Dataset):
         # 获取图片名列表，图片名即病历ID
         self.img_ID_list = [name[:-4] for name in img_list]            
         get_label(data, ref_data_root)
-        if(num_classes == 4):
+        if (num_classes == 4):
             label = np.array([i-1 for i in data['Type']])
-        elif(num_classes == 2):
+        elif (num_classes == 2):
             label = np.array([1 if (i == 2 or i == 3) else 0 for i in data['Type']])
-        elif(num_classes == 3):
+        elif (num_classes == 3):
             raise Exception('Undone.')
         else:
             raise Exception('Check parameter num_classes.')
@@ -116,9 +120,9 @@ class MTLDataset(data.Dataset):
     def __getitem__(self, index):
         with Image.open(self.img_path_list[index]) as pil_img:
             if(self.train_or_test == 'Train'):
-                img = self.transformer['All'](self.transformer['Train'](pil_img))
+                img = self.transformer['Gray'](self.transformer['Train'](pil_img))
             elif(self.train_or_test == 'Test'): 
-                img = self.transformer['All'](pil_img)
+                img = self.transformer['Gray'](pil_img)
         img_ID = self.img_ID_list[index]
         img_ID_data = torch.from_numpy(np.array(self.data.loc[img_ID,:],dtype=np.float32))
         
@@ -212,9 +216,9 @@ class SegDataset(data.Dataset):
     def __getitem__(self, index):
         with Image.open(self.img_path_list[index]) as pil_img:
             if(self.train_or_test == 'Train'):
-                img = self.transformer['All'](self.transformer['Train'](pil_img))
+                img = self.transformer['Gray'](self.transformer['Train'](pil_img))
             elif(self.train_or_test == 'Test'): 
-                img = self.transformer['All'](pil_img)
+                img = self.transformer['Gray'](pil_img)
         img_ID = self.img_ID_list[index]
         img_ID_data = torch.from_numpy(np.array(self.data.loc[img_ID,:],dtype=np.float32))
         with Image.open(self.seg_img_path_list[index]) as seg_pil_img:
@@ -321,16 +325,16 @@ class FluidSegDataset(data.Dataset):
     def __getitem__(self, index):
         with Image.open(self.img_path_list[index]) as pil_img:
             if (self.train_or_test == 'Train'):
-                img = self.transformer['All'](self.transformer['Train'](pil_img))
+                img = self.transformer['Gray'](self.transformer['Train'](pil_img))
             elif (self.train_or_test == 'Test'):
-                img = self.transformer['All'](pil_img)
+                img = self.transformer['Gray'](pil_img)
         with Image.open(self.fluid_img_list[index]) as f_img:
             if self.binary_fluid:
                 fluid_img = self.transformer['BinaryFluid'](f_img)
             elif (self.train_or_test == 'Train'):
-                fluid_img = self.transformer['All'](self.transformer['Train'](f_img))
+                fluid_img = self.transformer['Gray'](self.transformer['Train'](f_img))
             elif (self.train_or_test == 'Test'):
-                fluid_img = self.transformer['All'](f_img)
+                fluid_img = self.transformer['Gray'](f_img)
         img_ID = self.img_ID_list[index]
         img_ID_data = torch.from_numpy(np.array(self.data.loc[img_ID, :], dtype=np.float32))
         with Image.open(self.seg_img_path_list[index]) as seg_pil_img:
@@ -416,14 +420,14 @@ class FluidSegDatasetPureSeg(data.Dataset):
     def __getitem__(self, index):
         with Image.open(self.img_path_list[index]) as pil_img:
             if (self.train_or_test == 'Train'):
-                img = self.transformer['All'](self.transformer['Train'](pil_img))
+                img = self.transformer['Gray'](self.transformer['Train'](pil_img))
             elif (self.train_or_test == 'Test'):
-                img = self.transformer['All'](pil_img)
+                img = self.transformer['Gray'](pil_img)
         with Image.open(self.fluid_img_list[index]) as f_img:
             if (self.train_or_test == 'Train'):
-                fluid_img = self.transformer['All'](self.transformer['Train'](f_img))
+                fluid_img = self.transformer['Gray'](self.transformer['Train'](f_img))
             elif (self.train_or_test == 'Test'):
-                fluid_img = self.transformer['All'](f_img)
+                fluid_img = self.transformer['Gray'](f_img)
         img_ID = self.img_ID_list[index]
         with Image.open(self.seg_img_path_list[index]) as seg_pil_img:
             if (self.train_or_test == 'Train'):

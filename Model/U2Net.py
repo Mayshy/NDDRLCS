@@ -3,7 +3,6 @@ import torch.nn as nn
 from torchvision import models
 import torch.nn.functional as F
 
-from Model._utils import get_criterion
 
 
 class REBNCONV(nn.Module):

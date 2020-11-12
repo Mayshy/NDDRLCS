@@ -1,3 +1,5 @@
+import collections
+
 import torch.nn as nn
 from typing import Dict
 from collections import OrderedDict
@@ -86,6 +88,11 @@ class IntermediateLayerGetter(nn.ModuleDict):
                 out[out_name] = x
         return out
 
+def extractDict(x):
+    if isinstance(x, collections.OrderedDict):
+        return x['out']
+    return x
+
 
 def testModel(model):
     input = torch.rand((4, 5, 224, 224))
@@ -103,6 +110,33 @@ def testBackward(model):
         print(output.shape)
         criterion = get_criterion('BCELoss')
         optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
+        loss = criterion(output, label)
+        print(loss.item())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+def test2IModel(model):
+    input0 = torch.rand((4, 3, 224, 224))
+    input1 = torch.rand((4, 3, 224, 224))
+    out = model(input0, input1)
+    # print(out['out'].shape)
+    print(out)
+    print(out.shape)
+
+
+def test2IBackward(model):
+    label = torch.zeros((4, 1, 224, 224))
+    input0 = torch.rand((4, 3, 224, 224))
+    input1 = torch.rand((4, 3, 224, 224))
+    testEpoch = 10
+    for epoch in range(testEpoch):
+
+        output = model(input0, input1)
+        output = nn.Sigmoid()(output)
+        print(output.shape)
+        criterion = get_criterion('BCELoss')
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=5e-4, eps=1e-8)
         loss = criterion(output, label)
         print(loss.item())
         optimizer.zero_grad()

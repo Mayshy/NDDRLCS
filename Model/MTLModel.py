@@ -9,6 +9,7 @@ from torch.jit.annotations import List
 import torch
 from torch.hub import load_state_dict_from_url
 import re
+import numpy as np
 
 
 
@@ -1062,11 +1063,35 @@ def apply_cross_P(alpha, input1, input2):
 
 
 class NddrLayer(nn.Module):
-    def __init__(self,net0_channels, net1_channels, drop_rate=0):
+    def __init__(self, net0_channels, net1_channels, init_method='constant', init_weights=(0.7, 0.3), drop_rate=0):
         super(NddrLayer, self).__init__()
         self.drop_rate = drop_rate
+
+
         self.nddr_conv1d_task0 = nn.Conv2d(net0_channels + net1_channels, net0_channels, 1)
         self.nddr_conv1d_task1 = nn.Conv2d(net0_channels + net1_channels, net1_channels, 1)
+        if init_method == 'constant':
+            # 仅支持net0_channels==net1_channels
+            self.conv1.weight = nn.Parameter(torch.cat([
+                torch.eye(net0_channels) * init_weights[0],
+                torch.eye(net0_channels) * init_weights[1]
+            ], dim=1).view(net0_channels, -1, 1, 1))
+            if self.conv1.bias:
+                self.conv1.bias.data.fill_(0)
+            self.conv2.weight = nn.Parameter(torch.cat([
+                torch.eye(net0_channels) * init_weights[1],
+                torch.eye(net0_channels) * init_weights[0]
+            ], dim=1).view(net0_channels, -1, 1, 1))
+            if self.conv2.bias:
+                self.conv2.bias.data.fill_(0)
+        elif init_method == 'xavier':
+            nn.init.xavier_uniform_(self.conv1.weight)
+            nn.init.xavier_uniform_(self.conv2.weight)
+        elif init_method == 'kaiming':
+            nn.init.kaiming_normal_(self.conv1.weight, mode='fan_out', nonlinearity='relu')
+            nn.init.kaiming_normal_(self.conv2.weight, mode='fan_out', nonlinearity='relu')
+        else:
+            raise NotImplementedError
         # 可在此处加dropout      
         self.nddr_bn_task0 = nn.BatchNorm2d(net0_channels)
         self.nddr_bn_task1 = nn.BatchNorm2d(net1_channels)

@@ -48,6 +48,12 @@ def dict_sum(res, addend):
             res[k] += addend[k]
     return res
 
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
+    lr = args.lr * (0.1 ** (epoch // 50))
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
 def get_model(model_name, pretrained = False):
     model_name = model_name.strip()
     if model_name == 'FCN_ResNet50':
@@ -187,7 +193,7 @@ def parse_args(argv):
     parser.add_argument("--wd", type=float, help="weight decay", default=0.1)
     parser.add_argument("--momentum", type=float, help="momentum", default=0)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
-    parser.add_argument("--epoch", type=int, help="number of epoch", default=900)
+    parser.add_argument("--epoch", type=int, help="number of epoch", default=200)
     parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=8)
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
@@ -203,7 +209,6 @@ def parse_args(argv):
 
 # 训练
 def train(epoch):
-
     # 设置数据集
     train_dataloader = get_dataloader('train')
 
@@ -276,11 +281,10 @@ def test(epoch):
 
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
-            output = F.interpolate(output, size=(512, 512), mode='bilinear', align_corners=True)
-            loss = criterion(output, seg_label)
-
+            output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
+            loss = criterion(output, seg_label)
 
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
@@ -301,7 +305,7 @@ def test(epoch):
     test_loss_mean = log_mean(test_loss_list, "test loss", isLog= True)
     dice2_mean = log_mean(dice2_list, "dice2", isLog= True)
     for k in epoch_quality:
-        epoch_quality[k] /= len(test_dataloader)
+        epoch_quality[k] /= len(test_dataloader.dataset)
     logging.info("Epoch {0} MEAN {1}".format(epoch, epoch_quality))
 
     for k in epoch_quality:
@@ -351,6 +355,7 @@ logging.warning('Model: {}  Mode:{} LR:{} Loss:{} Data:{}'.format(args.net, args
 all_quality = collections.defaultdict(list)
 last_train_loss = float('inf')
 count_loss_improve = 0
+
 for epoch in range(start_epoch, args.epoch):
     cur_train_loss = train(epoch)
     if (cur_train_loss >= last_train_loss):

@@ -183,7 +183,7 @@ def parse_args(argv):
     parser.add_argument("--wd", type=float, help="weight decay", default=0.3)
     parser.add_argument("--momentum", type=float, help="momentum", default=0.9)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
-    parser.add_argument("--epoch", type=int, help="number of epoch", default=400)
+    parser.add_argument("--epoch", type=int, help="number of epoch", default=200)
     parser.add_argument("--n_batch_size", type=int, help="mini batch size", default=8)
     parser.add_argument("--n_tarin_check_batch", type=int, help="mini num of check batch", default=1)
     parser.add_argument("--save_best_model", type=int, help="if saving best model", default=0)
@@ -273,12 +273,9 @@ def test(epoch):
             output = model(img, fluid_img)
             output = nn.Sigmoid()(output)
 
-
-
-
             output[output >= 0.5] = 1
             output[output < 0.5] = 0
-            output = F.interpolate(output, size=(512, 512), mode='bilinear', align_corners=True)
+            output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
             # seg_label 标签, 注意此时的loss含义已然不同了，未来考虑把这个值去掉
@@ -361,8 +358,10 @@ logging.basicConfig(level=args.logging_level,filename= log_path + str(args.log_f
                     filemode='a', format='%(asctime)s   %(levelname)s   %(message)s')
 logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode, args.criterion, args.s_data_root))
 
+
 all_quality = collections.defaultdict(list)
 all_img_dice = collections.defaultdict(list)
+print('start')
 for epoch in range(start_epoch, args.epoch):
     train(epoch)
     test(epoch)

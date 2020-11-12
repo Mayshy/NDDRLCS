@@ -9,6 +9,9 @@ from queue import Queue
 import torch.autograd as autograd
 import torch.cuda.comm as comm
 
+from Model.Backbone import Dense_BB_ForUNet
+from Model.UNet import Up, OutConv
+
 
 class FCNHead(nn.Sequential):
     def __init__(self, in_channels, channels):
@@ -227,10 +230,59 @@ class ASPP(nn.Module):
         return self.project(res)
 
 
+
+
+class UNet_Classifier(nn.Module):
+    densenet_in_channels = (3264, 768, 384, 192)
+    def __init__(self, in_channels=(3264, 768, 384, 192), num_classes=1, origin_size=336):
+        super(UNet_Classifier, self).__init__()
+        factor = 2
+        self.origin_size = origin_size
+        self.up1 = Up(in_channels[0], in_channels[1] // factor)
+        self.up2 = Up(in_channels[1], in_channels[2] // factor)
+        self.up3 = Up(in_channels[2], in_channels[3] // factor)
+        self.up4 = Up(in_channels[3], 64)
+        self.outc = OutConv(64, num_classes)
+
+
+    def forward(self, x1, x2, x3, x4, x5):
+        x1 = F.interpolate(x1, size=self.origin_size, mode='bilinear', align_corners=True)
+        x2 = F.interpolate(x2, size=self.origin_size//2, mode='bilinear', align_corners=True)
+        x3 = F.interpolate(x3, size=self.origin_size//4, mode='bilinear', align_corners=True)
+        x4 = F.interpolate(x4, size=self.origin_size//8, mode='bilinear', align_corners=True)
+        x5 = F.interpolate(x5, size=self.origin_size//16, mode='bilinear', align_corners=True)
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+        x = self.outc(x)
+        return x
+
+
+
+
 def testModel(model):
     input = torch.rand((4, 5, 224, 224))
     output = model(input)
     print(output)
     print(output.shape)
+
+def testUNet_Classifier(backbone):
+    input = torch.rand((4, 5, 224, 224))
+    x1, x2, x3, x4, x5 = backbone(input)
+    print(x1.shape)
+    print(x2.shape)
+    print(x3.shape)
+    print(x4.shape)
+    print(x5.shape)
+
+
+    classifier = UNet_Classifier(2048, 1)
+    output = classifier(x1, x2, x3, x4, x5)
+    # print(output)
+    print(output.shape)
+
+
 if __name__ == '__main__':
-    testModel(SegNet(5, 1))
+    # testModel(SegNet(5, 1))
+    testUNet_Classifier(Dense_BB_ForUNet(5, 1))

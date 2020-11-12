@@ -346,6 +346,235 @@ class TwoInput_NDDRLSC_BB(nn.Module):
             return out
 
 
+class Dense_BB_ForUNet(nn.Module):
+    def __init__(self, in_channels, num_classes, growth_rate=48, block_config=(6, 12, 36, 24),
+                 num_init_features=96, bn_size=4, drop_rate=0, length_aux = 10 , mode = None, nddr_drop_rate = 0, memory_efficient=True):
+        super(Dense_BB_ForUNet, self).__init__()
+        self.features = nn.Sequential(OrderedDict([
+            ('conv0', nn.Conv2d(in_channels, num_init_features, kernel_size=7, stride=2,
+                                padding=3, bias=False)),
+            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('relu0', nn.ReLU(inplace=True)),
+            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+        ]))
+        num_features = num_init_features
+        for i, num_layers in enumerate(block_config):
+            block = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            block_aux = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            if (i == 0):
+                self.block0 = block
+            elif (i == 1):
+                self.block1 = block
+            elif (i == 2):
+                self.block2 = block
+            elif (i == 3):
+                self.block3 = block
+            num_features = num_features + num_layers * growth_rate
+            if i != len(block_config) - 1:
+                trans = _Transition(num_input_features=num_features,
+                                    num_output_features=num_features // 2)
+                trans_aux = _Transition(num_input_features=num_features,
+                                        num_output_features=num_features // 2)
+                if (i == 0):
+                    self.transition0 = trans
+
+                elif (i == 1):
+                    self.transition1 = trans
+
+                elif (i == 2):
+                    self.transition2 = trans
+
+                num_features = num_features // 2
+
+        # Final batch norm
+
+        self.final_bn = nn.BatchNorm2d(num_features)
+        # self.nddr3 = NddrLayer(net0_channels=num_features, net1_channels=num_features, drop_rate=nddr_drop_rate)
+
+        # Linear layer
+        # self.fc = nn.Linear(num_features, 1000)
+        # self.classifier = nn.Linear(1000, num_classes)
+
+
+
+    # x5是最新的
+    def forward(self, x):
+        features = self.features(x)
+
+        block0 = self.block0(features)
+        transition0 = self.transition0(block0)
+
+        block1 = self.block1(transition0)
+        transition1 = self.transition1(block1)
+
+        block2 = self.block2(transition1)
+        transition2 = self.transition2(block2)
+
+        block3 = self.block3(transition2)
+        transition3 = self.final_bn(block3)
+
+
+        return features, transition0, transition1, transition2, transition3
+
+
+# TODO:先实现一个base版的，然后魔改成自己的模型
+class NDDRLSC_BB_ForUNet(nn.Module):
+    def __init__(self, in_channels, in_aux_channels, num_classes, growth_rate=48, block_config=(6, 12, 36, 24),
+                 num_init_features=96, bn_size=4, drop_rate=0, length_aux = 10 , mode = None, nddr_drop_rate = 0, memory_efficient=True):
+        super(NDDRLSC_BB_ForUNet, self).__init__()
+        self.features = nn.Sequential(OrderedDict([
+            ('conv0', nn.Conv2d(in_channels, num_init_features, kernel_size=7, stride=2,
+                                padding=3, bias=False)),
+            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('relu0', nn.ReLU(inplace=True)),
+            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+        ]))
+
+        self.features_aux = nn.Sequential(OrderedDict([
+            ('conv0_aux', nn.Conv2d(in_aux_channels, num_init_features, kernel_size=7, stride=2,
+                                    padding=3, bias=False)),
+            ('norm0_aux', nn.BatchNorm2d(num_init_features)),
+            ('relu0_aux', nn.ReLU(inplace=True)),
+            ('pool0_aux', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+        ]))
+
+        self.nddrf = NddrLayer(net0_channels=num_init_features, net1_channels=num_init_features,
+                               drop_rate=nddr_drop_rate)
+
+        # Each denseblock
+        num_features = num_init_features
+        for i, num_layers in enumerate(block_config):
+            block = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            block_aux = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            if (i == 0):
+                self.block0 = block
+                self.block0_aux = block_aux
+            elif (i == 1):
+                self.block1 = block
+                self.block1_aux = block_aux
+            elif (i == 2):
+                self.block2 = block
+                self.block2_aux = block_aux
+            elif (i == 3):
+                self.block3 = block
+                self.block3_aux = block_aux
+            num_features = num_features + num_layers * growth_rate
+            if i != len(block_config) - 1:
+                trans = _Transition(num_input_features=num_features,
+                                    num_output_features=num_features // 2)
+                trans_aux = _Transition(num_input_features=num_features,
+                                        num_output_features=num_features // 2)
+                if (i == 0):
+                    self.transition0 = trans
+                    self.transition0_aux = trans_aux
+                    self.nddr0 = NddrLayer(net0_channels=num_features // 2, net1_channels=num_features // 2,
+                                           drop_rate=nddr_drop_rate)
+                    self.sluice0_reshape = nn.Linear(num_features // 2, 2208)
+                    self.sluice0_aux_reshape = nn.Linear(num_features // 2, 2208)
+                    # self.nddr0_conv1d = nn.Conv1d(num_features // 2 *2, num_features // 2)
+                    # self.nddr0_conv1d_aux =
+                    # self.nddr0_bn = nn.BatchNorm2d(num_features // 2)
+                    # self.nddr0_bn_aux = nn.BatchNorm2d(num_features // 2)
+                elif (i == 1):
+                    self.transition1 = trans
+                    self.transition1_aux = trans_aux
+                    self.nddr1 = NddrLayer(net0_channels=num_features // 2, net1_channels=num_features // 2,
+                                           drop_rate=nddr_drop_rate)
+                    self.sluice1_reshape = nn.Linear(num_features // 2, 2208)
+                    self.sluice1_aux_reshape = nn.Linear(num_features // 2, 2208)
+                elif (i == 2):
+                    self.transition2 = trans
+                    self.transition2_aux = trans_aux
+                    self.nddr2 = NddrLayer(net0_channels=num_features // 2, net1_channels=num_features // 2,
+                                           drop_rate=nddr_drop_rate)
+                    self.sluice2_reshape = nn.Linear(num_features // 2, 2208)
+                    self.sluice2_aux_reshape = nn.Linear(num_features // 2, 2208)
+                num_features = num_features // 2
+
+        # Final batch norm
+
+        self.final_bn = nn.BatchNorm2d(num_features)
+        self.final_bn_aux = nn.BatchNorm2d(num_features)
+        self.nddr3 = NddrLayer(net0_channels=num_features, net1_channels=num_features, drop_rate=nddr_drop_rate)
+        self.sluice3_reshape = nn.Linear(num_features, 2208)
+        self.sluice3_aux_reshape = nn.Linear(num_features, 2208)
+
+        # Linear layer
+        self.fc = nn.Linear(num_features, 1000)
+        self.fc_aux = nn.Linear(num_features, 1000)
+        self.classifier = nn.Linear(1000, num_classes)  # TODO:Finetune
+        self.classifier_aux = nn.Linear(1000, length_aux)
+        self.f_classifier = nn.Linear(num_features, num_classes)
+        self.f_classifier_aux = nn.Linear(num_features, length_aux)
+        # Official init from torch repo.
+
+        self.cross3 = nn.Linear(num_features * 2, num_features * 2, bias=False)
+        self.cross4 = nn.Linear(2000, 2000, bias=False)
+        self.cross5 = nn.Linear(6, 6, bias=False)
+        self.betas_5layer = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5]))
+        self.betas_5layer_aux = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5]))
+        self.betas_6layer = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5, 0.3]))
+        self.betas_6layer_aux = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5, 0.3]))
+
+    def forward(self, x, y):
+        features = self.features(x)
+        features_aux = self.features_aux(y)
+        features, features_aux = self.nddrf(features, features_aux)
+
+        block0 = self.block0(features)
+        transition0 = self.transition0(block0)
+        block0_aux = self.block0_aux(features_aux)
+        transition0_aux = self.transition0_aux(block0_aux)
+        transition0, transition0_aux = self.nddr0(transition0, transition0_aux)
+
+        block1 = self.block1(transition0)
+        transition1 = self.transition1(block1)
+        block1_aux = self.block1_aux(transition0_aux)
+        transition1_aux = self.transition1_aux(block1_aux)
+        transition1, transition1_aux = self.nddr1(transition1, transition1_aux)
+
+        block2 = self.block2(transition1)
+        transition2 = self.transition2(block2)
+        block2_aux = self.block2_aux(transition1_aux)
+        transition2_aux = self.transition2_aux(block2_aux)
+        transition2, transition2_aux = self.nddr2(transition2, transition2_aux)
+
+        block3 = self.block3(transition2)
+        transition3 = self.final_bn(block3)
+        block3_aux = self.block3_aux(transition2_aux)
+        transition3_aux = self.final_bn_aux(block3_aux)
+        transition3, transition3_aux = self.nddr3(transition3, transition3_aux)
+
+        return features, transition0, transition1, transition2, transition3
+
 def testModel(model):
     theModel = model(6)
     input = torch.rand((4, 6, 448, 448))

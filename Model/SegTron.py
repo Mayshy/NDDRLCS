@@ -1,11 +1,9 @@
-# 三或四阶段
-# Backbone
-# Classifier
-# BaseModel
-# PostProcess： 1.DenseCRF 2.CRFasRNN 3.马尔科夫随机场 4.高斯条件随机场
-# 模仿https://github.com/LikeLy-Journey/SegmenTron/blob/master/segmentron/models/pointrend.py
-# 模仿pytorch 官方的FCN
-
+# 提供以下特性：
+# 1. 组合BackBone与Classifier
+# 2. 提供统一的参数初始化接口，但可以允许某些指定的module自行初始化
+# 提供的模型包括非U-Net系的single model、input fusion、和NDDR系的layer fusion
+# TODO：新增功能， DecisionFusion
+import collections
 from collections import OrderedDict
 import torch
 from torch import nn
@@ -16,7 +14,7 @@ from typing import Dict
 from torchvision.models import resnet, densenet, vgg, inception
 from Model.Backbone import DenseNet_BB, TwoInput_NDDRLSC_BB
 from Model.Classifier import DeepLabV3Head, FCNHead
-from Model._utils import IntermediateLayerGetter, get_criterion
+from Model._utils import IntermediateLayerGetter, get_criterion, extractDict, test2IBackward
 
 
 class SimpleSegmentationModel(nn.Module):
@@ -66,9 +64,10 @@ class TwoInputSegmentationModel(nn.Module):
         self.classifier = classifier
         self.aux_classifier = aux_classifier
 
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.xavier_normal_(m.weight)
+                if not name.startswith('nddr'):
+                    nn.init.xavier_normal_(m.weight)
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -97,6 +96,44 @@ class TwoInputSegmentationModel(nn.Module):
         return result
 
 
+class DesicionFusion(nn.Module):
+    def __init__(self, modelA, modelB, num_class, combining_points='late', fusion_function='conv'):
+        super(DesicionFusion, self).__init__()
+        if fusion_function not in ['conv', 'max', 'sum']:
+            raise ValueError("Fusion Function not defined.")
+        self.modelA = modelA
+        self.modelB = modelB
+
+        if fusion_function == 'conv':
+            self.fusion = nn.Conv2d(num_class * 2, num_class, 1)
+        self.fusion_function = fusion_function
+        for name, m in self.named_modules():
+            if isinstance(m, nn.Conv2d):
+                if not name.startswith('nddr'):
+                    nn.init.xavier_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                stdv = 1./ math.sqrt(m.weight.size(1))
+                nn.init.uniform_(m.weight,-stdv,stdv)
+                # nn.init.normal_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x, y):
+        x = self.modelA(x)
+        y = self.modelB(y)
+        x = extractDict(x)
+        y = extractDict(y)
+        if self.fusion_function == 'conv':
+            out = torch.cat((x, y), dim=1)
+            out = self.fusion(out)
+        elif self.fusion_function == 'max':
+            out = torch.max(x, y)
+        elif self.fusion_function == 'sum':
+            out = torch.add(x, y)
+        return out
 
 
 
@@ -112,16 +149,11 @@ def testModel(model):
     print(out['out'].shape)
     print(out)
 
-def test2IModel(model):
-    input0 = torch.rand((4, 3, 224, 224))
-    input1 = torch.rand((4, 3, 224, 224))
-    out = model(input0, input1)
-    print(out['out'].shape)
-    print(out)
+
 
 def testBackward(model):
     label = torch.rand((4, 1, 224, 224))
-    input = torch.rand((4, 5, 224, 224))
+    input = torch.rand((4, 3, 224, 224))
     testEpoch = 3
     for epoch in range(testEpoch):
 
@@ -136,28 +168,15 @@ def testBackward(model):
         loss.backward()
         optimizer.step()
 
-def test2IBackward(model):
-    label = torch.rand((4, 1, 224, 224))
-    input0 = torch.rand((4, 3, 224, 224))
-    input1 = torch.rand((4, 1, 224, 224))
-    testEpoch = 3
-    for epoch in range(testEpoch):
-
-        output = model(input0, input1)['out']
-        output = nn.Sigmoid()(output)
-        print(output.shape)
-        criterion = get_criterion('BCELoss')
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=5e-4, eps=1e-8)
-        loss = criterion(output, label)
-        print(loss.item())
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 if __name__ == '__main__':
-    backbone = TwoInput_NDDRLSC_BB(3, 1)
+    backbone = DenseNet_BB(3)
     classifier = DeepLabV3Head(backbone.out_channels, 1)
-    model = TwoInputSegmentationModel(backbone, classifier)
-    # test2IModel(model)
+    modelA = SimpleSegmentationModel(backbone, classifier)
+    # testModel(modelA)
+    backboneB = DenseNet_BB(1)
+    classifierB = DeepLabV3Head(backboneB.out_channels, 1)
+    modelB = SimpleSegmentationModel(backboneB, classifierB)
+    model = DesicionFusion(modelA, modelB, 1)
     test2IBackward(model)
 
 
