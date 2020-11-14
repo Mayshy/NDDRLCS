@@ -258,35 +258,4 @@ def mean(l, ignore_nan=False, empty=0):
         return acc
     return acc / n
 
-def testLoss(model, Loss):
-    input = torch.rand((4, 3, 224, 224))
-    label = torch.rand((4, 1, 224, 224))
-    testEpoch = 3
-    for epoch in range(testEpoch):
-        output = model(input)['out']
-        output = torch.nn.Sigmoid()(output)
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
-        loss = Loss(output, label,  per_image=False)
-        print(loss.item())
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
-def setup_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-
-if __name__ == '__main__':
-    setup_seed(20)
-    DEVICE = torch.device('cuda:' + str(0) if torch.cuda.is_available() else 'cpu')
-    model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=False, num_classes=1,
-                                                            aux_loss=None)
-    # testLoss(model, HDLoss())  待有GPU时测试
-    # testLoss(model, BoundaryLoss())
-    # testLoss(model, nn.BCELoss())
-    # loss = lovasz_hinge
-    loss = lovasz_hinge
-    testLoss(model, loss)

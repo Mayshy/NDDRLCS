@@ -10,6 +10,7 @@ from scipy.ndimage import distance_transform_edt as distance
 
 from Loss.GeneralisedLoss import GeneralizedWassersteinDiceLoss
 from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax, symmetric_lovasz
+from Model._utils import extractDict
 
 """
 语义分割常用损失函数
@@ -409,7 +410,13 @@ class LovaszSoftmax(torch.nn.Module):
         super(LovaszSoftmax, self).__init__()
         self.per_image = per_image
 
+    # probas: [B, C, H, W] Variable, class probabilities at each prediction (between 0 and 1).
+    #               Interpreted as binary (sigmoid) output with outputs of size [B, H, W].
+    #       labels: [B, H, W] Tensor, ground truth labels (between 0 and C - 1)
+    #       classes: 'all' for all, 'present' for classes present in labels, or a list of classes to average.
     def forward(self, outputs_soft, label_batch):
+        label_batch = label_batch[:, 0, :]
+
         return lovasz_softmax(outputs_soft, label_batch, classes=[1], per_image=self.per_image)
 
 class LovaszHinge(torch.nn.Module):
@@ -448,12 +455,14 @@ def focal_loss(output, target, alpha, gamma, OHEM_percent):
         return OHEM.mean()
 
 class FocalLoss(torch.nn.Module):
-    def __init__(self, per_image=False):
+    def __init__(self, alpha, gamma, OHEM_percent):
         super(FocalLoss, self).__init__()
-        self.per_image = per_image
+        self.alpha = alpha
+        self.gamma = gamma
+        self.OHEM_percent = OHEM_percent
 
     def forward(self, outputs_soft, label_batch):
-        return symmetric_lovasz(outputs_soft, label_batch, per_image=self.per_image)
+        return focal_loss(outputs_soft, label_batch, alpha=self.alpha, gamma=self.gamma, OHEM_percent=self.OHEM_percent)
 
 # https://github.com/LucasFidon/GeneralizedWassersteinDiceLoss
 # 用于num_class=1时的二分类，其他时候请调整dist_mat和output
@@ -552,32 +561,9 @@ class CLDiceLoss(torch.nn.Module):
 
 
 
-def testLoss(model, Loss):
-    input = torch.rand((8, 3, 224, 224))
-    label = torch.rand((8, 1, 224, 224))
-    label[label < 0.5] = 0
-    label[label >= 0.5] = 1
-    testEpoch = 10
-    for epoch in range(testEpoch):
-        output = model(input)['out']
-        output = nn.Sigmoid()(output)
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
-        loss = Loss(output, label)
-        print(loss)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
 
 
 
-if __name__ == '__main__':
-    DEVICE = torch.device('cuda:' + str(0) if torch.cuda.is_available() else 'cpu')
-    model = torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=False, num_classes=1,
-                                                            aux_loss=None)
-    # testLoss(model, HDLoss())  待有GPU时测试
-    # testLoss(model, BoundaryLoss())
-    # testLoss(model, nn.BCELoss())
-    # loss = lovasz_hinge
-    loss = GWDL(weighting_mode='GDL')
-    testLoss(model, loss)
+
+

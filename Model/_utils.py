@@ -5,28 +5,36 @@ from typing import Dict
 from collections import OrderedDict
 import torch
 from Loss import MTLLoss
+import numpy as np
+import random
 
+
+def adjust_learning_rate(optimizer, epoch, base_lr):
+    """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
+    lr = base_lr * (0.1 ** (epoch // 50))
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
 def get_criterion(criterion):
     criterion = criterion.strip()
     if criterion == "TheCrossEntropy":
         return MTLLoss.TheCrossEntropy()
-    if criterion == "BCELoss":
+    elif criterion == "BCELoss":
         return nn.BCELoss()
-    if criterion == "SSLoss":
-        return
-    if criterion == "DiceLoss":
+    elif criterion == "DiceLoss":
         return MTLLoss.DiceLoss()
-    if criterion == "mIOULoss":
+    elif criterion == "mIOULoss":
         return MTLLoss.mIoULoss()
-    if criterion == "IouLoss":
+    elif criterion == "IouLoss":
         return MTLLoss.IouLoss()
-    if criterion == "GDL":
-        return MTLLoss.GDL()
-    if criterion == "LovaszSoftmax":
-        return MTLLoss.LovaszSoftmax()
-    if criterion == "LovaszHinge":
-        return MTLLoss.LovaszHinge()
+    elif criterion == "GDL":
+        return MTLLoss.GWDL(weighting_mode='GDL')
+    elif criterion == "GWDL":
+        return MTLLoss.GWDL(weighting_mode='default')
+    elif criterion == "LovaszSoftmax":
+        return MTLLoss.LovaszSoftmax(per_image=True)
+    elif criterion == "LovaszHinge":
+        return MTLLoss.LovaszHinge(per_image=True)
     # if criterion == "Hausdorff":
     #     return MTLLoss.GeomLoss(loss="hausdorff")
     if criterion == "HDLoss":
@@ -93,6 +101,12 @@ def extractDict(x):
         return x['out']
     return x
 
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
 
 def testModel(model):
     input = torch.rand((4, 5, 224, 224))

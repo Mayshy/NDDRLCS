@@ -21,7 +21,7 @@ import metrics
 import random
 import collections
 
-from Model._utils import get_criterion
+from Model._utils import get_criterion, adjust_learning_rate
 
 """
 双输入单输出分割，结合力学影响数据
@@ -363,6 +363,7 @@ all_quality = collections.defaultdict(list)
 all_img_dice = collections.defaultdict(list)
 print('start')
 for epoch in range(start_epoch, args.epoch):
+    adjust_learning_rate(optimizer, epoch, args.lr)
     train(epoch)
     test(epoch)
 

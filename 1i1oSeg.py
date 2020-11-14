@@ -21,7 +21,7 @@ import metrics
 import random
 import collections
 
-from Model._utils import get_criterion
+from Model._utils import get_criterion, adjust_learning_rate
 
 """
 单输入单输出分割
@@ -48,11 +48,7 @@ def dict_sum(res, addend):
             res[k] += addend[k]
     return res
 
-def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 50))
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+
 
 def get_model(model_name, pretrained = False):
     model_name = model_name.strip()
@@ -357,6 +353,7 @@ last_train_loss = float('inf')
 count_loss_improve = 0
 
 for epoch in range(start_epoch, args.epoch):
+    adjust_learning_rate(optimizer, epoch, args.lr)
     cur_train_loss = train(epoch)
     if (cur_train_loss >= last_train_loss):
         count_loss_improve += 1
