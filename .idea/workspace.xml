@@ -5,31 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Model/ModelList.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/NDDRLCS.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/NDDRLCS.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Model/ModelTest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/2i1oSeg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Loss/GeneralisedLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/GeneralisedLoss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Loss/MTLLoss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/LossList.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Loss/elastic_loss.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTLDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLDataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/Backbone.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/Backbone.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/Classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/Classifier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/CoLearning.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/CoSeg.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/DUC.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/DenseAPP.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/DenseAPP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/FCDenseNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/FCDenseNet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/HyperDenseNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/HyperDenseNet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/IVDNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/IVDNet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/PointRend.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/PointRend.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/ModelList.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/ModelList.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/SegTron.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/SegTron.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/U2Net.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/U2Net.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/UNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/UNet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/UNetNest.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/UNetNest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/resnest_.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/resnest_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/test_loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test/test_loss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seg.py" beforeDir="false" afterPath="$PROJECT_DIR$/seg.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,13 +22,27 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/ModelList.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="110" column="48" lean-forward="true" selection-start-line="110" selection-start-column="48" selection-end-line="110" selection-end-column="48" />
+            <state relative-caret-position="255">
+              <caret line="102" lean-forward="true" selection-start-line="102" selection-end-line="102" />
               <folding>
                 <element signature="e#46#64#0" expanded="true" />
               </folding>
@@ -51,49 +50,43 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/IVDNet.py">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Model/ModelTest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-600">
-              <caret line="154" column="32" lean-forward="true" selection-start-line="154" selection-start-column="32" selection-end-line="154" selection-end-column="32" />
+            <state relative-caret-position="264">
+              <caret line="38" column="32" lean-forward="true" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
               <folding>
-                <element signature="e#49#77#0" expanded="true" />
+                <element signature="e#49#64#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/HyperDenseNet.py">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/868610004/unittest/loader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="66">
-              <caret line="274" column="45" selection-start-line="274" selection-start-column="32" selection-end-line="274" selection-end-column="45" />
-              <folding>
-                <element signature="e#49#61#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="221">
+              <caret line="29" column="32" lean-forward="true" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
+        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/module.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="32">
-              <caret line="98" column="34" lean-forward="true" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
-              <folding>
-                <element signature="e#48#60#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="145">
+              <caret line="729" column="46" lean-forward="true" selection-start-line="729" selection-start-column="46" selection-end-line="729" selection-end-column="46" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/DenseAPP.py">
+        <entry file="file://$PROJECT_DIR$/Model/_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1038">
-              <caret line="284" lean-forward="true" selection-start-line="284" selection-end-line="284" />
+            <state relative-caret-position="184">
+              <caret line="121" column="26" lean-forward="true" selection-start-line="121" selection-start-column="26" selection-end-line="121" selection-end-column="26" />
               <folding>
-                <element signature="e#50#62#0" expanded="true" />
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -102,8 +95,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="287">
-              <caret line="128" column="42" lean-forward="true" selection-start-line="128" selection-start-column="42" selection-end-line="128" selection-end-column="42" />
+            <state relative-caret-position="171">
+              <caret line="63" column="66" lean-forward="true" selection-start-line="63" selection-start-column="66" selection-end-line="63" selection-end-column="66" />
               <folding>
                 <element signature="e#168#186#0" expanded="true" />
               </folding>
@@ -112,10 +105,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/U2Net.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="393">
+              <caret line="931" column="37" lean-forward="true" selection-start-line="931" selection-start-column="37" selection-end-line="931" selection-end-column="37" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="236" column="8" selection-start-line="236" selection-start-column="8" selection-end-line="236" selection-end-column="8" />
+            <state relative-caret-position="629">
+              <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="37" />
               <folding>
                 <element signature="e#74#95#0" expanded="true" />
               </folding>
@@ -124,24 +129,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+        <entry file="file://$PROJECT_DIR$/Model/UNet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="103">
-              <caret line="73" column="28" lean-forward="true" selection-start-line="73" selection-start-column="28" selection-end-line="73" selection-end-column="28" />
+            <state relative-caret-position="471">
+              <caret line="115" selection-start-line="115" selection-end-line="115" />
               <folding>
-                <element signature="e#34#43#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/resnest_.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="445" column="36" lean-forward="true" selection-start-line="445" selection-start-column="36" selection-end-line="445" selection-end-column="36" />
-              <folding>
-                <element signature="e#50#61#0" expanded="true" />
+                <element signature="e#95#107#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -150,8 +143,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/Backbone.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="143" column="51" lean-forward="true" selection-start-line="143" selection-start-column="51" selection-end-line="143" selection-end-column="51" />
+            <state relative-caret-position="134">
+              <caret line="346" selection-start-line="346" selection-end-line="346" />
+              <folding>
+                <element signature="e#46#81#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -167,11 +163,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>future</find>
-      <find>lovasz</find>
-      <find>sigm</find>
-      <find>fft</find>
-      <find>&lt;</find>
       <find>all_img_dice</find>
       <find>3</find>
       <find>3p</find>
@@ -197,6 +188,11 @@
       <find>num_</find>
       <find>self.in_dim</find>
       <find>Point</find>
+      <find>TwoINpu</find>
+      <find>Inception</find>
+      <find>classifier =</find>
+      <find>U2</find>
+      <find>DUC</find>
     </findStrings>
     <replaceStrings>
       <replace>dice_index</replace>
@@ -205,6 +201,7 @@
       <replace>item()</replace>
       <replace>torch</replace>
       <replace>Gray</replace>
+      <replace>return</replace>
     </replaceStrings>
     <dirStrings>
       <dir>D:\Workspace\MTL\NDDRLCS\Model</dir>
@@ -225,16 +222,13 @@
         <option value="$PROJECT_DIR$/Model/MechanicsModel.py" />
         <option value="$PROJECT_DIR$/metrics.py" />
         <option value="$PROJECT_DIR$/Model/resnest.py" />
-        <option value="$PROJECT_DIR$/Model/UNetNest.py" />
         <option value="$PROJECT_DIR$/Model/InputLevelFusion.py" />
         <option value="$PROJECT_DIR$/MTLLoss.py" />
-        <option value="$PROJECT_DIR$/Model/UNet.py" />
         <option value="$PROJECT_DIR$/Model/DeepMadSeg.py" />
         <option value="$PROJECT_DIR$/Loss.py" />
         <option value="$PROJECT_DIR$/Loss/fair_logloss.py" />
         <option value="$PROJECT_DIR$/Loss/elastic_loss.py" />
         <option value="$PROJECT_DIR$/Model/MTLModel.py" />
-        <option value="$PROJECT_DIR$/Model/SegTron.py" />
         <option value="$PROJECT_DIR$/Model/CoLearning.py" />
         <option value="$PROJECT_DIR$/Model/CoSeg.py" />
         <option value="$PROJECT_DIR$/Loss/lovasz_losses.py" />
@@ -246,17 +240,21 @@
         <option value="$PROJECT_DIR$/2i1oSeg.py" />
         <option value="$PROJECT_DIR$/Loss/LossList.py" />
         <option value="$PROJECT_DIR$/Model/DenseAPP.py" />
-        <option value="$PROJECT_DIR$/Model/_utils.py" />
         <option value="$PROJECT_DIR$/Model/DUC.py" />
         <option value="$PROJECT_DIR$/Model/FCDenseNet.py" />
         <option value="$PROJECT_DIR$/Model/PointRend.py" />
-        <option value="$PROJECT_DIR$/Model/U2Net.py" />
         <option value="$PROJECT_DIR$/Model/resnest_.py" />
-        <option value="$PROJECT_DIR$/Model/Classifier.py" />
-        <option value="$PROJECT_DIR$/Model/Backbone.py" />
         <option value="$PROJECT_DIR$/Model/HyperDenseNet.py" />
         <option value="$PROJECT_DIR$/Model/IVDNet.py" />
+        <option value="$PROJECT_DIR$/Model/UNetNest.py" />
+        <option value="$PROJECT_DIR$/Model/U2Net.py" />
+        <option value="$PROJECT_DIR$/Model/_utils.py" />
+        <option value="$PROJECT_DIR$/Model/Classifier.py" />
+        <option value="$PROJECT_DIR$/Model/SegTron.py" />
+        <option value="$PROJECT_DIR$/Model/Backbone.py" />
+        <option value="$PROJECT_DIR$/Model/UNet.py" />
         <option value="$PROJECT_DIR$/Model/ModelList.py" />
+        <option value="$PROJECT_DIR$/Model/ModelTest.py" />
       </list>
     </option>
   </component>
@@ -341,8 +339,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.resnest_">
-    <configuration name="DUC" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python tests.Unittests in ModelTest.py">
+    <configuration name="Backbone" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -352,7 +350,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DUC.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/Backbone.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -361,7 +359,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="DenseAPP" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="ModelList" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -371,26 +369,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DenseAPP.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="PointRend" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/PointRend.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/ModelList.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -403,6 +382,9 @@
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -444,6 +426,9 @@
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -459,13 +444,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Unittests in ModelTest.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/Model/ModelTest.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests in ModelTest.py" />
+        <item itemvalue="Python.Backbone" />
+        <item itemvalue="Python.ModelList" />
         <item itemvalue="Python.resnest_" />
         <item itemvalue="Python.U2Net" />
-        <item itemvalue="Python.PointRend" />
-        <item itemvalue="Python.DUC" />
-        <item itemvalue="Python.DenseAPP" />
       </list>
     </recent_temporary>
   </component>
@@ -555,7 +555,8 @@
       <workItem from="1605451086829" duration="1759000" />
       <workItem from="1605452871430" duration="945000" />
       <workItem from="1605453841929" duration="1978000" />
-      <workItem from="1605500542027" duration="12833000" />
+      <workItem from="1605500542027" duration="12942000" />
+      <workItem from="1605522945967" duration="9443000" />
     </task>
     <task id="LOCAL-00001" summary="Train Split">
       <created>1602381633304</created>
@@ -581,31 +582,63 @@
     <option name="localTasksCounter" value="4" />
     <servers />
   </component>
+  <component name="TestHistory">
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 13m 35s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 14m 51s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 17m 04s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 18m 46s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 20m 50s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 22m 31s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 23m 24s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 24m 35s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 25m 57s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 27m 50s.xml">
+      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
+    </history-entry>
+  </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="362083000" />
+    <option name="totallyTimeSpent" value="371635000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1693989" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1693989" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info id="Learn" order="3" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32984293" />
-      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.44815466" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39965096" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.2652705" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="8" sideWeight="0.49960968" visible="true" weight="0.26362038" />
       <window_info anchor="bottom" id="File Transfer" order="9" weight="0.12126538" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.37870854" />
-      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.43936732" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.3778559" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5003903" side_tool="true" visible="true" weight="0.26362038" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.41300526" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -691,33 +724,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="Sigmoid" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/NDDRLCS$Unittests_in_ModelTest_py.coverage" NAME="Unittests in ModelTest.py Coverage Results" MODIFIED="1605533243115" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Model" />
     <SUITE FILE_PATH="coverage/NDDRLCS$MTLLoss.coverage" NAME="MTLLoss Coverage Results" MODIFIED="1604926887156" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/vgg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="7" column="23" selection-start-line="6" selection-start-column="11" selection-end-line="7" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/inception.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3718">
-          <caret line="176" column="25" selection-start-line="176" selection-start-column="17" selection-end-line="176" selection-end-column="25" />
-          <folding>
-            <element signature="e#0#34#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torchvision/models/densenet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="11" column="81" selection-start-line="11" selection-start-column="23" selection-end-line="11" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
@@ -815,13 +825,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26576">
-          <caret line="1219" column="24" selection-start-line="1219" selection-start-column="24" selection-end-line="1219" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/conv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="175">
@@ -898,16 +901,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/CoSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="30" selection-start-line="10" selection-start-column="30" selection-end-line="10" selection-end-column="30" />
-          <folding>
-            <element signature="e#138#150#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/CoSeg.py" />
     <entry file="file://$PROJECT_DIR$/Loss/LossList.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="92">
@@ -918,26 +912,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="102" column="37" lean-forward="true" selection-start-line="102" selection-start-column="37" selection-end-line="102" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DUC.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-47">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#49#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/DUC.py" />
     <entry file="file://$PROJECT_DIR$/Model/FCDenseNet.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="242">
@@ -992,10 +967,142 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Model/CoLearning.py" />
+    <entry file="file://$PROJECT_DIR$/Model/IVDNet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2465">
+          <caret line="154" column="32" selection-start-line="154" selection-start-column="32" selection-end-line="154" selection-end-column="32" />
+          <folding>
+            <element signature="e#49#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/HyperDenseNet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4539">
+          <caret line="274" column="45" selection-start-line="274" selection-start-column="32" selection-end-line="274" selection-end-column="45" />
+          <folding>
+            <element signature="e#49#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1581">
+          <caret line="98" column="34" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
+          <folding>
+            <element signature="e#48#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/DenseAPP.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4709">
+          <caret line="284" selection-start-line="284" selection-end-line="284" />
+          <folding>
+            <element signature="e#50#62#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="73" column="28" selection-start-line="73" selection-start-column="28" selection-end-line="73" selection-end-column="28" />
+          <folding>
+            <element signature="e#34#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/resnest_.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7446">
+          <caret line="445" column="36" selection-start-line="445" selection-start-column="36" selection-end-line="445" selection-end-column="36" />
+          <folding>
+            <element signature="e#50#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/unittest/__init__.pyi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="26" column="14" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/UNetNest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="655" lean-forward="true" selection-start-line="655" selection-end-line="655" />
+          <folding>
+            <element signature="e#136#157#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="729" column="46" lean-forward="true" selection-start-line="729" selection-start-column="46" selection-end-line="729" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="121" column="26" lean-forward="true" selection-start-line="121" selection-start-column="26" selection-end-line="121" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/868610004/unittest/loader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="29" column="32" lean-forward="true" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="63" column="66" lean-forward="true" selection-start-line="63" selection-start-column="66" selection-end-line="63" selection-end-column="66" />
+          <folding>
+            <element signature="e#168#186#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="629">
+          <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="37" />
+          <folding>
+            <element signature="e#74#95#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/Backbone.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="134">
+          <caret line="346" selection-start-line="346" selection-end-line="346" />
+          <folding>
+            <element signature="e#46#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Model/U2Net.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="663" column="43" selection-start-line="663" selection-start-column="34" selection-end-line="663" selection-end-column="43" />
+        <state relative-caret-position="393">
+          <caret line="931" column="37" lean-forward="true" selection-start-line="931" selection-start-column="37" selection-end-line="931" selection-end-column="37" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
@@ -1004,121 +1111,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/UNet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="377" column="8" selection-start-line="377" selection-start-column="8" selection-end-line="377" selection-end-column="8" />
+        <state relative-caret-position="471">
+          <caret line="115" selection-start-line="115" selection-end-line="115" />
           <folding>
             <element signature="e#95#107#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/UNetNest.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="495" column="8" selection-start-line="495" selection-start-column="8" selection-end-line="495" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/resnest_.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="445" column="36" lean-forward="true" selection-start-line="445" selection-start-column="36" selection-end-line="445" selection-end-column="36" />
-          <folding>
-            <element signature="e#50#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="103">
-          <caret line="73" column="28" lean-forward="true" selection-start-line="73" selection-start-column="28" selection-end-line="73" selection-end-column="28" />
-          <folding>
-            <element signature="e#34#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="236" column="8" selection-start-line="236" selection-start-column="8" selection-end-line="236" selection-end-column="8" />
-          <folding>
-            <element signature="e#74#95#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/CoLearning.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DenseAPP.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1038">
-          <caret line="284" lean-forward="true" selection-start-line="284" selection-end-line="284" />
-          <folding>
-            <element signature="e#50#62#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="98" column="34" lean-forward="true" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
-          <folding>
-            <element signature="e#48#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/HyperDenseNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="274" column="45" selection-start-line="274" selection-start-column="32" selection-end-line="274" selection-end-column="45" />
-          <folding>
-            <element signature="e#49#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/IVDNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-600">
-          <caret line="154" column="32" lean-forward="true" selection-start-line="154" selection-start-column="32" selection-end-line="154" selection-end-column="32" />
-          <folding>
-            <element signature="e#49#77#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="128" column="42" lean-forward="true" selection-start-line="128" selection-start-column="42" selection-end-line="128" selection-end-column="42" />
-          <folding>
-            <element signature="e#168#186#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/Backbone.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="143" column="51" lean-forward="true" selection-start-line="143" selection-start-column="51" selection-end-line="143" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Model/ModelList.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="110" column="48" lean-forward="true" selection-start-line="110" selection-start-column="48" selection-end-line="110" selection-end-column="48" />
+        <state relative-caret-position="255">
+          <caret line="102" lean-forward="true" selection-start-line="102" selection-end-line="102" />
           <folding>
             <element signature="e#46#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/ModelTest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="38" column="32" lean-forward="true" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
+          <folding>
+            <element signature="e#49#64#0" expanded="true" />
           </folding>
         </state>
       </provider>

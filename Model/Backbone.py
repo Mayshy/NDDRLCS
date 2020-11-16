@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torchvision.models.inception import BasicConv2d
 
 from Model.MTLModel import NddrDenseNet, apply_cross, NddrLayer, _DenseBlock, _Transition
-from Model._utils import IntermediateLayerGetter
+from Model._utils import IntermediateLayerGetter, testModel
 from torchvision import models
 import torch
 
@@ -23,7 +23,6 @@ class Inception_BB(nn.Module):
             inception = models.inception_v3(pretrained, init_weights=True)
         else:
             raise NotImplementedError('version {} is not supported as of now'.format(version))
-        print(inception)
 
         inception.Conv2d_1a_3x3 = BasicConv2d(in_channels, 32, kernel_size=3, stride=2)
         return_layers = {'Mixed_7c': 'out'}
@@ -57,7 +56,6 @@ class VGG_BB(nn.Module):
             vgg = models.vgg19(pretrained)
         else:
             raise NotImplementedError('version {} is not supported as of now'.format(version))
-        print(vgg)
         vgg.features[0] = nn.Conv2d(in_channels, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
         return_layers = {'features': 'out'}
         self.backbone = IntermediateLayerGetter(vgg, return_layers)
@@ -346,103 +344,7 @@ class TwoInput_NDDRLSC_BB(nn.Module):
             return out
 
 
-class DUC(nn.Module):
-    def __init__(self, inplanes, planes, upscale_factor=2):
-        super(DUC, self).__init__()
-        self.relu = nn.ReLU()
-        self.conv = nn.Conv2d(inplanes, planes, kernel_size=3,
-                              padding=1)
-        self.bn = nn.BatchNorm2d(planes)
-        self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
 
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.relu(x)
-        x = self.pixel_shuffle(x)
-        return x
-
-class DUCFCN_BB_ForUNet(nn.Module):
-    def __init__(self, in_channels, num_classes):
-        super(DUCFCN_BB_ForUNet, self).__init__()
-
-        self.num_classes = num_classes
-
-        resnet = models.resnet50(pretrained=True)
-        if in_channels != 3:
-            self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3,
-                               bias=False)
-        else:
-            self.conv1 = resnet.conv1
-        self.bn0 = resnet.bn1
-        self.relu = resnet.relu
-        self.maxpool = resnet.maxpool
-
-        self.layer1 = resnet.layer1
-        self.layer2 = resnet.layer2
-        self.layer3 = resnet.layer3
-        self.layer4 = resnet.layer4
-
-        self.duc1 = DUC(2048, 2048*2)
-        self.duc2 = DUC(1024, 1024*2)
-        self.duc3 = DUC(512, 512*2)
-        self.duc4 = DUC(128, 128*2)
-        self.duc5 = DUC(64, 64*2)
-
-        self.out1 = self._classifier(1024)
-        self.out2 = self._classifier(512)
-        self.out3 = self._classifier(128)
-        self.out4 = self._classifier(64)
-        self.out5 = self._classifier(32)
-
-        self.transformer = nn.Conv2d(320, 128, kernel_size=1)
-
-    def _classifier(self, inplanes):
-        if inplanes == 32:
-            return nn.Sequential(
-                nn.Conv2d(inplanes, self.num_classes, 1),
-                nn.Conv2d(self.num_classes, self.num_classes,
-                          kernel_size=3, padding=1)
-            )
-        return nn.Sequential(
-            nn.Conv2d(inplanes, inplanes//2, 3, padding=1, bias=False),
-            nn.BatchNorm2d(inplanes//2, momentum=.95),
-            nn.ReLU(inplace=True),
-            nn.Dropout(.1),
-            nn.Conv2d(inplanes//2, self.num_classes, 1),
-        )
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn0(x)
-        x = self.relu(x)
-        conv_x = x
-        x = self.maxpool(x)
-        pool_x = x
-
-        fm1 = self.layer1(x)
-        fm2 = self.layer2(fm1)
-        fm3 = self.layer3(fm2)
-        fm4 = self.layer4(fm3)
-
-        dfm1 = fm3 + self.duc1(fm4)
-        out16 = self.out1(dfm1)
-
-        dfm2 = fm2 + self.duc2(dfm1)
-        out8 = self.out2(dfm2)
-
-        dfm3 = fm1 + self.duc3(dfm2)
-
-        dfm3_t = self.transformer(torch.cat((dfm3, pool_x), 1))
-        out4 = self.out3(dfm3_t)
-
-        dfm4 = conv_x + self.duc4(dfm3_t)
-        out2 = self.out4(dfm4)
-
-        dfm5 = self.duc5(dfm4)
-        out = self.out5(dfm5)
-
-        return out, out2, out4, out8, out16
 
 
 class Dense_BB_ForUNet(nn.Module):
@@ -517,7 +419,6 @@ class Dense_BB_ForUNet(nn.Module):
         return features, transition0, transition1, transition2, transition3
 
 
-# TODO:先实现一个base版的，然后魔改成自己的模型
 class NDDRLSC_BB_ForUNet(nn.Module):
     def __init__(self, in_channels, in_aux_channels, num_classes, growth_rate=48, block_config=(6, 12, 36, 24),
                  num_init_features=96, bn_size=4, drop_rate=0, length_aux = 10 , mode = None, nddr_drop_rate = 0, memory_efficient=True):
@@ -613,18 +514,9 @@ class NDDRLSC_BB_ForUNet(nn.Module):
         self.sluice3_reshape = nn.Linear(num_features, 2208)
         self.sluice3_aux_reshape = nn.Linear(num_features, 2208)
 
-        # Linear layer
-        self.fc = nn.Linear(num_features, 1000)
-        self.fc_aux = nn.Linear(num_features, 1000)
-        self.classifier = nn.Linear(1000, num_classes)  # TODO:Finetune
-        self.classifier_aux = nn.Linear(1000, length_aux)
-        self.f_classifier = nn.Linear(num_features, num_classes)
-        self.f_classifier_aux = nn.Linear(num_features, length_aux)
+
         # Official init from torch repo.
 
-        self.cross3 = nn.Linear(num_features * 2, num_features * 2, bias=False)
-        self.cross4 = nn.Linear(2000, 2000, bias=False)
-        self.cross5 = nn.Linear(6, 6, bias=False)
         self.betas_5layer = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5]))
         self.betas_5layer_aux = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5]))
         self.betas_6layer = nn.Parameter(torch.tensor([0.05, 0.1, 0.1, 0.25, 0.5, 0.3]))
@@ -661,22 +553,12 @@ class NDDRLSC_BB_ForUNet(nn.Module):
 
         return features, transition0, transition1, transition2, transition3
 
-def testModel(model):
-    theModel = model(6)
-    input = torch.rand((4, 6, 448, 448))
-    out = theModel(input)
-    print(out)
-    print(out['out'].shape)
 
-def test2IModel(model):
-    theModel = model(3, mode = 'LayersWeightCat')
-    input0 = torch.rand((4, 3, 224, 224))
-    input1 = torch.rand((4, 3, 224, 224))
-    out = theModel(input0, input1)
-    print(out)
-    print(out.shape)
 
 # 原始torchvision给出 backbone-classfier模型：backbone 将input(c, h, w) 变为 （2048， h/8, w/8)， 二分类为(1, h/8, w/8), 最后再插值回去。
-if __name__ == '__main__':
-    testModel(Inception_BB)
-    # test2IModel(TwoInput_NDDRLSC_BB)
+# if __name__ == '__main__':
+#     backbone = ResNet_BB(3)
+#     classifier = FCNHead(backbone.out_channels, 1)
+#     model = SimpleSegmentationModel(backbone, classifier)
+#     testModel(model)
+#     # test2IModel(TwoInput_NDDRLSC_BB)

@@ -13,6 +13,242 @@ from torch.nn import init
 
 from Model._utils import get_criterion, testBackward
 
+class DUC(nn.Module):
+    def __init__(self, inplanes, planes, upscale_factor=2):
+        super(DUC, self).__init__()
+        self.relu = nn.ReLU()
+        self.conv = nn.Conv2d(inplanes, planes, kernel_size=3,
+                              padding=1)
+        self.bn = nn.BatchNorm2d(planes)
+        self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        x = self.pixel_shuffle(x)
+        return x
+
+class DUCFCN(nn.Module):
+    def __init__(self, in_channels, num_classes):
+        super(DUCFCN, self).__init__()
+
+        self.num_classes = num_classes
+
+        resnet = models.resnet50(pretrained=True)
+        if in_channels != 3:
+            self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        else:
+            self.conv1 = resnet.conv1
+        self.bn0 = resnet.bn1
+        self.relu = resnet.relu
+        self.maxpool = resnet.maxpool
+
+        self.layer1 = resnet.layer1
+        self.layer2 = resnet.layer2
+        self.layer3 = resnet.layer3
+        self.layer4 = resnet.layer4
+
+        self.duc1 = DUC(2048, 2048*2)
+        self.duc2 = DUC(1024, 1024*2)
+        self.duc3 = DUC(512, 512*2)
+        self.duc4 = DUC(128, 128*2)
+        self.duc5 = DUC(64, 64*2)
+
+        self.out1 = self._classifier(1024)
+        self.out2 = self._classifier(512)
+        self.out3 = self._classifier(128)
+        self.out4 = self._classifier(64)
+        self.out5 = self._classifier(32)
+
+        self.transformer = nn.Conv2d(320, 128, kernel_size=1)
+
+    def _classifier(self, inplanes):
+        if inplanes == 32:
+            return nn.Sequential(
+                nn.Conv2d(inplanes, self.num_classes, 1),
+                nn.Conv2d(self.num_classes, self.num_classes,
+                          kernel_size=3, padding=1)
+            )
+        return nn.Sequential(
+            nn.Conv2d(inplanes, inplanes//2, 3, padding=1, bias=False),
+            nn.BatchNorm2d(inplanes//2, momentum=.95),
+            nn.ReLU(inplace=True),
+            nn.Dropout(.1),
+            nn.Conv2d(inplanes//2, self.num_classes, 1),
+        )
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn0(x)
+        x = self.relu(x)
+        conv_x = x
+        x = self.maxpool(x)
+        pool_x = x
+
+        fm1 = self.layer1(x)
+        fm2 = self.layer2(fm1)
+        fm3 = self.layer3(fm2)
+        fm4 = self.layer4(fm3)
+
+        dfm1 = fm3 + self.duc1(fm4)
+        out16 = self.out1(dfm1)
+
+        dfm2 = fm2 + self.duc2(dfm1)
+        out8 = self.out2(dfm2)
+
+        dfm3 = fm1 + self.duc3(dfm2)
+
+        dfm3_t = self.transformer(torch.cat((dfm3, pool_x), 1))
+        out4 = self.out3(dfm3_t)
+
+        dfm4 = conv_x + self.duc4(dfm3_t)
+        out2 = self.out4(dfm4)
+
+        dfm5 = self.duc5(dfm4)
+        out = self.out5(dfm5)
+
+
+
+
+        return out
+
+class SegNet(nn.Module):
+    def __init__(self,input_nbr,label_nbr):
+        super(SegNet, self).__init__()
+
+        batchNorm_momentum = 0.1
+
+        self.conv11 = nn.Conv2d(input_nbr, 64, kernel_size=3, padding=1)
+        self.bn11 = nn.BatchNorm2d(64, momentum= batchNorm_momentum)
+        self.conv12 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
+        self.bn12 = nn.BatchNorm2d(64, momentum= batchNorm_momentum)
+
+        self.conv21 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.bn21 = nn.BatchNorm2d(128, momentum= batchNorm_momentum)
+        self.conv22 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
+        self.bn22 = nn.BatchNorm2d(128, momentum= batchNorm_momentum)
+
+        self.conv31 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
+        self.bn31 = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+        self.conv32 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
+        self.bn32 = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+        self.conv33 = nn.Conv2d(256, 256, kernel_size=3, padding=1)
+        self.bn33 = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+
+        self.conv41 = nn.Conv2d(256, 512, kernel_size=3, padding=1)
+        self.bn41 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv42 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn42 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv43 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn43 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+
+        self.conv51 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn51 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv52 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn52 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv53 = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn53 = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+
+        self.conv53d = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn53d = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv52d = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn52d = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv51d = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn51d = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+
+        self.conv43d = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn43d = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv42d = nn.Conv2d(512, 512, kernel_size=3, padding=1)
+        self.bn42d = nn.BatchNorm2d(512, momentum= batchNorm_momentum)
+        self.conv41d = nn.Conv2d(512, 256, kernel_size=3, padding=1)
+        self.bn41d = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+
+        self.conv33d = nn.Conv2d(256, 256, kernel_size=3, padding=1)
+        self.bn33d = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+        self.conv32d = nn.Conv2d(256, 256, kernel_size=3, padding=1)
+        self.bn32d = nn.BatchNorm2d(256, momentum= batchNorm_momentum)
+        self.conv31d = nn.Conv2d(256,  128, kernel_size=3, padding=1)
+        self.bn31d = nn.BatchNorm2d(128, momentum= batchNorm_momentum)
+
+        self.conv22d = nn.Conv2d(128, 128, kernel_size=3, padding=1)
+        self.bn22d = nn.BatchNorm2d(128, momentum= batchNorm_momentum)
+        self.conv21d = nn.Conv2d(128, 64, kernel_size=3, padding=1)
+        self.bn21d = nn.BatchNorm2d(64, momentum= batchNorm_momentum)
+
+        self.conv12d = nn.Conv2d(64, 64, kernel_size=3, padding=1)
+        self.bn12d = nn.BatchNorm2d(64, momentum= batchNorm_momentum)
+        self.conv11d = nn.Conv2d(64, label_nbr, kernel_size=3, padding=1)
+
+
+    def forward(self, x):
+
+        # Stage 1
+        x11 = F.relu(self.bn11(self.conv11(x)))
+        x12 = F.relu(self.bn12(self.conv12(x11)))
+        x1p, id1 = F.max_pool2d(x12,kernel_size=2, stride=2,return_indices=True)
+
+        # Stage 2
+        x21 = F.relu(self.bn21(self.conv21(x1p)))
+        x22 = F.relu(self.bn22(self.conv22(x21)))
+        x2p, id2 = F.max_pool2d(x22,kernel_size=2, stride=2,return_indices=True)
+
+        # Stage 3
+        x31 = F.relu(self.bn31(self.conv31(x2p)))
+        x32 = F.relu(self.bn32(self.conv32(x31)))
+        x33 = F.relu(self.bn33(self.conv33(x32)))
+        x3p, id3 = F.max_pool2d(x33,kernel_size=2, stride=2,return_indices=True)
+
+        # Stage 4
+        x41 = F.relu(self.bn41(self.conv41(x3p)))
+        x42 = F.relu(self.bn42(self.conv42(x41)))
+        x43 = F.relu(self.bn43(self.conv43(x42)))
+        x4p, id4 = F.max_pool2d(x43,kernel_size=2, stride=2,return_indices=True)
+
+        # Stage 5
+        x51 = F.relu(self.bn51(self.conv51(x4p)))
+        x52 = F.relu(self.bn52(self.conv52(x51)))
+        x53 = F.relu(self.bn53(self.conv53(x52)))
+        x5p, id5 = F.max_pool2d(x53,kernel_size=2, stride=2,return_indices=True)
+
+
+        # Stage 5d
+        x5d = F.max_unpool2d(x5p, id5, kernel_size=2, stride=2)
+        x53d = F.relu(self.bn53d(self.conv53d(x5d)))
+        x52d = F.relu(self.bn52d(self.conv52d(x53d)))
+        x51d = F.relu(self.bn51d(self.conv51d(x52d)))
+
+        # Stage 4d
+        x4d = F.max_unpool2d(x4p, id4, kernel_size=2, stride=2)
+        x43d = F.relu(self.bn43d(self.conv43d(x4d)))
+        x42d = F.relu(self.bn42d(self.conv42d(x43d)))
+        x41d = F.relu(self.bn41d(self.conv41d(x42d)))
+
+        # Stage 3d
+        x3d = F.max_unpool2d(x41d, id3, kernel_size=2, stride=2)
+        x33d = F.relu(self.bn33d(self.conv33d(x3d)))
+        x32d = F.relu(self.bn32d(self.conv32d(x33d)))
+        x31d = F.relu(self.bn31d(self.conv31d(x32d)))
+
+        # Stage 2d
+        x2d = F.max_unpool2d(x31d, id2, kernel_size=2, stride=2)
+        x22d = F.relu(self.bn22d(self.conv22d(x2d)))
+        x21d = F.relu(self.bn21d(self.conv21d(x22d)))
+
+        # Stage 1d
+        x1d = F.max_unpool2d(x21d, id1, kernel_size=2, stride=2)
+        x12d = F.relu(self.bn12d(self.conv12d(x1d)))
+        x11d = self.conv11d(x12d)
+
+        return x11d
+
+    def load_from_segnet(self, model_path):
+        s_dict = self.state_dict()# create a copy of the state dict
+        th = torch.load(model_path).state_dict() # load the weigths
+        # for name in th:
+            # s_dict[corresp_name[name]] = th[name]
+        self.load_state_dict(th)
 
 class autoencoder(nn.Module):
     def __init__(self, n_channels, n_classes):

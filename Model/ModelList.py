@@ -3,20 +3,20 @@
 import torchvision
 
 from Model import InputLevelFusion, UNet
-from Model.Backbone import Inception_BB, VGG_BB, ResNet_BB, DenseNet_BB, DUCFCN_BB_ForUNet, Dense_BB_ForUNet
-from Model.Classifier import FCNHead, DeepLabV3Head, SegNet, UNet_Classifier
+from Model.Backbone import Inception_BB, VGG_BB, ResNet_BB, DenseNet_BB, DUCFCN, Dense_BB_ForUNet, \
+    TwoInput_NDDRLSC_BB, NDDRLSC_BB_ForUNet
+from Model.Classifier import FCNHead, DeepLabV3Head, UNet_Classifier
 from Model.DeepMadSeg import DeepMadSeg
 from Model.DenseAPP import DenseASPP
 from Model.FCDenseNet import FCDenseNet
 from Model.HyperDenseNet import HyperDenseNet_2Mod
 from Model.IVDNet import IVD_Net_asym_2M
 from Model.PointRend import PointRend, deeplabv3, PointHead
-from Model.SegTron import SimpleSegmentationModel
+from Model.SegTron import SimpleSegmentationModel, DesicionFusion, TwoInputSegmentationModel
 from Model.U2Net import U2NET, U2NETP, BASNet
-from Model.UNet import autoencoder, UNet, UNet_2Plus, UNet_3Plus, ResNetUNet, DilatedUNet, ZJUNet, kiunet
+from Model.UNet import autoencoder, UNet, UNet_2Plus, UNet_3Plus, ResNetUNet, DilatedUNet, ZJUNet, kiunet, SegNet
 from Model.UNetNest import R2U_Net, AttU_Net, R2AttU_Net, NestedUNet
-from Model._utils import testModel
-from Model.resnest_ import ResNestBase
+from Model._utils import testModel, test2IModel
 
 
 
@@ -37,6 +37,8 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
         return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=False, progress=False, num_classes=1,
                                                                    aux_loss=None)
     # 单个
+    if model_name == 'SegNet':
+        return SegNet(in_channelsX, n_class)
     if model_name == 'DeepMadSeg':
         return DeepMadSeg(in_channelsX, n_class)
     if model_name == 'DenseASPP':
@@ -78,6 +80,8 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
         return R2AttU_Net(in_ch=in_channelsX, out_ch=n_class)
     if model_name == 'NestedUNet':
         return NestedUNet(in_ch=in_channelsX, out_ch=n_class)
+    if model_name == 'DUCFCN':
+        return DUCFCN(in_channelsX, n_class)
 
 
     # layer fusion
@@ -98,15 +102,19 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
 
 
 
-
-def get_composed_model(backbone_name, classifier_name, in_channels=3, n_class=1):
-    # in_channelsX = 3, in_channelsY = 3,
+test_backbone_name_list = ['Inception', 'VGG', 'ResNet', 'DenseNet']
+test_classifier_name_list = ['FCNHead', 'SegNet', 'DeepLabV3Head']
+test_UNet_backbone_list = ['DUCFCNForUNet', 'Dense_BB_ForUNet']
+test_UNet_classifier_list = ['UNet_Classifier']
+test_2I_backcone_name_list = ['TwoInput_NDDRLSC_BB']
+test_2IForUNet_backcone_name_list = ['NDDRLSC_BB_ForUNet']
+def get_composed_model(backbone_name, classifier_name, in_channelsX=3, in_channelsY=3, n_class=1):
     '''
 
     Args:
         backbone_name: find the backbone in the list
             SingleInput ['Inception_BB', 'VGG_BB', 'ResNet_BB', 'DenseNet_BB']
-                For U-Net ['DUCFCN_BB_ForUNet', 'Dense_BB_ForUNet']
+                For U-Net ['DUCFCN_BB_ForUNet', 'DenseForUNet']
             MultiInput ['TwoInput_NDDRLSC_BB', ]
                 For U-Net ['NDDRLSC_BB_ForUNet']
         classifier_name: find the classifier in the list:
@@ -121,40 +129,57 @@ def get_composed_model(backbone_name, classifier_name, in_channels=3, n_class=1)
     backbone_name = backbone_name.strip()
     classifier_name = classifier_name.strip()
     if backbone_name == 'ResNet':
-        backbone = ResNet_BB(in_channels, version='resnet101')
+        backbone = ResNet_BB(in_channelsX, version='resnet101')
     elif backbone_name == 'VGG':
-        backbone = VGG_BB(in_channels, version='vgg19_bn')
+        backbone = VGG_BB(in_channelsX, version='vgg19_bn')
     elif backbone_name == 'Inception':
-        backbone = Inception_BB(in_channels, version='inception_v3')
+        backbone = Inception_BB(in_channelsX, version='inception_v3')
     elif backbone_name == 'DenseNet':
-        backbone = DenseNet_BB(in_channels, version='densenet161')
-    elif backbone_name == 'DUCFCN':
-        backbone = DUCFCN_BB_ForUNet(in_channels, n_class)
+        backbone = DenseNet_BB(in_channelsX, version='densenet161')
+
     elif backbone_name == 'DenseForUNet':
-        backbone = Dense_BB_ForUNet(in_channels)
+        backbone = Dense_BB_ForUNet(in_channelsX)
 
     elif backbone_name == 'TwoInput_NDDRLSC_BB':
-        backbone = TwoInput_NDDRLSC_BB(in_channels)
+        backbone = TwoInput_NDDRLSC_BB(in_channelsX, in_channelsY, num_classes=1)
+    elif backbone_name == 'NDDRLSC_BB_ForUNet':
+        backbone = NDDRLSC_BB_ForUNet(in_channelsX, in_channelsY, num_classes=n_class)
 
     else:
         raise NotImplementedError('backbone {} is not supported as of now'.format(backbone_name))
 
+    if hasattr(backbone, 'out_channels'):
+        backbone_out_channels = backbone.out_channels
+    else:
+        backbone_out_channels = None
+    classifier = get_clasifier(classifier_name, backbone_out_channels=backbone_out_channels, n_class=n_class)
+    return SimpleSegmentationModel(backbone, classifier)
+
+def get_2i_composed_model(backbone_name, classifier_name, in_channelsX=3, in_channelsY=3, n_class=1):
+    if backbone_name == 'TwoInput_NDDRLSC_BB':
+        backbone = TwoInput_NDDRLSC_BB(in_channelsX, in_channelsY, num_classes=1)
+    elif backbone_name == 'NDDRLSC_BB_ForUNet':
+        backbone = NDDRLSC_BB_ForUNet(in_channelsX, in_channelsY, num_classes=n_class)
+    else:
+        raise NotImplementedError('backbone {} is not supported as of now'.format(backbone_name))
+    if hasattr(backbone, 'out_channels'):
+        backbone_out_channels = backbone.out_channels
+    else:
+        backbone_out_channels = None
+    classifier = get_clasifier(classifier_name, backbone_out_channels=backbone_out_channels, n_class=n_class)
+    return TwoInputSegmentationModel(backbone, classifier)
+
+def get_decison_fusion_model(model0, model1, n_class=1):
+    return DesicionFusion(model0, model1, num_class=n_class)
+
+def get_clasifier(classifier_name, backbone_out_channels=None, n_class=1):
     if classifier_name == 'FCN':
-        classifier = FCNHead(backbone.out_channels, n_class)
-    elif classifier_name == 'SegNet':
-        classifier = SegNet(backbone.out_channels, n_class)
+        return FCNHead(backbone_out_channels, n_class)
     elif classifier_name == 'DeepLabV3':
-        classifier = DeepLabV3Head(backbone.out_channels, n_class)
+        return DeepLabV3Head(backbone_out_channels, n_class)
     elif classifier_name == 'UNet_Classifier':
         # Maybe need to check the inchannels list
-        classifier = UNet_Classifier(num_classes=n_class)
+        return UNet_Classifier(num_classes=n_class)
     else:
         raise NotImplementedError('classifier {} is not supported as of now'.format(classifier_name))
 
-    return SimpleSegmentationModel(backbone, classifier)
-
-
-def get_decison_fusion_model(model0_name, model1_name, in_channelsX=3, in_channelsY=3, n_class=1)
-
-if __name__ == '__main__':
-    testModel()

@@ -90,7 +90,10 @@ def setup_seed(seed):
 def testModel(model):
     input = torch.rand((4, 3, 224, 224))
     output = model(input)
-    print(output)
+    # print(output)
+    output = extractDict(output)
+    if isinstance(output, tuple):
+        output = output[0]
     print(output.shape)
 
 def testBackward(model):
@@ -115,7 +118,8 @@ def test2IModel(model):
     input1 = torch.rand((4, 3, 224, 224))
     out = model(input0, input1)
     # print(out['out'].shape)
-    print(out)
+    # print(out)
+    out = extractDict(out)
     print(out.shape)
 
 

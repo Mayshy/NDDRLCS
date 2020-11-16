@@ -3,6 +3,7 @@ import torch.nn as nn
 from torchvision import models
 import torch.nn.functional as F
 
+from Model._utils import testBackward
 
 
 class REBNCONV(nn.Module):
@@ -420,7 +421,7 @@ class U2NET(nn.Module):
 
         d0 = self.outconv(torch.cat((d1,d2,d3,d4,d5,d6),1))
 
-        return torch.sigmoid(d0), torch.sigmoid(d1), torch.sigmoid(d2), torch.sigmoid(d3), torch.sigmoid(d4), torch.sigmoid(d5), torch.sigmoid(d6)
+        return d0, d1, d2, d3, d4, d5, d6
 
 
 ### U^2-Net small ###
@@ -527,7 +528,7 @@ class U2NETP(nn.Module):
 
         d0 = self.outconv(torch.cat((d1,d2,d3,d4,d5,d6),1))
 
-        return torch.sigmoid(d0), torch.sigmoid(d1), torch.sigmoid(d2), torch.sigmoid(d3), torch.sigmoid(d4), torch.sigmoid(d5), torch.sigmoid(d6)
+        return d0, d1, d2, d3, d4, d5, d6
 
 class RefUnet(nn.Module):
     def __init__(self,in_ch,inc_ch):
@@ -922,24 +923,6 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 	return loss0, loss
 
 
-def testModel(model):
-    input = torch.rand((4, 5, 224, 224))
-    output = model(input)
-    print(output)
-    print(output.shape)
-
-def testBackward(model):
-    label = torch.rand((4, 1, 224, 224))
-    input = torch.rand((4, 5, 224, 224))
-    testEpoch = 3
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
-    for epoch in range(testEpoch):
-        d0, d1, d2, d3, d4, d5, d6 = model(input)
-        loss2, loss = muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, label)
-        print(loss.item())
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
 
 

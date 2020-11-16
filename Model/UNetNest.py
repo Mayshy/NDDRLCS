@@ -7,6 +7,8 @@ import torch.nn.functional as F
 import torch.utils.data
 import torch
 
+from Model._utils import testModel
+
 
 class conv_block(nn.Module):
     """
@@ -648,11 +650,9 @@ class Unet_dict(nn.Module):
         u0 = F.relu(self.expansive_0(u1, c00))
         return F.softmax(self.output(u0), dim=1)
 
-def testModel(model):
-    input = torch.rand((4, 5, 224, 224))
-    output = model(input)
-    print(output)
-    print(output.shape)
+
+
+
 
 if __name__ == '__main__':
     testModel(U_Net(5, 1))

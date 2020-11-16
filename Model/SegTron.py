@@ -44,8 +44,11 @@ class SimpleSegmentationModel(nn.Module):
         features = self.backbone(x)
 
         result = OrderedDict()
-        x = features["out"]
-        x = self.classifier(x)
+        x = extractDict(features)
+        if isinstance(features, tuple):
+            x = self.classifier(*x)
+        else:
+            x = self.classifier(x)
         x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
         result["out"] = x
 
@@ -81,9 +84,11 @@ class TwoInputSegmentationModel(nn.Module):
         input_shape = x.shape[-2:]
         # contract: features is a dict of tensors
         features = self.backbone(x, y)
-
         result = OrderedDict()
-        x = self.classifier(features)
+        if isinstance(features, tuple):
+            x = self.classifier(*features)
+        else:
+            x = self.classifier(features)
         x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
         result["out"] = x
 
@@ -143,30 +148,6 @@ class DesicionFusion(nn.Module):
 
 
 
-def testModel(model):
-    input = torch.rand((4, 3, 224, 224))
-    out = model(input)
-    print(out['out'].shape)
-    print(out)
-
-
-
-def testBackward(model):
-    label = torch.rand((4, 1, 224, 224))
-    input = torch.rand((4, 3, 224, 224))
-    testEpoch = 3
-    for epoch in range(testEpoch):
-
-        output = model(input)
-        output = nn.Sigmoid()(output)
-        print(output.shape)
-        criterion = get_criterion('BCELoss')
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=5e-4, eps=1e-8)
-        loss = criterion(output, label)
-        print(loss.item())
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
 if __name__ == '__main__':
     backbone = DenseNet_BB(3)
