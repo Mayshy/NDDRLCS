@@ -146,13 +146,14 @@ class Conv_residual_conv_Inception_Dilation_asymmetric(nn.Module):
 
 class IVD_Net_asym_2M(nn.Module):
 
-    def __init__(self, input_nc, output_nc, ngf):
+    def __init__(self, input0_nc, input1_nc, output_nc, ngf=32):
         super(IVD_Net_asym_2M, self).__init__()
-        print('~' * 50)
-        print(' ----- Creating FUSION_NET HD (Assymetric) network...')
-        print('~' * 50)
+        # print('~' * 50)
+        # print(' ----- Creating FUSION_NET HD (Assymetric) network...')
+        # print('~' * 50)
 
-        self.in_dim = input_nc
+        self.in0_dim = input0_nc
+        self.in1_dim = input1_nc
         self.out_dim = ngf
         self.final_out_dim = output_nc
 
@@ -163,7 +164,7 @@ class IVD_Net_asym_2M(nn.Module):
 
         # ~~~ Encoding Paths ~~~~~~ #
         # Encoder (Modality 1)
-        self.down_1_0 = Conv_residual_conv_Inception_Dilation_asymmetric(self.in_dim, self.out_dim, act_fn)
+        self.down_1_0 = Conv_residual_conv_Inception_Dilation_asymmetric(self.in0_dim, self.out_dim, act_fn)
         self.pool_1_0 = maxpool()
         self.down_2_0 = Conv_residual_conv_Inception_Dilation_asymmetric(self.out_dim * 2, self.out_dim * 2, act_fn)
         self.pool_2_0 = maxpool()
@@ -173,7 +174,7 @@ class IVD_Net_asym_2M(nn.Module):
         self.pool_4_0 = maxpool()
 
         # Encoder (Modality 2)
-        self.down_1_1 = Conv_residual_conv_Inception_Dilation_asymmetric(self.in_dim, self.out_dim, act_fn)
+        self.down_1_1 = Conv_residual_conv_Inception_Dilation_asymmetric(self.in1_dim, self.out_dim, act_fn)
         self.pool_1_1 = maxpool()
         self.down_2_1 = Conv_residual_conv_Inception_Dilation_asymmetric(self.out_dim * 2, self.out_dim * 2, act_fn)
         self.pool_2_1 = maxpool()

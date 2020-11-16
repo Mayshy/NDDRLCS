@@ -10,12 +10,6 @@ from scipy.ndimage import distance_transform_edt as distance
 
 from Loss.GeneralisedLoss import GeneralizedWassersteinDiceLoss
 from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax, symmetric_lovasz
-from Model._utils import extractDict
-
-"""
-语义分割常用损失函数
-https://blog.csdn.net/CaiDaoqing/article/details/90457197
-"""
 
 
 class MultiLossLayer(nn.Module):
@@ -469,13 +463,13 @@ class FocalLoss(torch.nn.Module):
 class GWDL(torch.nn.Module):
     # weighting_mode='default', GWDL
     # weighting_mode='GDL', GDL
-    def __init__(self, weighting_mode='default', reduction='mean', if_cuda=False):
+    def __init__(self, weighting_mode='default', reduction='mean'):
         super(GWDL, self).__init__()
         dist_mat = np.array([
             [0., 1.],
             [1., 0.],
         ])
-        self.gwdl = GeneralizedWassersteinDiceLoss(dist_mat, weighting_mode=weighting_mode, reduction=reduction, if_cuda=if_cuda)
+        self.gwdl = GeneralizedWassersteinDiceLoss(dist_mat, weighting_mode=weighting_mode, reduction=reduction)
 
     def forward(self, outputs_soft, label_batch):
         two_channel_output = torch.cat((outputs_soft, 1 - outputs_soft), dim=1)
@@ -562,7 +556,34 @@ class CLDiceLoss(torch.nn.Module):
 
 
 
-
+def get_criterion(criterion):
+    criterion = criterion.strip()
+    if criterion == "TheCrossEntropy":
+        return TheCrossEntropy()
+    elif criterion == "BCELoss":
+        return nn.BCEWithLogitsLoss()
+    elif criterion == "DiceLoss":
+        return DiceLoss()
+    elif criterion == "mIOULoss":
+        return mIoULoss()
+    elif criterion == "IouLoss":
+        return IouLoss()
+    elif criterion == "GDL":
+        # logits
+        return GWDL(weighting_mode='GDL')
+    elif criterion == "GWDL":
+        # logits
+        return GWDL(weighting_mode='default')
+    elif criterion == "LovaszSoftmax":
+        # logits
+        return LovaszSoftmax(per_image=True)
+    elif criterion == "LovaszHinge":
+        # logits
+        return LovaszHinge(per_image=True)
+    # if criterion == "Hausdorff":
+    #     return MTLLoss.GeomLoss(loss="hausdorff")
+    if criterion == "HDLoss":
+        return HDLoss()
 
 
 

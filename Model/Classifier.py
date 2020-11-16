@@ -244,7 +244,6 @@ class UNet_Classifier(nn.Module):
         self.up4 = Up(in_channels[3], 64)
         self.outc = OutConv(64, num_classes)
 
-
     def forward(self, x1, x2, x3, x4, x5):
         x1 = F.interpolate(x1, size=self.origin_size, mode='bilinear', align_corners=True)
         x2 = F.interpolate(x2, size=self.origin_size//2, mode='bilinear', align_corners=True)
@@ -257,9 +256,6 @@ class UNet_Classifier(nn.Module):
         x = self.up4(x, x1)
         x = self.outc(x)
         return x
-
-
-
 
 def testModel(model):
     input = torch.rand((4, 5, 224, 224))

@@ -24,18 +24,20 @@ transformer = {'Train':transforms.Compose([
 
 'Gray':transforms.Compose([
     transforms.Resize((336,336)),
-    transforms.Grayscale(3),
+    # transforms.Grayscale(3),
     transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'ColorAll':transforms.Compose([
     transforms.Resize((336,336)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'BinaryFluid':transforms.Compose([
     transforms.Resize((336,336)),
     transforms.Grayscale(3),
     transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'SegTrain':transforms.Compose([
     transforms.Resize((336,336)),
@@ -332,9 +334,9 @@ class FluidSegDataset(data.Dataset):
             if self.binary_fluid:
                 fluid_img = self.transformer['BinaryFluid'](f_img)
             elif (self.train_or_test == 'Train'):
-                fluid_img = self.transformer['Gray'](self.transformer['Train'](f_img))
+                fluid_img = self.transformer['ColorAll'](self.transformer['Train'](f_img))
             elif (self.train_or_test == 'Test'):
-                fluid_img = self.transformer['Gray'](f_img)
+                fluid_img = self.transformer['ColorAll'](f_img)
         img_ID = self.img_ID_list[index]
         img_ID_data = torch.from_numpy(np.array(self.data.loc[img_ID, :], dtype=np.float32))
         with Image.open(self.seg_img_path_list[index]) as seg_pil_img:

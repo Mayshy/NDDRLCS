@@ -11,7 +11,7 @@ import torch
 from torch import optim
 from torch import nn
 import torch.nn.functional as F
-from Loss import MTLLoss
+from Loss import LossList
 from Model import UNet
 from torch.utils import data
 from torchvision import transforms
@@ -87,7 +87,7 @@ def get_model(model_name, pretrained = False):
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
     if criterionUS == "XTanh":
-        return MTLLoss.XTanhLoss()
+        return LossList.XTanhLoss()
 # 配置优化器
 def get_optimizer(optimizer):
     if (optimizer == 'Adam'):
@@ -185,8 +185,8 @@ def parse_args(argv):
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=10e-4)
-    parser.add_argument("--wd", type=float, help="weight decay", default=0.1)
+    parser.add_argument("--lr", type=float, help="learning rate", default=1e-3)
+    parser.add_argument("--wd", type=float, help="weight decay", default=0)
     parser.add_argument("--momentum", type=float, help="momentum", default=0)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
     parser.add_argument("--epoch", type=int, help="number of epoch", default=200)
@@ -230,7 +230,7 @@ def train(epoch):
         # 执行模型，得到输出
         out = model(img)['out']
         # out = model(img)
-        out = nn.Sigmoid()(out)
+        # out = nn.Sigmoid()(out)
         # out = F.interpolate(out, size= , mode='bilinear')
 
         # 取损失函数
@@ -271,6 +271,7 @@ def test(epoch):
 
             # 输出
             output = model(img)['out']
+            loss = criterion(output, seg_label)
             output = nn.Sigmoid()(output)
 
             # seg_label 标签
@@ -280,7 +281,7 @@ def test(epoch):
             output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
-            loss = criterion(output, seg_label)
+
 
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))

@@ -3,7 +3,7 @@
 import torch
 import torchvision
 
-from Loss.MTLLoss import LovaszHinge, LovaszSoftmax, SymmetricLovasz
+from Loss.LossList import LovaszHinge, LovaszSoftmax, SymmetricLovasz
 from Model._utils import extractDict, setup_seed
 
 setup_seed(20)

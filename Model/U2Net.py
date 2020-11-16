@@ -661,7 +661,7 @@ class BasicBlock(nn.Module):
 
 # https://github.com/NathanUA/BASNet
 class BASNet(nn.Module):
-    def __init__(self,n_channels,n_classes):
+    def __init__(self,n_channels, n_classes):
         super(BASNet,self).__init__()
 
         resnet = models.resnet34(pretrained=True)
@@ -797,16 +797,16 @@ class BASNet(nn.Module):
         self.upscore2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
 
         ## -------------Side Output--------------
-        self.outconvb = nn.Conv2d(512,1,3,padding=1)
-        self.outconv6 = nn.Conv2d(512,1,3,padding=1)
-        self.outconv5 = nn.Conv2d(512,1,3,padding=1)
-        self.outconv4 = nn.Conv2d(256,1,3,padding=1)
-        self.outconv3 = nn.Conv2d(128,1,3,padding=1)
-        self.outconv2 = nn.Conv2d(64,1,3,padding=1)
-        self.outconv1 = nn.Conv2d(64,1,3,padding=1)
+        self.outconvb = nn.Conv2d(512,n_classes,3,padding=1)
+        self.outconv6 = nn.Conv2d(512,n_classes,3,padding=1)
+        self.outconv5 = nn.Conv2d(512,n_classes,3,padding=1)
+        self.outconv4 = nn.Conv2d(256,n_classes,3,padding=1)
+        self.outconv3 = nn.Conv2d(128,n_classes,3,padding=1)
+        self.outconv2 = nn.Conv2d(64,n_classes,3,padding=1)
+        self.outconv1 = nn.Conv2d(64,n_classes,3,padding=1)
 
         ## -------------Refine Module-------------
-        self.refunet = RefUnet(1,64)
+        self.refunet = RefUnet(n_classes,64)
 
 
     def forward(self,x):
@@ -900,11 +900,12 @@ class BASNet(nn.Module):
         ## -------------Refine Module-------------
         dout = self.refunet(d1) # 256
 
-        return torch.sigmoid(dout), torch.sigmoid(d1), torch.sigmoid(d2), torch.sigmoid(d3), torch.sigmoid(d4), torch.sigmoid(d5), torch.sigmoid(d6), torch.sigmoid(db)
+
+        return dout, d1, d2, d3, d4, d5, d6, db
 
 
 # 结果取第一个
-bce_loss = nn.BCELoss(reduction='mean')
+bce_loss = nn.BCEWithLogitsLoss(reduction='mean')
 def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 	loss0 = bce_loss(d0,labels_v)
@@ -947,4 +948,4 @@ if __name__ == '__main__':
     # testModel(autoencoder(5, 1))
     # testBackward(kinetwithsk(5, 1))
     # testBackward(autoencoder(5, 1))
-    testBackward(U2NET(5, 1))
+    testBackward(BASNet(5, 2))

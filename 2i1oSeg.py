@@ -9,7 +9,7 @@ import argparse
 import torch
 from torch import optim
 from torch import nn
-from Loss import MTLLoss
+from Loss import LossList
 from Model import UNet
 from Model import InputLevelFusion
 from torch.utils import data
@@ -86,16 +86,14 @@ def get_model(model_name, pretrained = False):
     if model_name == "kinetwithsk":
         return UNet.kinetwithsk()
 
-    # elif model_name == "pspnet":
-    #     return psp.PSPNet(layers=5, bins=(1, 2, 3, 6), dropout=0.1, classes=21, zoom_factor=1, use_ppm=True,
-    #                        pretrained=False).cuda()
+
 
 
 
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
     if criterionUS == "XTanh":
-        return MTLLoss.XTanhLoss()
+        return LossList.XTanhLoss()
 # 配置优化器
 def get_optimizer(optimizer):
     if (optimizer == 'Adam'):
@@ -164,8 +162,8 @@ def parse_args(argv):
     parser.add_argument("--net", type=str, help="The Main Model", default='FCN_ResNet101')
     parser.add_argument("--pretrained", type=bool, help="if pretrained", default=False)
     parser.add_argument("--mode", type=str, help="Mode", default='NddrLSC')
-    parser.add_argument("--optim", type=str, help="Optimizer", default='AdamW')
-    parser.add_argument("--criterion", type=str, help="criterion", default='BCELoss')
+    parser.add_argument("--optim", type=str, help="Optimizer", default='Adam')
+    parser.add_argument("--criterion", type=str, help="criterion", default='GDL')
     parser.add_argument("--criterionUS", type=str, help="criterionUS", default='XTanh')
     parser.add_argument("--s_data_root", type=str, help="single data root", default='../ResearchData/UltraImageUSFullTest/UltraImageCropWithoutMannualResize')
     parser.add_argument("--seg_root", type=str, help="segmentation label root",
@@ -179,8 +177,8 @@ def parse_args(argv):
     # parser.add_argument("--length_US", type=int, help="Length of US_x", default=32)
     parser.add_argument("--length_aux", type=int, help="Length of y", default=10)
     parser.add_argument("--n_class", type=int, help="number of classes", default=4)
-    parser.add_argument("--lr", type=float, help="learning rate", default=0.0005)
-    parser.add_argument("--wd", type=float, help="weight decay", default=0.3)
+    parser.add_argument("--lr", type=float, help="learning rate", default=1e-3)
+    parser.add_argument("--wd", type=float, help="weight decay", default=0)
     parser.add_argument("--momentum", type=float, help="momentum", default=0.9)
     parser.add_argument("--nddr_dr", type=float, help="nddr drop rate", default = 0)
     parser.add_argument("--epoch", type=int, help="number of epoch", default=200)
@@ -226,7 +224,6 @@ def train(epoch):
 
         # 执行模型，得到输出
         out = model(img, fluid_img)
-        out = nn.Sigmoid()(out)
 
         # 取损失函数
         # train_loss = criterion(out, seg_label)
@@ -271,6 +268,8 @@ def test(epoch):
 
             # 输出
             output = model(img, fluid_img)
+            # seg_label 标签, 注意此时的loss含义已然不同了，未来考虑把这个值去掉
+            loss = criterion(output, seg_label)
             output = nn.Sigmoid()(output)
 
             output[output >= 0.5] = 1
@@ -278,8 +277,7 @@ def test(epoch):
             output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
-            # seg_label 标签, 注意此时的loss含义已然不同了，未来考虑把这个值去掉
-            loss = criterion(output, seg_label)
+
             # 记录Loss，计算性能指标
             # logging.info("Epoch {0} TestLoss {1}".format(epoch, loss.item()))
             test_loss_list.append(loss.item())

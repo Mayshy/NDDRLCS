@@ -4,9 +4,11 @@ import torch.nn as nn
 from typing import Dict
 from collections import OrderedDict
 import torch
-from Loss import MTLLoss
+from Loss import LossList
 import numpy as np
 import random
+
+from Loss.LossList import get_criterion
 
 
 def adjust_learning_rate(optimizer, epoch, base_lr):
@@ -15,30 +17,7 @@ def adjust_learning_rate(optimizer, epoch, base_lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-def get_criterion(criterion):
-    criterion = criterion.strip()
-    if criterion == "TheCrossEntropy":
-        return MTLLoss.TheCrossEntropy()
-    elif criterion == "BCELoss":
-        return nn.BCELoss()
-    elif criterion == "DiceLoss":
-        return MTLLoss.DiceLoss()
-    elif criterion == "mIOULoss":
-        return MTLLoss.mIoULoss()
-    elif criterion == "IouLoss":
-        return MTLLoss.IouLoss()
-    elif criterion == "GDL":
-        return MTLLoss.GWDL(weighting_mode='GDL')
-    elif criterion == "GWDL":
-        return MTLLoss.GWDL(weighting_mode='default')
-    elif criterion == "LovaszSoftmax":
-        return MTLLoss.LovaszSoftmax(per_image=True)
-    elif criterion == "LovaszHinge":
-        return MTLLoss.LovaszHinge(per_image=True)
-    # if criterion == "Hausdorff":
-    #     return MTLLoss.GeomLoss(loss="hausdorff")
-    if criterion == "HDLoss":
-        return MTLLoss.HDLoss()
+
 
 class IntermediateLayerGetter(nn.ModuleDict):
     """
@@ -109,7 +88,7 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 def testModel(model):
-    input = torch.rand((4, 5, 224, 224))
+    input = torch.rand((4, 3, 224, 224))
     output = model(input)
     print(output)
     print(output.shape)
@@ -120,6 +99,7 @@ def testBackward(model):
     testEpoch = 3
     for epoch in range(testEpoch):
         output = model(input)
+        output = extractDict(output)
         output = nn.Sigmoid()(output)
         print(output.shape)
         criterion = get_criterion('BCELoss')

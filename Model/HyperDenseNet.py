@@ -272,7 +272,7 @@ def convBatch(nin, nout, kernel_size=3, stride=1, padding=1, bias=False, layer=n
 
 # for 2 model
 class HyperDenseNet_2Mod(nn.Module):
-    def __init__(self, nClasses, mod0_channels=3, mod1_channels=3):
+    def __init__(self, n_class, mod0_channels=3, mod1_channels=3):
         super(HyperDenseNet_2Mod, self).__init__()
 
         # Path-Top
@@ -300,7 +300,7 @@ class HyperDenseNet_2Mod(nn.Module):
         self.fully_1 = nn.Conv2d(1800, 400, kernel_size=1)
         self.fully_2 = nn.Conv2d(400, 200, kernel_size=1)
         self.fully_3 = nn.Conv2d(200, 150, kernel_size=1)
-        self.final = nn.Conv2d(150, nClasses, kernel_size=1)
+        self.final = nn.Conv2d(150, n_class, kernel_size=1)
 
     def forward(self, x, y):
         # ----- First layer ------ #

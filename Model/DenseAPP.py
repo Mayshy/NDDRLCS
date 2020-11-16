@@ -9,6 +9,8 @@ from torch import nn
 from collections import OrderedDict
 from torch.nn import BatchNorm2d as bn
 
+from Model._utils import testModel
+
 Model_CFG_Dense121 = {
     'bn_size': 4,
     'drop_rate': 0,
@@ -71,7 +73,22 @@ class DenseASPP(nn.Module):
     * output_scale can only set as 8 or 16
     """
 
-    def __init__(self, model_cfg, in_channels = 3, n_class=19, output_stride=8):
+    Model_CFG_Dense161 = {
+        'bn_size': 4,
+        'drop_rate': 0,
+        'growth_rate': 48,
+        'num_init_features': 96,
+        'block_config': (6, 12, 36, 24),
+
+        'dropout0': 0.1,
+        'dropout1': 0.1,
+        'd_feature0': 512,
+        'd_feature1': 128,
+
+        'pretrained_path': "./pretrained/densenet161.pth"
+    }
+
+    def __init__(self, model_cfg=Model_CFG_Dense161, in_channels = 3, n_class=1, output_stride=8):
         super(DenseASPP, self).__init__()
         bn_size = model_cfg['bn_size']
         drop_rate = model_cfg['drop_rate']
@@ -139,7 +156,7 @@ class DenseASPP(nn.Module):
         # Final batch norm
         self.features.add_module('norm5', bn(num_features))
         if feature_size > 1:
-            self.features.add_module('upsample', nn.Upsample(scale_factor=2, mode='bilinear'))
+            self.features.add_module('upsample', nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True))
 
         self.ASPP_3 = _DenseAsppBlock(input_num=num_features, num1=d_feature0, num2=d_feature1,
                                       dilation_rate=3, drop_out=dropout0, bn_start=False)
@@ -160,12 +177,12 @@ class DenseASPP(nn.Module):
         self.classification = nn.Sequential(
             nn.Dropout2d(p=dropout1),
             nn.Conv2d(in_channels=num_features, out_channels=n_class, kernel_size=1, padding=0),
-            nn.Upsample(scale_factor=8, mode='bilinear'),
+            nn.Upsample(scale_factor=8, mode='bilinear', align_corners=True),
         )
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_uniform(m.weight.data)
+                nn.init.kaiming_uniform_(m.weight.data)
 
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
@@ -262,6 +279,6 @@ class _Transition(nn.Sequential):
 
 
 if __name__ == "__main__":
-    model = DenseASPP(Model_CFG_Dense161, n_class=1, output_stride=8)
-    print(model)
-
+    model = DenseASPP(n_class=1, output_stride=8)
+    # print(model)
+    testModel(model)

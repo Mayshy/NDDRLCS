@@ -32,7 +32,7 @@ class GeneralizedWassersteinDiceLoss(_Loss):
         COVID-19 patients."
         Tilborghs, S. et al. arXiv preprint arXiv:2007.15546 (2020).
     """
-    def __init__(self, dist_matrix, weighting_mode='default', reduction='mean', if_cuda=False):
+    def __init__(self, dist_matrix, weighting_mode='default', reduction='mean'):
         """
         :param dist_matrix: 2d tensor or 2d numpy array; matrix of distances
         between the classes.
@@ -57,7 +57,7 @@ class GeneralizedWassersteinDiceLoss(_Loss):
         self.M = dist_matrix
         if isinstance(self.M, np.ndarray):
             self.M = torch.from_numpy(self.M)
-        if torch.cuda.is_available() and if_cuda:
+        if torch.cuda.is_available():
             self.M = self.M.cuda()
         if torch.max(self.M) != 1:
             print('Normalize the maximum of the distance matrix '
@@ -68,7 +68,6 @@ class GeneralizedWassersteinDiceLoss(_Loss):
         assert weighting_mode in SUPPORTED_WEIGHTING, \
             "weighting_mode must be in %s" % str(SUPPORTED_WEIGHTING)
         self.reduction = reduction
-        self.if_cuda = if_cuda
 
     def forward(self, input, target):
         """
@@ -138,7 +137,7 @@ class GeneralizedWassersteinDiceLoss(_Loss):
             M_extended.size(1),
             M_extended.size(2),
             flat_proba.size(2)
-        ))
+        )).cuda(flat_proba.device.index)
         # Expand the feature dimensions of the target
         flat_target_extended = torch.unsqueeze(flat_target, dim=1)  # b,s -> b,1,s
         flat_target_extended = flat_target_extended.expand(  # b,1,s -> b,C,s
@@ -146,6 +145,7 @@ class GeneralizedWassersteinDiceLoss(_Loss):
         )
         flat_target_extended = torch.unsqueeze(flat_target_extended, dim=1)  # b,C,s -> b,1,C,s
         # Extract the vector of class distances for the ground-truth label at each voxel
+
         M_extended = torch.gather(M_extended, dim=1, index=flat_target_extended)  # b,C,C,s -> b,1,C,s
         M_extended = torch.squeeze(M_extended, dim=1)  # b,1,C,s -> b,C,s
         # Compute the wasserstein distance map
@@ -209,7 +209,7 @@ class GeneralizedWassersteinDiceLoss(_Loss):
             alpha_np = np.ones((flat_target.size(0), self.num_classes))  # b,c
             alpha_np[:, 0] = 0.
             alpha = torch.from_numpy(alpha_np).float()
-            if torch.cuda.is_available() and self.if_cuda:
+            if torch.cuda.is_available():
                 alpha = alpha.cuda()
         return alpha
 

@@ -4,7 +4,7 @@
 import torch
 import torch.nn as nn
 
-from Model._utils import get_criterion
+from Model._utils import get_criterion, testBackward
 
 
 class DenseLayer(nn.Sequential):
@@ -201,27 +201,7 @@ def FCDenseNet103(n_classes):
         up_blocks=(12,10,7,5,4), bottleneck_layers=15,
         growth_rate=16, out_chans_first_conv=48, n_classes=n_classes)
 
-def testModel(model):
-    input = torch.rand((4, 5, 224, 224))
-    output = model(input)
-    print(output)
-    print(output.shape)
 
-def testBackward(model):
-    label = torch.rand((4, 1, 224, 224))
-    input = torch.rand((4, 3, 224, 224))
-    testEpoch = 3
-    for epoch in range(testEpoch):
-        output = model(input)
-        output = nn.Sigmoid()(output)
-        print(output.shape)
-        criterion = get_criterion('BCELoss')
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
-        loss = criterion(output, label)
-        print(loss.item())
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
 if __name__ == '__main__':
 

@@ -5,7 +5,11 @@
     <orderEntry type="jdk" jdkName="Remote Python 3.7.6 (sftp://18721788@202.120.121.211:22/environment/anaconda3/envs/shy/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PackageRequirementsSettings">
+    <option name="requirementsPath" value="" />
+  </component>
   <component name="PyDocumentationSettings">
+    <option name="myDocStringFormat" value="Google" />
     <option name="renderExternalDocumentation" value="true" />
   </component>
   <component name="TestRunnerService">

@@ -9,6 +9,10 @@ import torch.nn.functional as F
 from torch.nn import Conv2d, Module, Linear, BatchNorm2d, ReLU
 from torch.nn.modules.utils import _pair
 
+from Model._utils import testModel
+
+
+
 __all__ = ['resnest50', 'resnest101', 'resnest200', 'resnest269']
 
 _url_format = 'https://s3.us-west-1.wasabisys.com/resnest/torch/{}-{}.pth'
@@ -30,40 +34,40 @@ resnest_model_urls = {name: _url_format.format(name, short_hash(name)) for
 }
 
 def resnest50(pretrained=False, root='~/.encoding/models', **kwargs):
-    model = ResNet(Bottleneck, [3, 4, 6, 3],
-                   radix=2, groups=1, bottleneck_width=64,
-                   deep_stem=True, stem_width=32, avg_down=True,
-                   avd=True, avd_first=False, **kwargs)
+    model = ResNestBase(Bottleneck, [3, 4, 6, 3],
+                        radix=2, groups=1, bottleneck_width=64,
+                        deep_stem=True, stem_width=32, avg_down=True,
+                        avd=True, avd_first=False, **kwargs)
     if pretrained:
         model.load_state_dict(torch.hub.load_state_dict_from_url(
             resnest_model_urls['resnest50'], progress=True, check_hash=True))
     return model
 
 def resnest101(pretrained=False, root='~/.encoding/models', **kwargs):
-    model = ResNet(Bottleneck, [3, 4, 23, 3],
-                   radix=2, groups=1, bottleneck_width=64,
-                   deep_stem=True, stem_width=64, avg_down=True,
-                   avd=True, avd_first=False, **kwargs)
+    model = ResNestBase(Bottleneck, [3, 4, 23, 3],
+                        radix=2, groups=1, bottleneck_width=64,
+                        deep_stem=True, stem_width=64, avg_down=True,
+                        avd=True, avd_first=False, **kwargs)
     if pretrained:
         model.load_state_dict(torch.hub.load_state_dict_from_url(
             resnest_model_urls['resnest101'], progress=True, check_hash=True))
     return model
 
 def resnest200(pretrained=False, root='~/.encoding/models', **kwargs):
-    model = ResNet(Bottleneck, [3, 24, 36, 3],
-                   radix=2, groups=1, bottleneck_width=64,
-                   deep_stem=True, stem_width=64, avg_down=True,
-                   avd=True, avd_first=False, **kwargs)
+    model = ResNestBase(Bottleneck, [3, 24, 36, 3],
+                        radix=2, groups=1, bottleneck_width=64,
+                        deep_stem=True, stem_width=64, avg_down=True,
+                        avd=True, avd_first=False, **kwargs)
     if pretrained:
         model.load_state_dict(torch.hub.load_state_dict_from_url(
             resnest_model_urls['resnest200'], progress=True, check_hash=True))
     return model
 
 def resnest269(pretrained=False, root='~/.encoding/models', **kwargs):
-    model = ResNet(Bottleneck, [3, 30, 48, 8],
-                   radix=2, groups=1, bottleneck_width=64,
-                   deep_stem=True, stem_width=64, avg_down=True,
-                   avd=True, avd_first=False, **kwargs)
+    model = ResNestBase(Bottleneck, [3, 30, 48, 8],
+                        radix=2, groups=1, bottleneck_width=64,
+                        deep_stem=True, stem_width=64, avg_down=True,
+                        avd=True, avd_first=False, **kwargs)
     if pretrained:
         model.load_state_dict(torch.hub.load_state_dict_from_url(
             resnest_model_urls['resnest269'], progress=True, check_hash=True))
@@ -181,7 +185,7 @@ class Bottleneck(nn.Module):
 
         return out
 
-class ResNet(nn.Module):
+class ResNestBase(nn.Module):
     """ResNet Variants
     Parameters
     ----------
@@ -202,7 +206,7 @@ class ResNet(nn.Module):
         - Yu, Fisher, and Vladlen Koltun. "Multi-scale context aggregation by dilated convolutions."
     """
     # pylint: disable=unused-variable
-    def __init__(self, block, layers, radix=1, groups=1, bottleneck_width=64,
+    def __init__(self, layers, block=Bottleneck, in_channels=3, radix=1, groups=1, bottleneck_width=64,
                  num_classes=1000, dilated=False, dilation=1,
                  deep_stem=False, stem_width=64, avg_down=False,
                  rectified_conv=False, rectify_avg=False,
@@ -220,7 +224,7 @@ class ResNet(nn.Module):
         self.avd = avd
         self.avd_first = avd_first
 
-        super(ResNet, self).__init__()
+        super(ResNestBase, self).__init__()
         self.rectified_conv = rectified_conv
         self.rectify_avg = rectify_avg
         if rectified_conv:
@@ -231,7 +235,7 @@ class ResNet(nn.Module):
         conv_kwargs = {'average_mode': rectify_avg} if rectified_conv else {}
         if deep_stem:
             self.conv1 = nn.Sequential(
-                conv_layer(3, stem_width, kernel_size=3, stride=2, padding=1, bias=False, **conv_kwargs),
+                conv_layer(in_channels, stem_width, kernel_size=3, stride=2, padding=1, bias=False, **conv_kwargs),
                 norm_layer(stem_width),
                 nn.ReLU(inplace=True),
                 conv_layer(stem_width, stem_width, kernel_size=3, stride=1, padding=1, bias=False, **conv_kwargs),
@@ -240,7 +244,7 @@ class ResNet(nn.Module):
                 conv_layer(stem_width, stem_width*2, kernel_size=3, stride=1, padding=1, bias=False, **conv_kwargs),
             )
         else:
-            self.conv1 = conv_layer(3, 64, kernel_size=7, stride=2, padding=3,
+            self.conv1 = conv_layer(in_channels, 64, kernel_size=7, stride=2, padding=3,
                                    bias=False, **conv_kwargs)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -443,3 +447,10 @@ class rSoftMax(nn.Module):
         else:
             x = torch.sigmoid(x)
         return x
+
+if __name__ == '__main__':
+    model = ResNestBase([3, 4, 6, 3], in_channels=3, num_classes=1,
+                           radix=2, groups=1, bottleneck_width=64,
+                           deep_stem=True, stem_width=32, avg_down=True,
+                           avd=True, avd_first=False)
+    testModel(model)

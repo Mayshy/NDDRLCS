@@ -11,9 +11,9 @@ import argparse
 import datetime
 from Model import MTLModel
 import MTLDataset
-from Loss import MTLLoss
+from Loss import LossList
 import numpy as np
-from Loss.MTLLoss import MultiLossLayer
+from Loss.LossList import MultiLossLayer
 
 
 
@@ -25,7 +25,7 @@ def get_criterion(criterion):
 # 配置回归损失函数
 def get_criterionUS(criterionUS):
     if criterionUS == "XTanh":
-        return MTLLoss.XTanhLoss()
+        return LossList.XTanhLoss()
 # 配置优化器
 def get_optimizer(optimizer, multi_loss):
     if (optimizer == 'Adam'):
