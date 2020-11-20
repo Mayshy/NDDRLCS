@@ -12,20 +12,20 @@ model_name_list = ['DUCFCN','SegNet', 'FCN_ResNet50', 'FCN_ResNet101', 'DLV3__Re
 twoI_model_name_list = ['HyperDenseNet', 'IVDNet']
 test_backbone_name_list = ['VGG', 'ResNet', 'DenseNet']
 test_classifier_name_list = ['FCN', 'DeepLabV3']
-test_UNet_backbone_list = ['DUCFCNForUNet', 'Dense_BB_ForUNet']
+test_UNet_backbone_list = ['DenseForUNet']
 test_UNet_classifier_list = ['UNet_Classifier']
 test_2I_backcone_name_list = ['TwoInput_NDDRLSC_BB']
 test_2IForUNet_backcone_name_list = ['NDDRLSC_BB_ForUNet']
 
 class TestModels(unittest.TestCase):
-    @unittest.skip
+
     def test_get_model(self):
         for model_name in model_name_list:
             print(model_name + ':')
             model = get_model(model_name)
             testModel(model)
 
-    @unittest.skip
+
     def test_2I_get_model(self):
         for model_name in twoI_model_name_list:
             print(model_name + ':')
@@ -55,7 +55,7 @@ class TestModels(unittest.TestCase):
                 model = get_2i_composed_model(backbone_name, classifier_name)
                 test2IModel(model)
 
-    @unittest.skip
+
     def test_get_decision_fusion_model(self):
         model0 = get_composed_model('ResNet', 'FCN')
         model1 = get_composed_model('VGG', 'FCN')

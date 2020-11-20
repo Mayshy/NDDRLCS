@@ -1068,21 +1068,21 @@ class NddrLayer(nn.Module):
         self.drop_rate = drop_rate
 
 
-        self.nddr_conv1d_task0 = nn.Conv2d(net0_channels + net1_channels, net0_channels, 1)
-        self.nddr_conv1d_task1 = nn.Conv2d(net0_channels + net1_channels, net1_channels, 1)
+        self.conv1 = nn.Conv2d(net0_channels + net1_channels, net0_channels, 1)
+        self.conv2 = nn.Conv2d(net0_channels + net1_channels, net1_channels, 1)
         if init_method == 'constant':
             # 仅支持net0_channels==net1_channels
             self.conv1.weight = nn.Parameter(torch.cat([
                 torch.eye(net0_channels) * init_weights[0],
                 torch.eye(net0_channels) * init_weights[1]
             ], dim=1).view(net0_channels, -1, 1, 1))
-            if self.conv1.bias:
+            if self.conv1.bias is not None:
                 self.conv1.bias.data.fill_(0)
             self.conv2.weight = nn.Parameter(torch.cat([
                 torch.eye(net0_channels) * init_weights[1],
                 torch.eye(net0_channels) * init_weights[0]
             ], dim=1).view(net0_channels, -1, 1, 1))
-            if self.conv2.bias:
+            if self.conv1.bias is not None:
                 self.conv2.bias.data.fill_(0)
         elif init_method == 'xavier':
             nn.init.xavier_uniform_(self.conv1.weight)
@@ -1098,8 +1098,8 @@ class NddrLayer(nn.Module):
         
     def forward(self, net0, net1):
         nddr = torch.cat((net0, net1), dim=1)
-        net0 = self.nddr_conv1d_task0(nddr)
-        net1 = self.nddr_conv1d_task1(nddr)
+        net0 = self.conv1(nddr)
+        net1 = self.conv2(nddr)
         if (self.drop_rate > 0):
             net0 = F.dropout(net0, p=self.drop_rate,
                                      training=self.training)

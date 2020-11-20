@@ -7,13 +7,14 @@ import torch
 from Loss import LossList
 import numpy as np
 import random
+import logging
 
 from Loss.LossList import get_criterion
 
 
-def adjust_learning_rate(optimizer, epoch, base_lr):
+def adjust_learning_rate(optimizer, epoch, base_lr, full_epoch=200):
     """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
-    lr = base_lr * (0.1 ** (epoch // 50))
+    lr = base_lr * (0.2 ** (epoch // (full_epoch/4)))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
@@ -87,14 +88,36 @@ def setup_seed(seed):
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
 
-def testModel(model):
+def log_mean(epoch, array, name, isLog = False):
+    array = np.array(array)
+    mean = np.mean(array)
+    if isLog:
+        logging.info("Epoch {0} {2} MEAN {1}".format(epoch, mean, name))
+        logging.info("Epoch {0} {2} STD {1}".format(epoch, np.std(array), name))
+    return mean
+
+def dict_sum(res, addend):
+    if not res:
+        res = addend
+    else:
+        for k in res:
+            res[k] += addend[k]
+    return res
+
+def testModel(model, eval=False):
+    if eval:
+        model.eval()
     input = torch.rand((4, 3, 224, 224))
     output = model(input)
-    # print(output)
-    output = extractDict(output)
-    if isinstance(output, tuple):
-        output = output[0]
-    print(output.shape)
+    if isinstance(output, dict) and len(output) > 1:
+        for k, v in output.items():
+            print(k, v.shape)
+
+    else:
+        output = extractDict(output)
+        if isinstance(output, tuple):
+            output = output[0]
+        print(output.shape)
 
 def testBackward(model):
     label = torch.rand((4, 1, 224, 224))
@@ -113,17 +136,26 @@ def testBackward(model):
         loss.backward()
         optimizer.step()
 
-def test2IModel(model):
+def test2IModel(model, eval=False):
+    if eval:
+        model.eval()
     input0 = torch.rand((4, 3, 224, 224))
     input1 = torch.rand((4, 3, 224, 224))
-    out = model(input0, input1)
-    # print(out['out'].shape)
-    # print(out)
-    out = extractDict(out)
-    print(out.shape)
+    output = model(input0, input1)
+    if isinstance(output, dict) and len(output) > 1:
+        for k, v in output.items():
+            print(k, v.shape)
+
+    else:
+        output = extractDict(output)
+        if isinstance(output, tuple):
+            output = output[0]
+        print(output.shape)
 
 
-def test2IBackward(model):
+def test2IBackward(model, eval=False):
+    if eval:
+        model.eval()
     label = torch.zeros((4, 1, 224, 224))
     input0 = torch.rand((4, 3, 224, 224))
     input1 = torch.rand((4, 3, 224, 224))

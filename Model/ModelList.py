@@ -2,8 +2,8 @@
 #-*- coding:utf-8 _*-
 import torchvision
 
-from Model import InputLevelFusion, UNet
-from Model.Backbone import Inception_BB, VGG_BB, ResNet_BB, DenseNet_BB, DUCFCN, Dense_BB_ForUNet, \
+from Model import UNet, SourceRaw
+from Model.Backbone import Inception_BB, VGG_BB, ResNet_BB, DenseNet_BB, Dense_BB_ForUNet, \
     TwoInput_NDDRLSC_BB, NDDRLSC_BB_ForUNet
 from Model.Classifier import FCNHead, DeepLabV3Head, UNet_Classifier
 from Model.DeepMadSeg import DeepMadSeg
@@ -11,12 +11,12 @@ from Model.DenseAPP import DenseASPP
 from Model.FCDenseNet import FCDenseNet
 from Model.HyperDenseNet import HyperDenseNet_2Mod
 from Model.IVDNet import IVD_Net_asym_2M
+from Model.LinkNet import LinkNet
 from Model.PointRend import PointRend, deeplabv3, PointHead
 from Model.SegTron import SimpleSegmentationModel, DesicionFusion, TwoInputSegmentationModel
 from Model.U2Net import U2NET, U2NETP, BASNet
-from Model.UNet import autoencoder, UNet, UNet_2Plus, UNet_3Plus, ResNetUNet, DilatedUNet, ZJUNet, kiunet, SegNet
+from Model.UNet import autoencoder, UNet, UNet_2Plus, UNet_3Plus, ResNetUNet, DilatedUNet, kiunet, SegNet, DUCFCN
 from Model.UNetNest import R2U_Net, AttU_Net, R2AttU_Net, NestedUNet
-from Model._utils import testModel, test2IModel
 
 
 
@@ -25,17 +25,13 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
     model_name = model_name.strip()
     # Pure Single Or InputLevel
     if model_name == 'FCN_ResNet50':
-        return torchvision.models.segmentation.fcn_resnet50(pretrained=False, progress=False, num_classes=1,
-                                                            aux_loss=None)
+        return SourceRaw.SourceModel(in_channelsX, n_class, model_name='FCN_ResNet50')
     if model_name == 'FCN_ResNet101':
-        return torchvision.models.segmentation.fcn_resnet101(pretrained=False, progress=False, num_classes=1,
-                                                             aux_loss=None)
+        return SourceRaw.SourceModel(in_channelsX, n_class, model_name='FCN_ResNet101')
     if model_name == 'DLV3__ResNet50':
-        return torchvision.models.segmentation.deeplabv3_resnet50(pretrained=False, progress=False, num_classes=1,
-                                                                  aux_loss=None)
+        return SourceRaw.SourceModel(in_channelsX, n_class, model_name='DLV3__ResNet50')
     if model_name == 'DLV3__ResNet101':
-        return torchvision.models.segmentation.deeplabv3_resnet101(pretrained=False, progress=False, num_classes=1,
-                                                                   aux_loss=None)
+        return SourceRaw.SourceModel(in_channelsX, n_class, model_name='DLV3__ResNet101')
     # 单个
     if model_name == 'SegNet':
         return SegNet(in_channelsX, n_class)
@@ -68,6 +64,8 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
         return UNet_3Plus(in_channels=in_channelsX, n_classes=n_class)
     if model_name == 'ResNetUNet':
         return ResNetUNet(in_channels=in_channelsX, n_class=n_class)
+    if model_name == 'LinkNet':
+        return LinkNet(in_channels=in_channelsX, n_class=n_class)
     if model_name == 'DilatedUNet':
         return DilatedUNet(n_channels=in_channelsX, n_classes=n_class)
     if model_name == 'kiunet':
@@ -82,16 +80,11 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
         return NestedUNet(in_ch=in_channelsX, out_ch=n_class)
     if model_name == 'DUCFCN':
         return DUCFCN(in_channelsX, n_class)
-
-
     # layer fusion
     if model_name == 'HyperDenseNet':
         return HyperDenseNet_2Mod(n_class=n_class, mod0_channels=in_channelsX, mod1_channels=in_channelsY)
     if model_name == 'IVDNet':
         return IVD_Net_asym_2M(input0_nc=in_channelsX, input1_nc=in_channelsY, output_nc=n_class, ngf=32)
-
-
-
     else:
         raise NotImplementedError('model {} is not supported as of now'.format(model_name))
 
@@ -102,12 +95,7 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
 
 
 
-test_backbone_name_list = ['Inception', 'VGG', 'ResNet', 'DenseNet']
-test_classifier_name_list = ['FCNHead', 'SegNet', 'DeepLabV3Head']
-test_UNet_backbone_list = ['DUCFCNForUNet', 'Dense_BB_ForUNet']
-test_UNet_classifier_list = ['UNet_Classifier']
-test_2I_backcone_name_list = ['TwoInput_NDDRLSC_BB']
-test_2IForUNet_backcone_name_list = ['NDDRLSC_BB_ForUNet']
+
 def get_composed_model(backbone_name, classifier_name, in_channelsX=3, in_channelsY=3, n_class=1):
     '''
 
@@ -169,8 +157,8 @@ def get_2i_composed_model(backbone_name, classifier_name, in_channelsX=3, in_cha
     classifier = get_clasifier(classifier_name, backbone_out_channels=backbone_out_channels, n_class=n_class)
     return TwoInputSegmentationModel(backbone, classifier)
 
-def get_decison_fusion_model(model0, model1, n_class=1):
-    return DesicionFusion(model0, model1, num_class=n_class)
+def get_decison_fusion_model(model0, model1, n_class=1, fusion_function='conv'):
+    return DesicionFusion(model0, model1, num_class=n_class, fusion_function=fusion_function)
 
 def get_clasifier(classifier_name, backbone_out_channels=None, n_class=1):
     if classifier_name == 'FCN':
@@ -182,4 +170,32 @@ def get_clasifier(classifier_name, backbone_out_channels=None, n_class=1):
         return UNet_Classifier(num_classes=n_class)
     else:
         raise NotImplementedError('classifier {} is not supported as of now'.format(classifier_name))
+
+def get_single_input_model(model_name, model_clf_name=None,composed=False):
+    if composed:
+        return get_composed_model(model_name, model_clf_name)
+    return get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1)
+
+def get_multi_input_model(modelX_name, modelX_clf_name=None, modelY_name=None, modelY_clf_name=None, in_channelsX=3, in_channelsY=3, input_fusion=False, decision_fusion=False, composedX=False, composedY=False, fusion_function='conv'):
+    # input fusion
+    if input_fusion:
+        if composedX:
+            return get_composed_model(modelX_name, modelX_clf_name, in_channelsX=6)
+        return get_model(modelX_name, in_channelsX=6, in_channelsY=in_channelsY, n_class=1)
+    # decision fusion
+    if decision_fusion:
+        if composedX:
+            modelX = get_composed_model(modelX_name, modelX_clf_name, in_channelsX=3)
+        else:
+            modelX = get_model(modelX_name, in_channelsX=3, in_channelsY=in_channelsY, n_class=1)
+        if composedY:
+            modelY = get_composed_model(modelY_name, modelY_clf_name, in_channelsX=3)
+        else:
+            modelY = get_model(modelY_name, in_channelsX=3, in_channelsY=in_channelsY, n_class=1)
+        return get_decison_fusion_model(modelX, modelY, fusion_function=fusion_function)
+
+    # layer fusion
+    if composedX:
+        return get_composed_model(modelX_name, modelX_clf_name, in_channelsX=3, in_channelsY=3, n_class=1)
+    return get_model(modelX_name, in_channelsX=3, in_channelsY=3, n_class=1)
 

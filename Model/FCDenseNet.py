@@ -4,7 +4,6 @@
 import torch
 import torch.nn as nn
 
-from Model._utils import get_criterion, testBackward
 
 
 class DenseLayer(nn.Sequential):
@@ -202,7 +201,3 @@ def FCDenseNet103(n_classes):
         growth_rate=16, out_chans_first_conv=48, n_classes=n_classes)
 
 
-
-if __name__ == '__main__':
-
-    testBackward(FCDenseNet103(1))

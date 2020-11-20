@@ -9,7 +9,9 @@ from math import exp
 from scipy.ndimage import distance_transform_edt as distance
 
 from Loss.GeneralisedLoss import GeneralizedWassersteinDiceLoss
+from Loss.BasNetLoss import BasNetLoss
 from Loss.lovasz_losses import lovasz_hinge, lovasz_softmax, symmetric_lovasz
+from Loss.U2NetLoss import U2NetLoss
 
 
 class MultiLossLayer(nn.Module):
@@ -466,8 +468,8 @@ class GWDL(torch.nn.Module):
     def __init__(self, weighting_mode='default', reduction='mean'):
         super(GWDL, self).__init__()
         dist_mat = np.array([
-            [0., 1.],
             [1., 0.],
+            [0., 1.],
         ])
         self.gwdl = GeneralizedWassersteinDiceLoss(dist_mat, weighting_mode=weighting_mode, reduction=reduction)
 
@@ -558,11 +560,12 @@ class CLDiceLoss(torch.nn.Module):
 
 def get_criterion(criterion):
     criterion = criterion.strip()
-    if criterion == "TheCrossEntropy":
-        return TheCrossEntropy()
-    elif criterion == "BCELoss":
+
+    if criterion == "BCELoss":
+        # logits
         return nn.BCEWithLogitsLoss()
     elif criterion == "DiceLoss":
+        # logits
         return DiceLoss()
     elif criterion == "mIOULoss":
         return mIoULoss()
@@ -580,10 +583,14 @@ def get_criterion(criterion):
     elif criterion == "LovaszHinge":
         # logits
         return LovaszHinge(per_image=True)
-    # if criterion == "Hausdorff":
-    #     return MTLLoss.GeomLoss(loss="hausdorff")
-    if criterion == "HDLoss":
+    elif criterion == "HDLoss":
         return HDLoss()
+    elif criterion == "BasNetLoss":
+        return BasNetLoss()
+    elif criterion == "U2NetLoss":
+        return U2NetLoss()
+    else:
+        raise NotImplementedError('criterion {} is not supported as of now'.format(criterion))
 
 
 

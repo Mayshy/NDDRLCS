@@ -134,7 +134,7 @@ def resnet103(pretrained=False, progress=True, **kwargs):
 
 
 class PointHead(nn.Module):
-    def __init__(self, in_c=514, num_classes=1, k=3, beta=0.75):
+    def __init__(self, in_c=514, num_classes=2, k=3, beta=0.75):
         super().__init__()
         self.mlp = nn.Conv1d(in_c, num_classes, 1)
         self.k = k
@@ -143,7 +143,7 @@ class PointHead(nn.Module):
     def forward(self, x, res2, out):
         """
         1. Fine-grained features are interpolated from res2 for DeeplabV3
-        2. During training we sample as many points as there are on a stride 16 feature map of the input
+        2. During training we sample as many points as there are on a stride 16 feature map of the input()
         3. To measure prediction uncertainty
            we use the same strategy during training and inference: the difference between the most
            confident and second most confident class probabilities.
@@ -169,7 +169,6 @@ class PointHead(nn.Module):
         (i.e., the number of points in the stride 16 map of a 1024×2048 image)
         """
         num_points = 8096
-
         while out.shape[-1] != x.shape[-1]:
             out = F.interpolate(out, scale_factor=2, mode="bilinear", align_corners=True)
 
@@ -184,6 +183,7 @@ class PointHead(nn.Module):
 
             B, C, H, W = out.shape
             points_idx = points_idx.unsqueeze(1).expand(-1, C, -1)
+
             out = (out.reshape(B, C, -1)
                       .scatter_(2, points_idx, rend)
                       .view(B, C, H, W))
@@ -226,11 +226,13 @@ class PointRend(nn.Module):
         result.update(self.head(x, result["res2"], result["coarse"]))
         return result
 
+print('start')
 if __name__ == "__main__":
-    x = torch.randn(3, 3, 244, 244)
+    x = torch.randn(4, 3, 244, 244)
     # pred = F.interpolate(result["coarse"], x.shape[-2:], mode="bilinear", align_corners=True)
     # seg_loss = F.cross_entropy(pred, gt, ignore_index=255)
-    net = PointRend(deeplabv3(False), PointHead())
+    net = PointRend(deeplabv3(False, num_classes=2), PointHead(num_classes=2))
+    # net.eval()
     out = net(x)
     for k, v in out.items():
         print(k, v.shape)

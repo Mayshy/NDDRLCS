@@ -35,7 +35,7 @@ class Inception_BB(nn.Module):
 class VGG_BB(nn.Module):
     version_set = ['vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn', 'vgg19_bn', 'vgg19']
 
-    def __init__(self, in_channels, pretrained=False, version='vgg19_bn'):
+    def __init__(self, in_channels, pretrained=False, version='vgg19_bn', clf=None):
         super(VGG_BB, self).__init__()
         version = version.strip()
         if version == 'vgg11':
@@ -71,7 +71,7 @@ class ResNet_BB(nn.Module):
            'wide_resnet50_2', 'wide_resnet101_2',
                    'resnest50', 'resnest101', 'resnest200', 'resnest269']
 
-    def __init__(self, in_channels, pretrained=False, version='resnet101'):
+    def __init__(self, in_channels, pretrained=False, version='resnet101', clf=None):
         super(ResNet_BB, self).__init__()
         version = version.strip()
         if version == 'resnet18':
@@ -104,9 +104,16 @@ class ResNet_BB(nn.Module):
             raise NotImplementedError('version {} is not supported as of now'.format(version))
         resnet.conv1 = nn.Conv2d(in_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3),
                                             bias=False)
-        return_layers = {'layer4': 'out'}
+        if clf == 'deeplabv3Plus':
+            return_layers = {'layer4': 'out', 'layer1': 'low_level'}
+        elif clf == 'PointRend':
+            return_layers = {'layer4': 'out', 'layer2': 'fine_grained'}
+        else:
+            return_layers = {'layer4': 'out'}
         self.backbone = IntermediateLayerGetter(resnet, return_layers)
         self.out_channels = 2048
+        self.low_channels = 256
+        self.fine_grained_channels = 512
 
     def forward(self, x):
         return self.backbone(x)
@@ -138,7 +145,7 @@ class TwoInput_NDDRLSC_BB(nn.Module):
              'SingleTasks', 'MultiTasks', 'SIDCCross3', 'SIDCCross34', 'SIDCCross345', 'SIDCCross35', 'SIDCPure']
     modes = {'LayersLearningMixutres', 'EasyCat', 'WeightCat', 'LayersWeightCat', 'WeightMixtures'}
     def __init__(self, in_channels, in_aux_channels, growth_rate=48, block_config=(6, 12, 36, 24),
-                 num_init_features=96, bn_size=4, drop_rate=0, num_classes=4, length_aux = 10 , mode='WeightMixtures', nddr_drop_rate = 0, memory_efficient=True):
+                 num_init_features=96, bn_size=4, drop_rate=0, num_classes=4, length_aux = 10 , mode='WeightMixtures', nddr_drop_rate = 0, memory_efficient=True, clf=None):
         super(TwoInput_NDDRLSC_BB, self).__init__()
         self.features = nn.Sequential(OrderedDict([
             ('conv0', nn.Conv2d(in_channels, num_init_features, kernel_size=7, stride=2,
@@ -239,8 +246,11 @@ class TwoInput_NDDRLSC_BB(nn.Module):
 
         self.mode = mode
         self.out_channels = 2208
+        self.clf = clf
+        self.fine_grained_channels = 384
 
     def forward(self, x, y):
+        result = OrderedDict()
         features = self.features(x)
         features_aux = self.features_aux(y)
 
@@ -254,31 +264,28 @@ class TwoInput_NDDRLSC_BB(nn.Module):
 
 
         transition0, transition0_aux = self.nddr0(transition0, transition0_aux)
-
+        if self.clf == 'PointRend':
+            result['fine_grained'] = torch.cat((transition0, transition0_aux), dim=1)
         block1 = self.block1(transition0)
         transition1 = self.transition1(block1)
         block1_aux = self.block1_aux(transition0_aux)
         transition1_aux = self.transition1_aux(block1_aux)
 
-
+        # if self.clf == 'PointRend':
+        #     result['fine_grained'] = torch.cat((transition0, transition0_aux), dim=1)
 
         transition1, transition1_aux = self.nddr1(transition1, transition1_aux)
-
         block2 = self.block2(transition1)
         transition2 = self.transition2(block2)
         block2_aux = self.block2_aux(transition1_aux)
         transition2_aux = self.transition2_aux(block2_aux)
 
 
-
         transition2, transition2_aux = self.nddr2(transition2, transition2_aux)
-
         block3 = self.block3(transition2)
         transition3 = self.final_bn(block3)
         block3_aux = self.block3_aux(transition2_aux)
         transition3_aux = self.final_bn_aux(block3_aux)
-
-
 
         transition3, transition3_aux = self.nddr3(transition3, transition3_aux)
 
@@ -301,16 +308,19 @@ class TwoInput_NDDRLSC_BB(nn.Module):
             transition2_aux = F.adaptive_avg_pool2d(transition2_aux, (7, 7))
 
             out = torch.mul(transition0, self.betas_8layer[0]) + torch.mul(transition0_aux, self.betas_8layer[1]) + torch.mul(transition1, self.betas_8layer[2]) + torch.mul(transition1_aux, self.betas_8layer[3]) + torch.mul(transition2, self.betas_8layer[4]) + torch.mul(transition2_aux, self.betas_8layer[5]) + torch.mul(transition3, self.betas_8layer[6]) + torch.mul(transition3_aux, self.betas_8layer[7])
-            return out
+            result['out'] = out
+            return result
 
         if self.mode == 'EasyCat':
             out = torch.cat((transition3, transition3_aux), dim=1)
-            return out
+            result['out'] = out
+            return result
         if self.mode == 'WeightCat':
             out_0 = torch.mul(transition3, self.betas_2layer[0])
             out_1 = torch.mul(transition3_aux, self.betas_2layer[1])
             out = torch.cat((out_0, out_1), dim=1)
-            return out
+            result['out'] = out
+            return result
         if self.mode == 'LayersWeightCat':
             transition0 = self.sluice0_conv1(transition0)
             transition0 = F.adaptive_avg_pool2d(transition0, (7, 7))
@@ -336,12 +346,14 @@ class TwoInput_NDDRLSC_BB(nn.Module):
             out_6 = torch.mul(transition3, self.betas_8layer[6])
             out_7 = torch.mul(transition3_aux, self.betas_8layer[7])
             out = torch.cat((out_0, out_1, out_2, out_3, out_4, out_5, out_6, out_7), dim=1)
-            return out
+            result['out'] = out
+            return result
 
         if self.mode == 'WeightMixtures':
             out = torch.mul(transition3, self.betas_2layer[0]) + torch.mul(transition3_aux, self.betas_2layer[1])
 
-            return out
+            result['out'] = out
+            return result
 
 
 

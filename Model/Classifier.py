@@ -2,11 +2,13 @@
 #-*- coding:utf-8 _*-
 # TODO:实现SegNet
 # 实现DeepLabV1
+from collections import OrderedDict
+
 import torch.nn as nn
 from torch.nn import functional as F
 import torch
 
-
+from Model.DeepLabV3Plus import ASPPPlus, convert_conv2_to_separable_conv
 from Model.UNet import Up, OutConv
 
 
@@ -25,7 +27,7 @@ class FCNHead(nn.Sequential):
 
 
 
-
+# 输入输出size不变
 class DeepLabV3Head(nn.Sequential):
     def __init__(self, in_channels, num_classes):
         super(DeepLabV3Head, self).__init__(
@@ -36,9 +38,55 @@ class DeepLabV3Head(nn.Sequential):
             nn.Conv2d(256, num_classes, 1)
         )
 
+class DeepLabHeadV3Plus(nn.Module):
+    def __init__(self, in_channels, low_level_channels, num_classes, aspp_dilate=[12, 24, 36]):
+        super(DeepLabHeadV3Plus, self).__init__()
+        # 48维是论文中实验过的一个参数，具体看论文
+        self.project = nn.Sequential(
+            nn.Conv2d(low_level_channels, 48, 1, bias=False),
+            nn.BatchNorm2d(48),
+            nn.ReLU(inplace=True),
+        )
+
+        self.aspp = ASPPPlus(in_channels, aspp_dilate)
+
+        # use double Conv2d get better performance
+        self.classifier = nn.Sequential(
+            nn.Conv2d(304, 256, 3, padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, num_classes, 1)
+        )
+        convert_conv2_to_separable_conv(self)
+        self._init_weight()
+
+    # 高级特征来自aspp的输出
+    # 提供细节信息的低级特征似乎可以有更优美的输入
+    def forward(self, feature):
+        low_level_feature = self.project(feature['low_level'])
+        output_feature = self.aspp(feature['out'])
+        output_feature = F.interpolate(output_feature, size=low_level_feature.shape[2:], mode='bilinear',
+                                       align_corners=False)
+        # output_feature 通常output stride为16
+        # low_level_feature 通常output stride为4
+        return self.classifier(torch.cat([low_level_feature, output_feature], dim=1))
+        # 最后仍然需要上采样4倍
+
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
 
 class ASPPConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, dilation):
+        # padding = dilation to keep the size invariant
         modules = [
             nn.Conv2d(in_channels, out_channels, 3, padding=dilation, dilation=dilation, bias=False),
             nn.BatchNorm2d(out_channels),
@@ -66,6 +114,7 @@ class ASPP(nn.Module):
     def __init__(self, in_channels, atrous_rates, out_channels=256):
         super(ASPP, self).__init__()
         modules = []
+        # base condition: only 1x1 conv to transfer channels
         modules.append(nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 1, bias=False),
             nn.BatchNorm2d(out_channels),
@@ -120,6 +169,16 @@ class UNet_Classifier(nn.Module):
         x = self.outc(x)
         return x
 
+# TODO: UNet Familiy, including
+# class U
 
 
-
+if __name__ == '__main__':
+    classifier = DeepLabHeadV3Plus(3,6, 1)
+    low_features = torch.rand((2, 6, 224, 224))
+    out_features = torch.rand((2, 3, 56, 56))
+    features = OrderedDict()
+    features['low_level'] = low_features
+    features['out'] = out_features
+    out = classifier(features)
+    print(out.shape)

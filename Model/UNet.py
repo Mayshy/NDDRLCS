@@ -11,7 +11,7 @@ from torchvision import models
 from torch import optim
 from torch.nn import init
 
-from Model._utils import get_criterion, testBackward
+from Model._utils import testBackward
 
 class DUC(nn.Module):
     def __init__(self, inplanes, planes, upscale_factor=2):
