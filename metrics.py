@@ -225,11 +225,11 @@ def get_sum_metrics(batch_output, batch_target, metrics_type, test = False, prin
         return metrics, dices
     return metrics
 
-def one_hot(labels: torch.Tensor,
-            num_classes: int,
-            device: Optional[torch.device] = None,
-            dtype: Optional[torch.dtype] = None,
-            eps: Optional[float] = 1e-6) -> torch.Tensor:
+def one_hot3D(labels: torch.Tensor,
+              num_classes: int,
+              device: Optional[torch.device] = None,
+              dtype: Optional[torch.dtype] = None,
+              eps: Optional[float] = 1e-6) -> torch.Tensor:
     r"""Converts an integer label 2D tensor to a one-hot 3D tensor.
 
     Args:
@@ -274,6 +274,7 @@ def one_hot(labels: torch.Tensor,
     one_hot = torch.zeros(batch_size, num_classes, height, width,
                           device=device, dtype=dtype)
     return one_hot.scatter_(1, labels.unsqueeze(1), 1.0)
+
 
 
 # jaccard_index = make_weighted_metric(classwise_iou)
@@ -380,6 +381,10 @@ def data_test():
     print(get_average_metrics(soft_output, seg_label, test_metrics, test=True))
 
 if __name__ == '__main__':
-    data_test()
+    # data_test()
     # virtual_test()
+    labels = torch.LongTensor([[[0, 1],
+                                [0, 0]]])
+    labels = one_hot3D(labels, 2)
+    print(labels)
 

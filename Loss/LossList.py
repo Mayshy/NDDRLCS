@@ -402,9 +402,10 @@ class MSSSIM(torch.nn.Module):
 
 
 class LovaszSoftmax(torch.nn.Module):
-    def __init__(self, per_image=False):
+    def __init__(self, per_image=False, classes=[1]):
         super(LovaszSoftmax, self).__init__()
         self.per_image = per_image
+        self.classes = classes
 
     # probas: [B, C, H, W] Variable, class probabilities at each prediction (between 0 and 1).
     #               Interpreted as binary (sigmoid) output with outputs of size [B, H, W].
@@ -413,7 +414,7 @@ class LovaszSoftmax(torch.nn.Module):
     def forward(self, outputs_soft, label_batch):
         label_batch = label_batch[:, 0, :]
 
-        return lovasz_softmax(outputs_soft, label_batch, classes=[1], per_image=self.per_image)
+        return lovasz_softmax(outputs_soft, label_batch, classes=self.classes, per_image=self.per_image)
 
 class LovaszHinge(torch.nn.Module):
     def __init__(self, per_image=False):
@@ -558,7 +559,7 @@ class CLDiceLoss(torch.nn.Module):
 
 
 
-def get_criterion(criterion):
+def get_criterion(criterion, classes=[1]):
     criterion = criterion.strip()
 
     if criterion == "BCELoss":
@@ -579,7 +580,7 @@ def get_criterion(criterion):
         return GWDL(weighting_mode='default')
     elif criterion == "LovaszSoftmax":
         # logits
-        return LovaszSoftmax(per_image=True)
+        return LovaszSoftmax(per_image=True, classes=classes)
     elif criterion == "LovaszHinge":
         # logits
         return LovaszHinge(per_image=True)

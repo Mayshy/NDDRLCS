@@ -4,8 +4,8 @@ import torchvision
 
 from Model import UNet, SourceRaw
 from Model.Backbone import Inception_BB, VGG_BB, ResNet_BB, DenseNet_BB, Dense_BB_ForUNet, \
-    TwoInput_NDDRLSC_BB, NDDRLSC_BB_ForUNet
-from Model.Classifier import FCNHead, DeepLabV3Head, UNet_Classifier
+    TwoInput_NDDRLSC_BB, NDDRLSC_BB_ForUNet, BestPractice2I
+from Model.Classifier import FCNHead, DeepLabV3Head, UNet_Classifier, DeepLabHeadV3Plus
 from Model.DeepMadSeg import DeepMadSeg
 from Model.DenseAPP import DenseASPP
 from Model.FCDenseNet import FCDenseNet
@@ -21,7 +21,7 @@ from Model.UNetNest import R2U_Net, AttU_Net, R2AttU_Net, NestedUNet
 
 
 
-def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
+def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1, ifPointRend=False):
     model_name = model_name.strip()
     # Pure Single Or InputLevel
     if model_name == 'FCN_ResNet50':
@@ -85,8 +85,12 @@ def get_model(model_name, in_channelsX=3, in_channelsY=3, n_class=1):
         return HyperDenseNet_2Mod(n_class=n_class, mod0_channels=in_channelsX, mod1_channels=in_channelsY)
     if model_name == 'IVDNet':
         return IVD_Net_asym_2M(input0_nc=in_channelsX, input1_nc=in_channelsY, output_nc=n_class, ngf=32)
-    else:
-        raise NotImplementedError('model {} is not supported as of now'.format(model_name))
+    if model_name == 'NDDR_DLV3P_PointRend':
+        backbone = BestPractice2I(3, 3 )
+        classifier = DeepLabHeadV3Plus(backbone.out_channels, backbone.fine_grained_channels, 2)
+        return TwoInputSegmentationModel(backbone, classifier, if_point_rend_upsample=ifPointRend)
+
+    raise NotImplementedError('model {} is not supported as of now'.format(model_name))
 
 
 

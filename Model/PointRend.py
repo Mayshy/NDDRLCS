@@ -226,7 +226,6 @@ class PointRend(nn.Module):
         result.update(self.head(x, result["res2"], result["coarse"]))
         return result
 
-print('start')
 if __name__ == "__main__":
     x = torch.randn(4, 3, 244, 244)
     # pred = F.interpolate(result["coarse"], x.shape[-2:], mode="bilinear", align_corners=True)

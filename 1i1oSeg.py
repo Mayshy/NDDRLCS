@@ -48,11 +48,6 @@ def get_dataloader(dataset_type):
         return data.DataLoader(
             test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-
-
-
-
-
 # 训练
 def train(epoch):
     # 设置数据集
@@ -84,6 +79,8 @@ def train(epoch):
 
         # 取损失函数
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
+        # train_loss = criterion(out, seg_label)
+
         train_loss_list.append(train_loss.item())
 
         # 使用优化器执行反向传播
@@ -109,7 +106,7 @@ def test(epoch):
             batch_num += 1
             # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
             img = img.to(DEVICE)
-            seg_label = seg_label.to(DEVICE)
+            seg_label = seg_label.long().to(DEVICE)
             if args.criterion.strip() == 'BCELoss':
                 seg_label = seg_label.float()
             US_data = US_data.to(DEVICE)
@@ -122,10 +119,14 @@ def test(epoch):
             output = nn.Sigmoid()(output)
 
             # seg_label 标签
-
-            output[output >= 0.5] = 1
-            output[output < 0.5] = 0
-            output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
+            if args.criterion in ['GDL', 'GWDL']:
+                output[output >= 0.5] = 0
+                output[output < 0.5] = 1
+            else:
+                output[output >= 0.5] = 1
+                output[output < 0.5] = 0
+            if output.shape[3] != 512:
+                output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
             seg_test = seg_label.long()
 
 
@@ -201,6 +202,8 @@ last_train_loss = float('inf')
 count_loss_improve = 0
 
 for epoch in range(start_epoch, args.epoch):
+    # train(epoch)
+    # test(epoch)
     adjust_learning_rate(optimizer, epoch, args.lr, args.epoch)
     cur_train_loss = train(epoch)
     if (cur_train_loss >= last_train_loss):
@@ -209,7 +212,7 @@ for epoch in range(start_epoch, args.epoch):
         count_loss_improve = 0
     last_train_loss = cur_train_loss
     test(epoch)
-    if (count_loss_improve == 8):
+    if (count_loss_improve == 4):
         break
 
 

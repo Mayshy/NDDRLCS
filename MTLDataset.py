@@ -11,36 +11,40 @@ from sklearn.ensemble import RandomForestClassifier
 import logging
 
 
-import metrics
-
-
 transformer = {'Train':transforms.Compose([
-    # transforms.ToPILImage(),
-    # transforms.RandomRotation(180),
-    # transforms.RandomHorizontalFlip(p=0.5),
-    # transforms.RandomVerticalFlip(p=0.5),
-    # transforms.ToTensor(),
+    transforms.ToPILImage(),
+    transforms.RandomRotation(180),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),
+    transforms.ToTensor(),
+]),
+ 'All':transforms.Compose([
+    transforms.Resize((256,256)),
+    transforms.Grayscale(3),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ]),
 
 'Gray':transforms.Compose([
-    transforms.Resize((336,336)),
+    transforms.Resize((256,256)),
     # transforms.Grayscale(3),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'ColorAll':transforms.Compose([
-    transforms.Resize((336,336)),
+    transforms.Resize((256,256)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'BinaryFluid':transforms.Compose([
-    transforms.Resize((336,336)),
+    transforms.Resize((256,256)),
     transforms.Grayscale(3),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ]),
 'SegTrain':transforms.Compose([
-    transforms.Resize((336,336)),
+    transforms.Resize((256,256)),
     transforms.Grayscale(1)
 ]),
 'SegTest':transforms.Compose([
@@ -48,6 +52,24 @@ transformer = {'Train':transforms.Compose([
     transforms.Grayscale(1)
 ])
 }
+# transformer = {'Train':transforms.Compose([
+#     # transforms.ToPILImage(),
+#     transforms.RandomRotation(180),
+#     transforms.RandomHorizontalFlip(p=0.5),
+#     transforms.RandomVerticalFlip(p=0.5),
+#     # transforms.ToTensor(),
+# ]),
+# 'All':transforms.Compose([
+#     transforms.Resize((224,224)),
+#     transforms.Grayscale(3),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+# ]),
+# 'Seg':transforms.Compose([
+#     transforms.Resize((224, 224)),
+#     transforms.Grayscale(1)
+# ]),
+# }
 
 
 
@@ -275,13 +297,14 @@ class FluidSegDataset(data.Dataset):
     # auxiliary: optional propertiy: 'US','MIX'
     # filter: input can be any 1D list object, or specified methods ---- 'rf_importance'
     def __init__(self, img_root, seg_label_root, fluid_root, binary_fluid=False, my_transformer=transformer,
-                 ref_data_root='../ResearchData/data_ultrasound_-1.csv', num_classes=4, auxiliary='US', us_path=None,
-                 mix_path=None, screener='rf_importance', screen_num=10, train_or_test='Test'):
+                 ref_data_root='../ResearchData/data_ultrasound_-1.csv', num_classes=2, auxiliary='US', us_path=None,
+                 mix_path=None, screener='rf_importance', screen_num=10, train_or_test='Test', seg_channel=1):
         self.transformer = my_transformer
         self.datatype = auxiliary
         self.num_classes = num_classes
         self.train_or_test = train_or_test
         self.binary_fluid = binary_fluid
+        self.seg_channel = seg_channel
         if (auxiliary == 'US' and us_path):
             # logging.debug('US Dataset has prepared to init.')
             data = pd.read_csv(us_path, index_col=-1)
@@ -327,12 +350,12 @@ class FluidSegDataset(data.Dataset):
     def __getitem__(self, index):
         with Image.open(self.img_path_list[index]) as pil_img:
             if (self.train_or_test == 'Train'):
-                img = self.transformer['Gray'](self.transformer['Train'](pil_img))
+                img = self.transformer['All'](self.transformer['Train'](pil_img))
             elif (self.train_or_test == 'Test'):
-                img = self.transformer['Gray'](pil_img)
+                img = self.transformer['All'](pil_img)
         with Image.open(self.fluid_img_list[index]) as f_img:
             if self.binary_fluid:
-                fluid_img = self.transformer['BinaryFluid'](f_img)
+                fluid_img = self.transformer['All'](f_img)
             elif (self.train_or_test == 'Train'):
                 fluid_img = self.transformer['ColorAll'](self.transformer['Train'](f_img))
             elif (self.train_or_test == 'Test'):
@@ -349,9 +372,6 @@ class FluidSegDataset(data.Dataset):
             seg_label[seg_label == 0] = 0
             seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
 
-            # seg_label = torch.unsqueeze(torch.LongTensor(seg_label), 0)
-            # seg_label = metrics.one_hot(seg_label, 2)
-            # seg_label = torch.squeeze(seg_label, 0)
         numeric_data = img_ID_data[:-1]
         type_label = img_ID_data[-1]
         type_label4 = type_label.long()

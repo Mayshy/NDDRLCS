@@ -2,6 +2,8 @@
 # 每个函数前
 import os
 import pandas as pd
+from torch.cuda import amp
+
 import MTLDataset
 import logging
 import torch
@@ -17,8 +19,11 @@ import metrics
 import collections
 
 from Model.ModelList import get_model
-from Model._utils import adjust_learning_rate, setup_seed, log_mean, dict_sum
+from Model.PointRend import point_sample
+from Model._utils import adjust_learning_rate, setup_seed, log_mean, dict_sum, extractDict
 from Model.mixup import mixup_data2, mixup_criterion_type
+import warnings
+warnings.filterwarnings('ignore')
 
 
 
@@ -33,7 +38,7 @@ def train(epoch):
     # 设置数据集
     train_dataset = MTLDataset.FluidSegDataset(
         str(data_root) + 'TRAIN/', args.seg_root, args.fluid_root, binary_fluid=args.binary_fluid, us_path=us_path, num_classes=NUM_CLASSES, train_or_test='Train',
-        screener=rf_sort_list, screen_num=10)
+        screener=rf_sort_list, screen_num=10, seg_channel=NUM_CLASSES)
     train_dataloader = data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     logging.info("Epoch " + str(epoch))
@@ -44,6 +49,8 @@ def train(epoch):
         # 数据分为两类， 算法的输入:img 算法的输出 seg_label ， （其他还没用到)
         img = img.to(DEVICE)
         seg_label = seg_label.to(DEVICE)
+        if args.n_class == 2:
+            seg_label = torch.cat((seg_label, 1-seg_label), dim=1)
         fluid_img = fluid_img.to(DEVICE)
         if args.criterion.strip() == 'BCELoss':
             seg_label = seg_label.float()
@@ -57,15 +64,34 @@ def train(epoch):
                                                                                                     device=DEVICE, alpha=args.alpha)
 
         # 执行模型，得到输出
-        input_ = torch.cat((img, fluid_img), dim=1)
-        out = model(input_)
+        if args.net_input_num == 1:
+            input_ = torch.cat((img, fluid_img), dim=1)
+            out = model(input_)
+        elif args.net_input_num == 2:
+            out = model(img, fluid_img)
         # out = model(img, fluid_img)
 
+        if args.ifPointRend:
+            rend = out["rend"]
+            points = out["points"]
+        out = extractDict(out, True)
+        # if out.shape[1] == 1:
+        #     out = nn.Sigmoid()(out)
+        # else:
+        #     out = torch.softmax(out, dim=0)
         # 取损失函数
-        # train_loss = criterion(out, seg_label)
+
         train_loss = mixup_criterion_type(criterion, out, seg_label_a, seg_label_b, lam)
         train_loss_list.append(train_loss.item())
-
+        if args.ifPointRend:
+            gt_points = point_sample(
+                seg_label.float(),
+                points,
+                mode="nearest",
+                align_corners=False
+            ).long()
+            point_loss = F.cross_entropy(rend, gt_points[:,1])
+            train_loss = point_loss + train_loss
         # 使用优化器执行反向传播
         optimizer.zero_grad()
         train_loss.backward()
@@ -81,7 +107,7 @@ def test(epoch):
     test_dataset = MTLDataset.FluidSegDataset(
         str(data_root) + 'TEST/', args.seg_root, args.fluid_root, binary_fluid=args.binary_fluid, us_path=us_path,  num_classes=NUM_CLASSES, train_or_test='Test',
         screener=rf_sort_list,
-        screen_num=10)
+        screen_num=10, seg_channel=NUM_CLASSES)
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=BATCH_SIZE, shuffle=False)
     model.eval()
@@ -95,30 +121,45 @@ def test(epoch):
             actual_batch_size = len(ID)
             img = img.to(DEVICE)
             seg_label = seg_label.to(DEVICE)
+            if args.n_class == 2:
+                seg_label = torch.cat((seg_label, 1-seg_label), dim=1)
             fluid_img = fluid_img.to(DEVICE)
             if args.criterion.strip() == 'BCELoss':
                 seg_label = seg_label.float()
             US_data = US_data.to(DEVICE)
-            US_label = US_data[:, :args.length_aux]
-            label4 = label4.to(DEVICE)
+            # US_label = US_data[:, :args.length_aux]
+            # label4 = label4.to(DEVICE)
 
             # 输出
-            input_ = torch.cat((img, fluid_img), dim=1)
-            output = model(input_)
+            if args.net_input_num == 1:
+                input_ = torch.cat((img, fluid_img), dim=1)
+                output = model(input_)
+            elif args.net_input_num == 2:
+                output = model(img, fluid_img)
             # output = model(img, fluid_img)
             # seg_label 标签, 注意此时的loss含义已然不同了，未来考虑把这个值去掉
+            output = extractDict(output, True)
+            if output.shape[1] == 1:
+                output = nn.Sigmoid()(output)
+            else:
+                output = torch.softmax(output, dim=0)
 
-            output = nn.Sigmoid()(output)
-
-            output[output >= 0.5] = 1
-            output[output < 0.5] = 0
-            output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
-            seg_test = seg_label.long()
+            if args.criterion in ['GDL', 'GWDL']:
+                output[output >= 0.5] = 0
+                output[output < 0.5] = 1
+            else:
+                output[output >= 0.5] = 1
+                output[output < 0.5] = 0
+            if output.shape[3] != 512:
+                output = F.interpolate(output, size=512, mode='bilinear', align_corners=True)
 
 
             # 记录Loss，计算性能指标
             loss = criterion(output, seg_label)
             test_loss_list.append(loss.item())
+
+            seg_test = seg_label[:,0:1].long()
+            output = output[:,0:1]
             dice2 = metrics.dice_index(output, seg_test)
             dice2_list.append(dice2)
             quality, dices = metrics.get_sum_metrics(output, seg_test, count_metrics, printDice=True)
@@ -170,15 +211,16 @@ LEARNING_RATE = args.lr
 WEIGHT_DECAY = args.wd
 MOMENTUM = args.momentum
 if args.ifDataParallel:
-    model = torch.nn.DataParallel(get_model(args.net, in_channelsX=6), device_ids=[0, 1]).cuda()
+    model = torch.nn.DataParallel(get_model(args.net, in_channelsX=6,n_class=args.n_class), device_ids=[0, 1]).cuda()
 else:
-    model = get_model(args.net, in_channelsX=6).to(DEVICE)
+    model = get_model(args.net, in_channelsX=6, n_class=2).to(DEVICE)
 criterion = get_criterion(args.criterion).to(DEVICE)
 
 optimizer = get_optimizer(args.optim, model, LEARNING_RATE=LEARNING_RATE, MOMENTUM=MOMENTUM, WEIGHT_DECAY=WEIGHT_DECAY)
 data_root = args.s_data_root.strip()
-NUM_CLASSES = 4
-BATCH_SIZE = args.n_batch_size
+NUM_CLASSES = 1 #TODO
+BATCH_SIZE = args.n_batch_size #TODOt
+# BATCH_SIZE = args.n_batch_size
 NUM_TRAIN_CHECK_BATCHES = 4
 us_path = '../ResearchData/data_ultrasound_1.csv'
 count_metrics = ['dice', 'jaccard', 'ppv', 'precision', 'recall', 'fpr', 'fnr', 'vs','hd', 'hd95', 'msd', 'mdsd', 'stdsd']
@@ -194,7 +236,8 @@ logging.warning('Model: {}  Mode:{} Loss:{} Data:{}'.format(args.net, args.mode,
 
 all_quality = collections.defaultdict(list)
 all_img_dice = collections.defaultdict(list)
-print('start')
+
+
 for epoch in range(start_epoch, args.epoch):
     adjust_learning_rate(optimizer, epoch, args.lr, args.epoch)
     train(epoch)

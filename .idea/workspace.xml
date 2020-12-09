@@ -2,31 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1d450966-61aa-45b2-b053-bf273f51fa3a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Loss/BasNetLoss.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Loss/OptimList.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Loss/U2NetLoss.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/DeepLabV3Plus.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/DyReLU.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/FReLU.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/LinkNet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/SourceRaw.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/mixup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/parse_args.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Test/testNewModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/1i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/1i1oSeg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/2i1oSeg.py" beforeDir="false" afterPath="$PROJECT_DIR$/2i1oSeg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Loss/LossList.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/LossList.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTLDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTLDataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/Backbone.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/Backbone.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/Classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/Classifier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/FCDenseNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/FCDenseNet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/DeepLabV3Plus.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/DeepLabV3Plus.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/MTLModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/MTLModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/ModelList.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/ModelList.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/ModelTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/ModelTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/ModelTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test/ModelTest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/PointRend.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/PointRend.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/SegTron.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/SegTron.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model/U2Net.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/U2Net.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/UNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/UNet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Test/test_loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test/test_loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parse_args.py" beforeDir="false" afterPath="$PROJECT_DIR$/parse_args.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -51,90 +45,12 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
+        <entry file="file://$PROJECT_DIR$/Test/ModelTest.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="238">
-              <caret line="209" column="42" lean-forward="true" selection-start-line="209" selection-start-column="42" selection-end-line="209" selection-end-column="42" />
+              <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
               <folding>
-                <element signature="e#140#158#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/_utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1705">
-              <caret line="49" column="23" lean-forward="true" selection-start-line="49" selection-start-column="23" selection-end-line="49" selection-end-column="23" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/Backbone.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
-              <caret line="459" column="27" selection-start-line="459" selection-start-column="27" selection-end-line="459" selection-end-column="27" />
-              <folding>
-                <element signature="e#46#81#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/MTLModel.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="179" column="32" lean-forward="true" selection-start-line="179" selection-start-column="32" selection-end-line="179" selection-end-column="32" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/pooling.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="44">
-              <caret line="86" selection-start-line="86" selection-end-line="86" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="159">
-              <caret line="65" column="19" lean-forward="true" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
-              <folding>
-                <element signature="e#74#109#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/collections/__init__.pyi">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="584">
-              <caret line="300" column="59" lean-forward="true" selection-start-line="300" selection-start-column="59" selection-end-line="300" selection-end-column="59" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Model/DeepLabV3Plus.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="240" column="23" lean-forward="true" selection-start-line="240" selection-start-column="23" selection-end-line="240" selection-end-column="23" />
-              <folding>
-                <element signature="e#46#81#0" expanded="true" />
+                <element signature="e#49#64#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -143,8 +59,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/ModelList.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="25" column="31" lean-forward="true" selection-start-line="25" selection-start-column="31" selection-end-line="25" selection-end-column="31" />
+            <state relative-caret-position="255">
+              <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
               <folding>
                 <element signature="e#46#64#0" expanded="true" />
               </folding>
@@ -153,15 +69,85 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/UNetNest.py">
+        <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="205">
-              <caret line="491" column="28" lean-forward="true" selection-start-line="491" selection-start-column="28" selection-end-line="491" selection-end-column="28" />
+            <state relative-caret-position="-1088">
+              <caret line="29" column="41" selection-start-line="29" selection-start-column="41" selection-end-line="29" selection-end-column="41" />
               <folding>
-                <element signature="e#136#157#0" expanded="true" />
+                <element signature="e#0#138#0" expanded="true" />
               </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/metrics.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-2108">
+              <caret line="227" column="8" selection-start-line="227" selection-start-column="8" selection-end-line="227" selection-end-column="8" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="168">
+              <caret line="170" column="10" selection-start-line="170" selection-start-column="10" selection-end-line="170" selection-end-column="10" />
+              <folding>
+                <element signature="e#34#43#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/parse_args.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="695">
+              <caret line="45" column="34" lean-forward="true" selection-start-line="45" selection-start-column="34" selection-end-line="45" selection-end-column="34" />
+              <folding>
+                <element signature="e#48#63#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/_utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="236">
+              <caret line="82" column="12" lean-forward="true" selection-start-line="82" selection-start-column="12" selection-end-line="82" selection-end-column="12" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="185">
+              <caret line="239" lean-forward="true" selection-start-line="239" selection-end-line="239" />
+              <folding>
+                <element signature="e#34#43#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/0712.txt">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/0713.txt">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -175,11 +161,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>@unittest.skip</find>
-      <find>DUC</find>
-      <find>LinkNetBase</find>
-      <find>LinkNet</find>
-      <find>setup</find>
       <find>get_optimizer</find>
       <find>['out</find>
       <find>argparse</find>
@@ -199,12 +180,17 @@
       <find>para</find>
       <find>log_mean</find>
       <find>parse_args</find>
-      <find>print</find>
       <find>max</find>
       <find>print(</find>
-      <find>pool</find>
       <find>avg_pool</find>
+      <find>get_criterion</find>
+      <find>pool</find>
       <find>Max</find>
+      <find>print</find>
+      <find>print('star</find>
+      <find>one_hot</find>
+      <find>sig</find>
+      <find>336</find>
     </findStrings>
     <replaceStrings>
       <replace>dice_index</replace>
@@ -214,6 +200,7 @@
       <replace>torch</replace>
       <replace>Gray</replace>
       <replace>return</replace>
+      <replace>256</replace>
     </replaceStrings>
     <dirStrings>
       <dir>D:\Workspace\MTL\NDDRLCS\Model</dir>
@@ -225,12 +212,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/preScreen.sh" />
-        <option value="$PROJECT_DIR$/Model/U-Net.py" />
         <option value="$PROJECT_DIR$/Model/KiUNet.py" />
         <option value="$PROJECT_DIR$/Model/DilatedUNet.py" />
         <option value="$PROJECT_DIR$/Model/MechanicsModel.py" />
-        <option value="$PROJECT_DIR$/metrics.py" />
         <option value="$PROJECT_DIR$/Model/resnest.py" />
         <option value="$PROJECT_DIR$/Model/InputLevelFusion.py" />
         <option value="$PROJECT_DIR$/MTLLoss.py" />
@@ -241,10 +225,8 @@
         <option value="$PROJECT_DIR$/Model/CoLearning.py" />
         <option value="$PROJECT_DIR$/Model/CoSeg.py" />
         <option value="$PROJECT_DIR$/Loss/lovasz_losses.py" />
-        <option value="$PROJECT_DIR$/Test/test_loss.py" />
         <option value="$PROJECT_DIR$/Loss/GeneralisedLoss.py" />
         <option value="$PROJECT_DIR$/Loss/MTLLoss.py" />
-        <option value="$PROJECT_DIR$/MTLDataset.py" />
         <option value="$PROJECT_DIR$/Model/DenseAPP.py" />
         <option value="$PROJECT_DIR$/Model/DUC.py" />
         <option value="$PROJECT_DIR$/Model/resnest_.py" />
@@ -261,21 +243,26 @@
         <option value="$PROJECT_DIR$/Loss/u2net_loss.py" />
         <option value="$PROJECT_DIR$/Loss/PointRendLoss.py" />
         <option value="$PROJECT_DIR$/Loss/OptimList.py" />
-        <option value="$PROJECT_DIR$/Model/UNet.py" />
-        <option value="$PROJECT_DIR$/Model/PointRend.py" />
         <option value="$PROJECT_DIR$/Model/FCDenseNet.py" />
-        <option value="$PROJECT_DIR$/parse_args.py" />
-        <option value="$PROJECT_DIR$/2i1oSeg.py" />
+        <option value="$PROJECT_DIR$/Model/SourceRaw.py" />
+        <option value="$PROJECT_DIR$/Test/testNewModel.py" />
+        <option value="$PROJECT_DIR$/Model/_utils.py" />
         <option value="$PROJECT_DIR$/Model/MTLModel.py" />
         <option value="$PROJECT_DIR$/Model/Backbone.py" />
-        <option value="$PROJECT_DIR$/Model/_utils.py" />
-        <option value="$PROJECT_DIR$/Loss/LossList.py" />
-        <option value="$PROJECT_DIR$/Model/ModelList.py" />
-        <option value="$PROJECT_DIR$/Model/SourceRaw.py" />
-        <option value="$PROJECT_DIR$/1i1oSeg.py" />
-        <option value="$PROJECT_DIR$/Model/SegTron.py" />
-        <option value="$PROJECT_DIR$/Model/Classifier.py" />
         <option value="$PROJECT_DIR$/Model/DeepLabV3Plus.py" />
+        <option value="$PROJECT_DIR$/Model/tempTest.py" />
+        <option value="$PROJECT_DIR$/Model/PointRend.py" />
+        <option value="$PROJECT_DIR$/metrics.py" />
+        <option value="$PROJECT_DIR$/Model/SegTron.py" />
+        <option value="$PROJECT_DIR$/Model/ModelList.py" />
+        <option value="$PROJECT_DIR$/Test/test_loss.py" />
+        <option value="$PROJECT_DIR$/Loss/LossList.py" />
+        <option value="$PROJECT_DIR$/parse_args.py" />
+        <option value="$PROJECT_DIR$/2i1oSeg.py" />
+        <option value="$PROJECT_DIR$/Model/UNet.py" />
+        <option value="$PROJECT_DIR$/Model/Classifier.py" />
+        <option value="$PROJECT_DIR$/MTLDataset.py" />
+        <option value="$PROJECT_DIR$/1i1oSeg.py" />
       </list>
     </option>
   </component>
@@ -306,17 +293,7 @@
             <path>
               <item name="NDDRLCS" type="b2602c69:ProjectViewProjectNode" />
               <item name="NDDRLCS" type="462c0819:PsiDirectoryNode" />
-              <item name="Loss" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="NDDRLCS" type="b2602c69:ProjectViewProjectNode" />
-              <item name="NDDRLCS" type="462c0819:PsiDirectoryNode" />
               <item name="Model" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="NDDRLCS" type="b2602c69:ProjectViewProjectNode" />
-              <item name="NDDRLCS" type="462c0819:PsiDirectoryNode" />
-              <item name="Test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="NDDRLCS" type="b2602c69:ProjectViewProjectNode" />
@@ -382,6 +359,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
+    <property name="full.screen.before.presentation.mode" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -394,12 +372,13 @@
     <property name="settings.editor.selected.configurable" value="MTConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Workspace\MTL\NDDRLCS" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Workspace\MTL\NDDRLCS\Test" />
       <recent name="D:\Workspace\MTL\NDDRLCS\Loss" />
       <recent name="D:\Workspace\MTL\NDDRLCS\Model" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Workspace\MTL\NDDRLCS" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -414,46 +393,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.DeepLabV3Plus">
-    <configuration name="Classifier" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/Classifier.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DeepLabV3Plus" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DeepLabV3Plus.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DyReLU" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python tests.Unittests for ModelTest.TestModels.test_get_model">
+    <configuration name="2i1oSeg" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="NDDRLCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -461,56 +402,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/DyReLU.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="PointRend" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/PointRend.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="SegTron" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="NDDRLCS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/SegTron.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/2i1oSeg.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -541,13 +438,94 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="metrics" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/metrics.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="testNewModel" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Test/testNewModel.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_loss" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Test/test_loss.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for ModelTest.TestModels.test_get_model" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="NDDRLCS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;ModelTest.TestModels.test_get_model&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.DeepLabV3Plus" />
-        <item itemvalue="Python.Classifier" />
-        <item itemvalue="Python.SegTron" />
-        <item itemvalue="Python.PointRend" />
-        <item itemvalue="Python.DyReLU" />
+        <item itemvalue="Python tests.Unittests for ModelTest.TestModels.test_get_model" />
+        <item itemvalue="Python.2i1oSeg" />
+        <item itemvalue="Python.test_loss" />
+        <item itemvalue="Python.metrics" />
+        <item itemvalue="Python.testNewModel" />
       </list>
     </recent_temporary>
   </component>
@@ -646,7 +624,15 @@
       <workItem from="1605699416301" duration="4727000" />
       <workItem from="1605711776215" duration="5277000" />
       <workItem from="1605761613307" duration="13147000" />
-      <workItem from="1605840172942" duration="17607000" />
+      <workItem from="1605840172942" duration="17761000" />
+      <workItem from="1605932062965" duration="24560000" />
+      <workItem from="1605962208903" duration="2794000" />
+      <workItem from="1606049300405" duration="1452000" />
+      <workItem from="1606233035123" duration="599000" />
+      <workItem from="1606800727278" duration="954000" />
+      <workItem from="1606880940954" duration="2268000" />
+      <workItem from="1606983181298" duration="712000" />
+      <workItem from="1607515820335" duration="4237000" />
     </task>
     <task id="LOCAL-00001" summary="Train Split">
       <created>1602381633304</created>
@@ -680,15 +666,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 22m 31s.xml">
-      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 23m 24s.xml">
-      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 24m 35s.xml">
-      <configuration name="Unittests in ModelTest.py" configurationId="tests" />
-    </history-entry>
     <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 21h 25m 57s.xml">
       <configuration name="Unittests in ModelTest.py" configurationId="tests" />
     </history-entry>
@@ -710,9 +687,18 @@
     <history-entry file="Unittests_in_ModelTest_py - 2020.11.16 at 22h 29m 36s.xml">
       <configuration name="Unittests in ModelTest.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="Unittests_for_ModelTest_TestModels_test_get_model - 2020.11.21 at 12h 43m 12s.xml">
+      <configuration name="Unittests for ModelTest.TestModels.test_get_model" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_ModelTest_TestModels_test_get_model - 2020.11.21 at 12h 44m 54s.xml">
+      <configuration name="Unittests for ModelTest.TestModels.test_get_model" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_ModelTest_TestModels_test_get_model - 2020.12.09 at 22h 44m 06s.xml">
+      <configuration name="Unittests for ModelTest.TestModels.test_get_model" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="436079000" />
+    <option name="totallyTimeSpent" value="473809000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="23" width="1295" height="704" extended-state="6" />
@@ -724,49 +710,50 @@
       <window_info id="Learn" order="3" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.56414765" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49960968" weight="0.44815466" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49960968" weight="0.12829526" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39965096" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49960968" weight="0.5307557" />
-      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.34094903" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49960968" weight="0.07557118" />
+      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.30228472" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4980484" weight="0.3778559" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4980484" weight="0.18980668" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5003903" side_tool="true" weight="0.44815466" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" visible="true" weight="0.23198594" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.15641476" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32983023" />
-      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="4" side_tool="true" weight="0.23185012" />
+      <window_info active="true" anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="4" side_tool="true" visible="true" weight="0.23263076" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="right" id="SciView" order="6" weight="0.32983023" />
     </layout>
     <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.28617623" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14832163" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info id="Learn" order="3" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32984293" />
-      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.56414765" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49960968" weight="0.34446397" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39965096" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.2652705" />
-      <window_info anchor="bottom" id="File Transfer" order="9" weight="0.37696335" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49960968" weight="0.07557118" />
+      <window_info anchor="bottom" id="File Transfer" order="9" visible="true" weight="0.27240774" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4987874" weight="0.37870854" />
-      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.57242584" />
-      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.35951135" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4980484" weight="0.18980668" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5003903" side_tool="true" weight="0.44815466" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.4987874" weight="0.15641476" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32983023" />
-      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="4" side_tool="true" weight="0.15521424" />
+      <window_info anchor="right" x="0" y="0" width="273" height="504" id="Documentation" order="4" side_tool="true" weight="0.23263076" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="right" id="SciView" order="6" weight="0.32983023" />
     </layout-to-restore>
@@ -825,7 +812,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Model/ModelTest.py</url>
+          <url>file://$PROJECT_DIR$/Test/ModelTest.py</url>
           <line>64</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
@@ -834,117 +821,10 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NDDRLCS$Unittests_in_ModelTest_py.coverage" NAME="Unittests in ModelTest.py Coverage Results" MODIFIED="1605536892083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Model" />
+    <SUITE FILE_PATH="coverage/NDDRLCS$Unittests_for_ModelTest_TestModels_test_get_model.coverage" NAME="Unittests for ModelTest.TestModels.test_get_model Coverage Results" MODIFIED="1607524990368" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
     <SUITE FILE_PATH="coverage/NDDRLCS$MTLLoss.coverage" NAME="MTLLoss Coverage Results" MODIFIED="1604926887156" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Loss/GeneralisedLoss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1564">
-          <caret line="98" column="65" selection-start-line="98" selection-start-column="65" selection-end-line="98" selection-end-column="65" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Loss/lovasz_losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="34" selection-start-line="34" selection-end-line="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1292">
-          <caret line="89" column="41" selection-start-line="89" selection-start-column="41" selection-end-line="89" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/CoSeg.py" />
-    <entry file="file://$PROJECT_DIR$/Model/DUC.py" />
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/resnest/torch/resnest.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-260">
-          <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/loss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="532" column="23" selection-start-line="532" selection-start-column="6" selection-end-line="532" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/CoLearning.py" />
-    <entry file="file://$PROJECT_DIR$/Model/IVDNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2465">
-          <caret line="154" column="32" selection-start-line="154" selection-start-column="32" selection-end-line="154" selection-end-column="32" />
-          <folding>
-            <element signature="e#49#77#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/HyperDenseNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4539">
-          <caret line="274" column="45" selection-start-line="274" selection-start-column="32" selection-end-line="274" selection-end-column="45" />
-          <folding>
-            <element signature="e#49#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DeepMadSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1581">
-          <caret line="98" column="34" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
-          <folding>
-            <element signature="e#48#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DenseAPP.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4709">
-          <caret line="284" selection-start-line="284" selection-end-line="284" />
-          <folding>
-            <element signature="e#50#62#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/unittest/__init__.pyi">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="26" column="14" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/868610004/unittest/loader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="29" column="32" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/LinkNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1292">
-          <caret line="81" column="13" selection-start-line="81" selection-start-column="6" selection-end-line="81" selection-end-column="13" />
-          <folding>
-            <element signature="e#49#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Model/resnest_.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3825">
@@ -1079,46 +959,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/PointRend.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3672">
-          <caret line="222" lean-forward="true" selection-start-line="222" selection-end-line="222" />
-          <folding>
-            <element signature="e#346#358#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/ModelTest.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="14" column="42" lean-forward="true" selection-start-line="14" selection-start-column="42" selection-end-line="14" selection-end-column="42" />
-          <folding>
-            <element signature="e#49#64#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Loss/LossList.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="470" column="21" lean-forward="true" selection-start-line="470" selection-start-column="21" selection-end-line="470" selection-end-column="21" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/UNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="116" lean-forward="true" selection-start-line="116" selection-end-line="118" selection-end-column="38" />
-          <folding>
-            <element signature="e#95#107#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Model/InputLevelFusion.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="239">
@@ -1139,77 +979,129 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/parse_args.py">
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/pooling.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-          <folding>
-            <element signature="e#48#63#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1343">
+          <caret line="86" selection-start-line="86" selection-end-line="86" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/collections/__init__.pyi">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="174" column="46" lean-forward="true" selection-start-line="174" selection-start-column="22" selection-end-line="174" selection-end-column="46" />
-          <folding>
-            <element signature="e#34#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="179" column="19" selection-start-line="179" selection-start-column="19" selection-end-line="179" selection-end-column="19" />
-          <folding>
-            <element signature="e#34#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/ModelList.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="25" column="31" lean-forward="true" selection-start-line="25" selection-start-column="31" selection-end-line="25" selection-end-column="31" />
-          <folding>
-            <element signature="e#46#64#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="4607">
+          <caret line="300" column="59" selection-start-line="300" selection-start-column="59" selection-end-line="300" selection-end-column="59" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/UNetNest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="491" column="28" lean-forward="true" selection-start-line="491" selection-start-column="28" selection-end-line="491" selection-end-column="28" />
+        <state relative-caret-position="8262">
+          <caret line="491" column="28" selection-start-line="491" selection-start-column="28" selection-end-line="491" selection-end-column="28" />
           <folding>
             <element signature="e#136#157#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Loss/GeneralisedLoss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-459">
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/MTLModel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="145" column="13" lean-forward="true" selection-start-line="145" selection-start-column="13" selection-end-line="145" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/tempTest.py" />
+    <entry file="file://$PROJECT_DIR$/Test/testNewModel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" selection-start-line="8" selection-end-line="8" selection-end-column="33" />
+          <folding>
+            <element signature="e#46#85#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Model/SegTron.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="209" column="42" lean-forward="true" selection-start-line="209" selection-start-column="42" selection-end-line="209" selection-end-column="42" />
+        <state relative-caret-position="83">
+          <caret line="52" column="25" lean-forward="true" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
           <folding>
             <element signature="e#140#158#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/collections/__init__.pyi">
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/cuda/amp/grad_scaler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="584">
-          <caret line="300" column="59" lean-forward="true" selection-start-line="300" selection-start-column="59" selection-end-line="300" selection-end-column="59" />
+        <state relative-caret-position="213">
+          <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/cuda/amp/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="31" selection-start-line="1" selection-start-column="31" selection-end-line="1" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test/test_loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="561">
+          <caret line="37" column="42" selection-start-line="37" selection-start-column="42" selection-end-line="37" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/functional.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42874">
+          <caret line="2533" selection-start-line="2533" selection-end-line="2533" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Loss/LossList.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9554">
+          <caret line="575" column="16" selection-start-line="575" selection-start-column="16" selection-end-line="575" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Loss/lovasz_losses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2567">
+          <caret line="159" column="12" selection-start-line="159" selection-start-column="12" selection-end-line="159" selection-end-column="12" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/Backbone.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="459" column="27" selection-start-line="459" selection-start-column="27" selection-end-line="459" selection-end-column="27" />
+        <state relative-caret-position="9690">
+          <caret line="580" column="11" selection-start-line="580" selection-start-column="11" selection-end-line="580" selection-end-column="11" />
+          <folding>
+            <element signature="e#46#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/DeepLabV3Plus.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3162">
+          <caret line="190" selection-start-line="190" selection-end-line="190" />
           <folding>
             <element signature="e#46#81#0" expanded="true" />
           </folding>
@@ -1218,47 +1110,132 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/Classifier.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="65" column="19" lean-forward="true" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
+        <state relative-caret-position="2788">
+          <caret line="171" column="9" selection-start-line="171" selection-start-column="9" selection-end-line="171" selection-end-column="9" />
           <folding>
             <element signature="e#74#109#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Model/UNet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5916">
+          <caret line="355" selection-start-line="355" selection-end-line="355" />
+          <folding>
+            <element signature="e#95#107#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/PointRend.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="31" column="27" selection-start-line="31" selection-start-column="27" selection-end-line="31" selection-end-column="27" />
+          <folding>
+            <element signature="e#346#358#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MTLDataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="3" lean-forward="true" selection-start-line="19" selection-start-column="3" selection-end-line="19" selection-end-column="3" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pic/Model.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pic/Detail.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test/ModelTest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
+          <folding>
+            <element signature="e#49#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/0712.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/0713.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1088">
+          <caret line="29" column="41" selection-start-line="29" selection-start-column="41" selection-end-line="29" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#138#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/metrics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2108">
+          <caret line="227" column="8" selection-start-line="227" selection-start-column="8" selection-end-line="227" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Model/_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1705">
-          <caret line="49" column="23" lean-forward="true" selection-start-line="49" selection-start-column="23" selection-end-line="49" selection-end-column="23" />
+        <state relative-caret-position="236">
+          <caret line="82" column="12" lean-forward="true" selection-start-line="82" selection-start-column="12" selection-end-line="82" selection-end-column="12" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/MTLModel.py">
+    <entry file="file://$PROJECT_DIR$/Model/ModelList.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="179" column="32" lean-forward="true" selection-start-line="179" selection-start-column="32" selection-end-line="179" selection-end-column="32" />
+        <state relative-caret-position="255">
+          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#46#64#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2019.1/system/remote_sources/-1246759694/-759174728/torch/nn/modules/pooling.py">
+    <entry file="file://$PROJECT_DIR$/1i1oSeg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="44">
-          <caret line="86" selection-start-line="86" selection-end-line="86" />
+        <state relative-caret-position="168">
+          <caret line="170" column="10" selection-start-line="170" selection-start-column="10" selection-end-line="170" selection-end-column="10" />
+          <folding>
+            <element signature="e#34#43#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/DeepLabV3Plus.py">
+    <entry file="file://$PROJECT_DIR$/parse_args.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="240" column="23" lean-forward="true" selection-start-line="240" selection-start-column="23" selection-end-line="240" selection-end-column="23" />
+        <state relative-caret-position="695">
+          <caret line="45" column="34" lean-forward="true" selection-start-line="45" selection-start-column="34" selection-end-line="45" selection-end-column="34" />
           <folding>
-            <element signature="e#46#81#0" expanded="true" />
+            <element signature="e#48#63#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2i1oSeg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="239" lean-forward="true" selection-start-line="239" selection-end-line="239" />
+          <folding>
+            <element signature="e#34#43#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -220,17 +220,7 @@ def convert_conv2_to_separable_conv(module):
         new_module.add_module(name, convert_conv2_to_separable_conv(child))
     return new_module
 
-# test failure, 更改map的过程必须手动调整...
-# def convert_map_to_separable_conv(module):
-#     new_module = module
-#     if isinstance(module, nn.MaxPool2d) and module.kernel_size > 1:
-#         new_module = AtrousSeparableConvolution(module.kernel_size,
-#                                                 module.stride,
-#                                                 module.padding,
-#                                                 module.dilation)
-#     for name, child in module.named_children():
-#         new_module.add_module(name, convert_conv2_to_separable_conv(child))
-#     return new_module
+
 
 
 if __name__ == '__main__':

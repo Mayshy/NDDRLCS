@@ -66,7 +66,7 @@ class DeepLabHeadV3Plus(nn.Module):
     # 高级特征来自aspp的输出
     # 提供细节信息的低级特征似乎可以有更优美的输入
     def forward(self, feature):
-        low_level_feature = self.project(feature['low_level'])
+        low_level_feature = self.project(feature['fine_grained'])
         output_feature = self.aspp(feature['out'])
         output_feature = F.interpolate(output_feature, size=low_level_feature.shape[2:], mode='bilinear',
                                        align_corners=False)
@@ -155,7 +155,6 @@ class UNet_Classifier(nn.Module):
         self.up3 = Up(in_channels[2], in_channels[3] // factor)
         self.up4 = Up(in_channels[3], 64)
         self.outc = OutConv(64, num_classes)
-
     def forward(self, x1, x2, x3, x4, x5):
         x1 = F.interpolate(x1, size=self.origin_size, mode='bilinear', align_corners=True)
         x2 = F.interpolate(x2, size=self.origin_size//2, mode='bilinear', align_corners=True)

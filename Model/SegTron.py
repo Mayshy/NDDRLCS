@@ -51,8 +51,7 @@ class PointRendUpsample(nn.Module):
         (i.e., the number of points in the stride 16 map of a 1024×2048 image)
         """
         num_points = 8096
-
-        while coarse_feature.shape[-1] != origin_shape:
+        while coarse_feature.shape[-1] < origin_shape:
             coarse_feature = F.interpolate(coarse_feature, scale_factor=2, mode="bilinear", align_corners=True)
 
             points_idx, points = sampling_points(coarse_feature, num_points, training=self.training)
@@ -63,7 +62,6 @@ class PointRendUpsample(nn.Module):
             feature_representation = torch.cat([coarse, fine], dim=1)
 
             rend = self.mlp(feature_representation)
-
             B, C, H, W = coarse_feature.shape
             points_idx = points_idx.unsqueeze(1).expand(-1, C, -1)
             coarse_feature = (coarse_feature.reshape(B, C, -1)
@@ -111,10 +109,11 @@ class SimpleSegmentationModel(nn.Module):
             x = self.classifier(features)
 
         if self.if_point_rend_upsample:
-            result = self.rend_upsample(input_shape, fine_grained, x)
             if not self.training:
+                result = self.rend_upsample(512, fine_grained, x)
                 return result['out']
             else:
+                result = self.rend_upsample(input_shape, fine_grained, x)
                 # when training, calculating seg_loss from result['coarse'] after interpolating and point_loss from result['point'] and rend
                 result['out'] = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
                 return result
@@ -152,7 +151,6 @@ class TwoInputSegmentationModel(nn.Module):
         input_shape = x.shape[-1]
         # contract: features is a dict of tensors
         features = self.backbone(x, y)
-
         if self.if_extract_dict:
             fine_grained = features['fine_grained']
             features = extractDict(features)
@@ -162,10 +160,11 @@ class TwoInputSegmentationModel(nn.Module):
             x = self.classifier(features)
 
         if self.if_point_rend_upsample:
-            result = self.rend_upsample(input_shape, fine_grained, x)
             if not self.training:
+                result = self.rend_upsample(512, fine_grained, x)
                 return result['out']
             else:
+                result = self.rend_upsample(input_shape, fine_grained, x)
                 # when training, calculating seg_loss from result['coarse'] after interpolating and point_loss from result['point'] and rend
                 result['out'] = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
                 return result
@@ -221,11 +220,15 @@ class DesicionFusion(nn.Module):
 
 
 if __name__ == '__main__':
-    backbone = TwoInput_NDDRLSC_BB(3, 3, clf='PointRend')
+    backbone = ResNet_BB(3, clf='PointRend')
     classifier = DeepLabV3Head(backbone.out_channels, 2)
-    modelA = TwoInputSegmentationModel(backbone, classifier, if_point_rend_upsample=True)
-    test2IModel(modelA, eval=True)
-    # test2IBackward(modelA, eval=True)
+    modelA = SimpleSegmentationModel(backbone, classifier, if_point_rend_upsample=True)
+    testModel(modelA, eval=True)
+
+    # backbone = TwoInput_NDDRLSC_BB(3, 3, clf='PointRend')
+    # classifier = DeepLabV3Head(backbone.out_channels, 2)
+    # modelA = TwoInputSegmentationModel(backbone, classifier, if_point_rend_upsample=True)
+    # test2IModel(modelA, eval=True)
 
 
 # 原始torchvision给出 backbone-classfier模型：backbone 将input(c, h, w) 变为 （2048， h/8, w/8)， 二分类为(1, h/8, w/8), 最后再插值回去。

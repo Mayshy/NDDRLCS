@@ -76,9 +76,10 @@ class IntermediateLayerGetter(nn.ModuleDict):
                 out[out_name] = x
         return out
 
-def extractDict(x):
-    if isinstance(x, collections.OrderedDict):
-        return x['out']
+def extractDict(x, force=False):
+    if isinstance(x, dict):
+        if force or (len(x)==1):
+            return x['out']
     return x
 
 def setup_seed(seed):
@@ -107,7 +108,7 @@ def dict_sum(res, addend):
 def testModel(model, eval=False):
     if eval:
         model.eval()
-    input = torch.rand((4, 3, 224, 224))
+    input = torch.rand((4, 3, 256, 256))
     output = model(input)
     if isinstance(output, dict) and len(output) > 1:
         for k, v in output.items():
@@ -120,14 +121,13 @@ def testModel(model, eval=False):
         print(output.shape)
 
 def testBackward(model):
-    label = torch.rand((4, 1, 224, 224))
-    input = torch.rand((4, 5, 224, 224))
+    label = torch.rand((4, 2, 224, 224))
+    input = torch.rand((4, 3, 224, 224))
     testEpoch = 3
     for epoch in range(testEpoch):
         output = model(input)
-        output = extractDict(output)
+        output = extractDict(output, True)
         output = nn.Sigmoid()(output)
-        print(output.shape)
         criterion = get_criterion('BCELoss')
         optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
         loss = criterion(output, label)
@@ -139,8 +139,8 @@ def testBackward(model):
 def test2IModel(model, eval=False):
     if eval:
         model.eval()
-    input0 = torch.rand((4, 3, 224, 224))
-    input1 = torch.rand((4, 3, 224, 224))
+    input0 = torch.rand((4, 3, 256, 256))
+    input1 = torch.rand((4, 3, 256, 256))
     output = model(input0, input1)
     if isinstance(output, dict) and len(output) > 1:
         for k, v in output.items():
